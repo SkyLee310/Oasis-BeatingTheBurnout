@@ -1,0 +1,18 @@
+{
+  "shape": "package",
+  "pkg": ".",
+  "buildCmd": "pnpm build:ds",
+  "entry": "dist-ds/oasis-ds.js",
+  "cssEntry": "dist-ds/oasis-ds.css",
+  "srcDir": "src/ds",
+  "tsconfig": "tsconfig.lib.json",
+  "globalName": "OasisDS",
+  "overrides": {
+    "WeekCalendar": {
+      "cardMode": "column"
+    },
+    "Tag": {
+      "cardMode": "column"
+    }
+  }
+}
