@@ -1,0 +1,11 @@
+{
+  "title": "oasis",
+  "description": "This browser-based app offers an interactive prototype optimized for mobile and desktop, enabling users to seamlessly test and refine their designs.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
