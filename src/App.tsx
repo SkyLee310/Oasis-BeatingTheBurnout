@@ -8,7 +8,7 @@ import {
   Home, Activity, BarChart2, Shield, Settings,
   Heart, Moon, Bluetooth, Mic, MicOff, Brain,
   Zap, TrendingUp, AlertTriangle, CheckCircle,
-  ChevronRight, Plus, X, Waves, Calendar, Clock,
+  ChevronRight, Plus, X, Calendar, Clock,
   Sparkles, Check, ArrowUpRight, Copy, BatteryCharging,
   Quote, RefreshCw,
 } from 'lucide-react'
@@ -483,9 +483,6 @@ const DAILY_QUOTES = [
 function DashboardPage({ onGoLoad, onGoRecovery }: {
   onGoLoad: () => void; onGoRecovery: () => void
 }) {
-  const [selectedDay, setSelectedDay] = useState<CalDay | null>(
-    CALENDAR_WEEK.find(d => d.isToday) ?? null
-  )
   const [showCommit, setShowCommit] = useState(false)
   const [quoteIdx, setQuoteIdx] = useState(0)
   const [isRotating, setIsRotating] = useState(false)
@@ -512,202 +509,187 @@ function DashboardPage({ onGoLoad, onGoRecovery }: {
     .slice(0, 4)
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1100px] mx-auto">
+    <div className="flex flex-col gap-12 sm:gap-16 max-w-[1140px] mx-auto pb-4">
 
-      {/* ── Welcome & Quote of the Day Card ─────────────────────────────────── */}
-      <div className="apple-card p-5 sm:p-6 flex flex-col gap-4">
-        {/* Top Header: Avatar + Single-Line Greeting */}
+      {/* ── Editorial Hero ──────────────────────────────────────────────────── */}
+      <header className="flex flex-col gap-8">
         <div className="flex items-center gap-3">
           <Avatar type="initial" initials="MC" size="medium" shape="circle" />
-          <div className="flex flex-col min-w-0">
-            <span className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider">
-              Wednesday, 10 Sep 2026
-            </span>
-            <h1 className="text-[18px] sm:text-[24px] font-semibold headline-tight text-[#1d1d1f] truncate whitespace-nowrap">
-              Good morning, Maya
-            </h1>
+          <div className="flex flex-col">
+            <span className="eyebrow">Wednesday · 10 Sep 2026</span>
+            <span className="text-[15px] font-medium text-ink-2">Good morning, Maya</span>
           </div>
         </div>
 
-        {/* Divider */}
-        <div style={{ height: 1, background: 'var(--hairline)' }} />
-
-        {/* Quote of the Day Section */}
-        <div className="flex items-start gap-3 bg-[#fafafc] rounded-[14px] p-3.5 sm:p-4 border border-[var(--hairline)]">
-          <div className="w-8 h-8 rounded-full bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center shrink-0 mt-0.5">
-            <Quote size={15} />
-          </div>
-          <div className="flex flex-col flex-1 min-w-0 gap-1">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#0066cc]">
-                Quote of the Day
-              </span>
-              <button
-                onClick={handleNextQuote}
-                className="text-[11px] text-[#86868b] hover:text-[#0066cc] transition-colors flex items-center gap-1.5 focus-ring px-2 py-0.5 rounded-full hover:bg-white"
-                title="Next inspirational quote"
-              >
-                <RefreshCw size={11} className={isRotating ? 'animate-spin' : ''} />
-                <span>Next Quote</span>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] items-end gap-8 lg:gap-12">
+          <div className="flex flex-col gap-5">
+            <span className="eyebrow text-brand">Today&apos;s reading — Near capacity</span>
+            <h1 className="display-hero headline-display text-ink">
+              You&apos;re running<br />near capacity.
+            </h1>
+            <p className="text-[16px] sm:text-[18px] text-ink-muted leading-relaxed max-w-[46ch]">
+              Sleep is trending low and your calendar is 89% full through Friday.
+              Protect this afternoon — a small recovery now prevents a crash on the 15th.
+            </p>
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <button className="apple-btn-primary" onClick={onGoRecovery}>
+                <Shield size={15} /> Build recovery plan
+              </button>
+              <button className="apple-btn-secondary" onClick={onGoLoad}>
+                Review this week&apos;s load <ChevronRight size={14} />
               </button>
             </div>
-            <p className="text-[14px] sm:text-[15px] text-[#1d1d1f] italic font-normal leading-relaxed">
-              "{currentQuote.quote}"
-            </p>
-            <span className="text-[12px] text-[#86868b] font-medium self-end">
-              — {currentQuote.author}
-            </span>
+          </div>
+
+          <div className="flex lg:flex-col items-center justify-center gap-4 lg:pl-8 lg:border-l" style={{ borderColor: 'var(--hairline)' }}>
+            <CircularGauge value={38} zone="amber" label="38" sublabel="/ 100 energy" size={168} />
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* ── Unified Biometric Telemetry Dashboard (Visual-First) ─────────── */}
-      <div className="apple-card p-5 sm:p-6 flex flex-col gap-5">
-        <div className="flex items-center justify-between flex-wrap gap-2 border-b border-[var(--hairline)] pb-3.5">
-          <div className="flex items-center gap-2">
-            <Activity size={18} className="text-[#0066cc]" />
-            <span className="text-[17px] font-semibold headline-tight text-[#1d1d1f]">
-              Biometric Telemetry
-            </span>
+      {/* ── Telemetry strip (inline, hairline-divided — not boxed cards) ─────── */}
+      <section className="flex flex-col gap-5">
+        <div className="flex items-center justify-between">
+          <h2 className="eyebrow">Live biometrics</h2>
+          <span className="text-[12px] text-ink-faint">Synced from Smart Band · 2m ago</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x" style={{ borderColor: 'var(--hairline)' }}>
+          {/* Energy */}
+          <div className="flex flex-col gap-2 py-5 md:py-0 md:pr-8">
+            <div className="flex items-center gap-2 text-ink-muted">
+              <Zap size={15} style={{ color: 'var(--zone-amber-accent)' }} />
+              <span className="text-[13px] font-medium">Energy index</span>
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[44px] font-semibold headline-display text-ink">38</span>
+              <span className="text-[14px] text-ink-faint">/ 100</span>
+            </div>
+            <ZoneChip zone="amber" size="sm" />
           </div>
-          <span className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider">
-            Live Health Overview
+
+          {/* Heart rate */}
+          <div className="flex flex-col gap-2 py-5 md:py-0 md:px-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-ink-muted">
+                <Heart size={15} style={{ color: 'var(--zone-red-accent)' }} />
+                <span className="text-[13px] font-medium">Heart rate</span>
+              </div>
+              <span className="text-[12px] font-semibold" style={{ color: 'var(--zone-amber-text)' }}>+6 bpm</span>
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[44px] font-semibold headline-display text-ink">78</span>
+              <span className="text-[14px] text-ink-faint">bpm</span>
+            </div>
+            <Sparkline values={hrValues} color={zoneAccent('amber')} height={40} />
+          </div>
+
+          {/* Sleep */}
+          <div className="flex flex-col gap-2 py-5 md:py-0 md:pl-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-ink-muted">
+                <Moon size={15} className="text-brand" />
+                <span className="text-[13px] font-medium">Sleep · 7-day</span>
+              </div>
+              <span className="text-[12px] font-semibold" style={{ color: 'var(--zone-red-text)' }}>Goal 7.5h</span>
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[44px] font-semibold headline-display text-ink">5.4</span>
+              <span className="text-[14px] text-ink-faint">hrs avg</span>
+            </div>
+            <SleepBars data={sleepData} height={44} />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Pull-quote ──────────────────────────────────────────────────────── */}
+      <section className="flex flex-col gap-3 border-l-2 pl-5 sm:pl-6" style={{ borderColor: 'var(--brand-primary)' }}>
+        <div className="flex items-center justify-between">
+          <span className="eyebrow text-brand inline-flex items-center gap-2">
+            <Quote size={13} /> Daily reset
           </span>
+          <button
+            onClick={handleNextQuote}
+            className="focus-ring text-[12px] text-ink-faint hover:text-brand transition-colors flex items-center gap-1.5 px-2 py-0.5 rounded-full"
+            title="Next reflection"
+          >
+            <RefreshCw size={12} className={isRotating ? 'animate-spin' : ''} />
+            <span>Next</span>
+          </button>
         </div>
+        <p className="text-[20px] sm:text-[26px] headline-display text-ink leading-snug max-w-[38ch]">
+          &ldquo;{currentQuote.quote}&rdquo;
+        </p>
+        <span className="text-[13px] text-ink-muted font-medium">— {currentQuote.author}</span>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 divide-y md:divide-y-0 md:divide-x divide-[var(--hairline)]">
-          {/* Metric 1: Energy Gauge Visual */}
-          <div className="flex flex-col items-center justify-between gap-3 pt-2 md:pt-0">
-            <div className="flex items-center gap-2">
-              <Zap size={16} className="text-[#ff9500]" />
-              <span className="text-[14px] font-semibold text-[#1d1d1f]">Energy Index</span>
-            </div>
-            <CircularGauge value={38} zone="amber" label="38" sublabel="/ 100" size={130} />
+      {/* ── Asymmetric: this week's pressure + decision rail ─────────────────── */}
+      <section className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-8 lg:gap-12">
+        {/* Wide narrative column */}
+        <div className="flex flex-col gap-5">
+          <div className="flex items-baseline justify-between hairline-b pb-3">
+            <h2 className="text-[22px] headline-display text-ink">This week&apos;s pressure</h2>
+            <Badge label={`${upcoming.length} pending`} variant="warning" />
           </div>
-
-          {/* Metric 2: Heart Rate Trend Visual */}
-          <div className="flex flex-col justify-between gap-3 pt-4 md:pt-0 md:px-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Heart size={16} className="text-[#ff3b30]" />
-                <span className="text-[14px] font-semibold text-[#1d1d1f]">Heart Rate</span>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-[26px] font-semibold headline-tight text-[#1d1d1f]">78</span>
-                <span className="text-[12px] text-[#86868b]">bpm</span>
-              </div>
-            </div>
-            <div className="flex flex-col gap-1.5 mt-1">
-              <div className="flex items-center justify-between text-[11px] text-[#86868b] font-medium">
-                <span>Baseline: 72 bpm</span>
-                <span className="text-[#ff9500] font-semibold">+6 bpm</span>
-              </div>
-              <Sparkline values={hrValues} color="#ff9500" height={58} />
-            </div>
-            <div className="flex justify-end">
-              <ZoneChip zone="amber" size="sm" />
-            </div>
-          </div>
-
-          {/* Metric 3: Sleep Distribution Visual */}
-          <div className="flex flex-col justify-between gap-3 pt-4 md:pt-0 md:pl-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Moon size={16} className="text-[#0066cc]" />
-                <span className="text-[14px] font-semibold text-[#1d1d1f]">Sleep Duration</span>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-[26px] font-semibold headline-tight text-[#1d1d1f]">5.4</span>
-                <span className="text-[12px] text-[#86868b]">hrs avg</span>
-              </div>
-            </div>
-            <div className="flex flex-col gap-1.5 mt-1">
-              <div className="flex items-center justify-between text-[11px] text-[#86868b] font-medium">
-                <span>7-Day Pattern</span>
-                <span className="text-[#ff3b30] font-semibold">Goal: 7.5h</span>
-              </div>
-              <SleepBars data={sleepData} height={66} />
-            </div>
-            <div className="flex justify-end">
-              <ZoneChip zone="red" size="sm" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Commitments & Pending Decisions ─────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Upcoming Commitments */}
-        <div className="apple-card p-6 flex flex-col gap-4 justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[17px] font-semibold headline-tight text-[#1d1d1f]">Upcoming Deadlines</span>
-            <Badge label={`${upcoming.length} Pending`} variant="warning" />
-          </div>
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col rule-divide">
             {upcoming.map((ev, i) => {
               const s = KIND_STYLE[ev.kind]
               return (
-                <div key={i} className="flex items-start gap-3 rounded-[12px] p-3.5" style={{ background: s.bg }}>
-                  <div style={{ width: 8, height: 8, borderRadius: 999, background: s.dot, flexShrink: 0, marginTop: 4 }} />
-                  <div className="flex flex-col gap-0.5 flex-1">
-                    <span className="text-[14px] font-semibold" style={{ color: s.text }}>{ev.title}</span>
-                    <span className="text-[12px]" style={{ color: s.text, opacity: 0.85 }}>{ev.day} {ev.date} Sep · {ev.time}</span>
+                <div key={i} className="flex items-center gap-4 py-3.5">
+                  <div style={{ width: 9, height: 9, borderRadius: 999, background: s.dot, flexShrink: 0 }} />
+                  <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                    <span className="text-[15px] font-semibold text-ink truncate">{ev.title}</span>
+                    <span className="text-[12px] text-ink-faint">{ev.day} {ev.date} Sep · {ev.time}</span>
                   </div>
                   {ev.energy !== undefined && (
-                    <span className="text-[12px] font-semibold" style={{ color: s.text }}>{ev.energy} pts</span>
+                    <span className="text-[13px] font-semibold" style={{ color: s.text }}>{ev.energy} pts</span>
                   )}
                 </div>
               )
             })}
           </div>
           <button className="apple-btn-secondary self-start" onClick={onGoLoad}>
-            View Schedule & Load <ChevronRight size={14} />
+            Open full schedule <ChevronRight size={14} />
           </button>
         </div>
 
-        {/* Decision Pending Card */}
-        <div className="apple-card p-6 flex flex-col gap-4 justify-between" style={{ background: 'linear-gradient(180deg, #fffdfa 0%, #ffffff 100%)', borderColor: '#ff9500]/30' }}>
+        {/* Narrow decision rail */}
+        <aside className="apple-card p-6 flex flex-col gap-4 self-start" style={{ background: 'var(--surface-pearl)' }}>
           <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#fef4e5] flex items-center justify-center shrink-0">
-              <AlertTriangle size={18} className="text-[#ff9500]" />
+            <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--zone-amber-bg)' }}>
+              <AlertTriangle size={18} style={{ color: 'var(--zone-amber-accent)' }} />
             </div>
             <div className="flex flex-col">
-              <span className="text-[12px] font-semibold uppercase tracking-wider text-[#b25e02]">Decision Pending</span>
-              <span className="text-[18px] font-semibold headline-tight text-[#1d1d1f]">Part-time Retail Offer</span>
+              <span className="eyebrow" style={{ color: 'var(--zone-amber-text)' }}>Decision pending</span>
+              <span className="text-[17px] font-semibold headline-tight text-ink">Part-time retail offer</span>
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             {[
-              { label: '12 hrs / week workload', icon: <Clock size={16} /> },
-              { label: 'Tue · Thu · Sat distribution', icon: <Calendar size={16} /> },
-              { label: 'High crash risk for 15 Sep week', icon: <AlertTriangle size={16} /> },
+              { label: '12 hrs / week workload', icon: <Clock size={15} /> },
+              { label: 'Tue · Thu · Sat distribution', icon: <Calendar size={15} /> },
+              { label: 'High crash risk, week of 15 Sep', icon: <AlertTriangle size={15} /> },
             ].map(r => (
-              <div key={r.label} className="flex items-center gap-2.5 text-[14px] text-[#1d1d1f]">
-                <span className="text-[#ff9500] flex">{r.icon}</span>
+              <div key={r.label} className="flex items-center gap-2.5 text-[13px] text-ink-2">
+                <span className="flex" style={{ color: 'var(--zone-amber-accent)' }}>{r.icon}</span>
                 <span>{r.label}</span>
               </div>
             ))}
           </div>
 
-          <p className="text-[13px] text-[#7a7a7a] leading-relaxed">
+          <p className="text-[13px] text-ink-muted leading-relaxed">
             Accepting this shift pushes your recovery score from 38 down to 22 when DS A2 and LinAlg mid-terms overlap.
           </p>
 
-          <div className="flex gap-3 flex-wrap">
-            <button className="apple-btn-primary" onClick={() => setShowCommit(true)}>
-              <TrendingUp size={15} /> Run Impact Check
-            </button>
-            <button className="apple-btn-secondary" onClick={onGoRecovery}>
-              Recovery Plan
-            </button>
-          </div>
+          <button className="apple-btn-primary w-full" onClick={() => setShowCommit(true)}>
+            <TrendingUp size={15} /> Run impact check
+          </button>
 
           {showCommit && (
             <CommitmentCheck onClose={() => setShowCommit(false)} />
           )}
-        </div>
-      </div>
+        </aside>
+      </section>
     </div>
   )
 }
@@ -736,46 +718,36 @@ function SmartBandPage() {
     { day: 'Fri', hours: 6.2 }, { day: 'Sat', hours: 5.0 }, { day: 'Sun', hours: 5.4 },
   ]
 
-  return (
-    <div className="flex flex-col gap-6 max-w-[1100px] mx-auto">
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-[28px] sm:text-[36px] font-semibold headline-tight text-[#1d1d1f]">
-            Smart Band
-          </h1>
-          <p className="text-[15px] text-[#7a7a7a]">
-            Continuous real-time biometric telemetry and burnout prediction
-          </p>
-        </div>
-        <Badge label={connected ? 'Connected · Live' : 'Disconnected'} variant={connected ? 'success' : 'default'} />
-      </div>
+  const factors = [
+    { label: 'Autonomic HR', value: '78 bpm', weight: 40, icon: <Heart size={16} />, zone: 'amber' as ZoneKey },
+    { label: 'Sleep quality', value: '5.4 hrs', weight: 35, icon: <Moon size={16} />, zone: 'red' as ZoneKey },
+    { label: 'Calendar density', value: '89%', weight: 25, icon: <Activity size={16} />, zone: 'red' as ZoneKey },
+  ]
 
-      {/* Device Connection Showcase */}
-      <div className="apple-card p-6 flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-[#f5f5f7] flex items-center justify-center text-[#0066cc]">
-            <Waves size={24} />
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="text-[17px] font-semibold headline-tight text-[#1d1d1f]">Xiaomi Smart Band 8 Pro</span>
-              <BatteryCharging size={16} className="text-[#34c759]" />
+  return (
+    <div className="flex flex-col gap-12 sm:gap-16 max-w-[1140px] mx-auto pb-4">
+
+      {/* ── Device showcase hero (dark editorial band) ──────────────────────── */}
+      <header className="editorial-dark p-7 sm:p-10 flex flex-col gap-8">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex flex-col gap-1">
+            <span className="eyebrow" style={{ color: 'var(--brand-primary-on-dark)' }}>Connected device</span>
+            <div className="flex items-center gap-2.5">
+              <span className="text-[24px] sm:text-[28px] headline-display text-white">Xiaomi Smart Band 8 Pro</span>
+              <BatteryCharging size={18} style={{ color: 'var(--zone-green-accent)' }} />
             </div>
-            <span className="text-[13px] text-[#86868b]">
-              {connected ? 'Syncing live telemetry every 2s' : 'Last synchronized: Today, 08:14'}
+            <span className="text-[13px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              {connected ? 'Streaming live telemetry every 2 seconds' : 'Last synchronized today at 08:14'}
             </span>
           </div>
-        </div>
-
-        <div className="flex items-center gap-3">
           <button
             onClick={() => setConnected(c => !c)}
             role="switch"
             aria-checked={connected}
             aria-label="Toggle band connection"
-            className="focus-ring relative w-12 h-7 rounded-full transition-colors duration-200"
+            className="focus-ring relative w-12 h-7 rounded-full transition-colors duration-200 shrink-0"
             style={{
-              background: connected ? 'var(--brand-primary)' : '#e5e5ea',
+              background: connected ? 'var(--brand-primary)' : 'rgba(255,255,255,0.22)',
               border: 'none', cursor: 'pointer',
             }}
           >
@@ -785,78 +757,85 @@ function SmartBandPage() {
             />
           </button>
         </div>
-      </div>
 
-      {/* Biometric Rings Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Real-time HR */}
-        <div className="apple-card p-6 flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <span className="text-[17px] font-semibold headline-tight text-[#1d1d1f]">Heart Rate Monitoring</span>
-            {connected && <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[#ff3b30] bg-[#fde8e8] px-2.5 py-1 rounded-full"><span className="w-2 h-2 rounded-full bg-[#ff3b30] animate-ping" /> LIVE</span>}
+        <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] items-center gap-8">
+          <div className="flex items-baseline gap-2">
+            <span className="headline-display text-white" style={{ fontSize: 'clamp(3.5rem, 14vw, 6rem)', lineHeight: 0.9 }}>
+              {hr}
+            </span>
+            <span className="text-[16px]" style={{ color: 'rgba(255,255,255,0.6)' }}>bpm</span>
           </div>
-          <div className="flex items-end gap-6 flex-wrap">
-            <CircularGauge value={hr} max={120} zone={hrZone} label={String(hr)} sublabel="bpm" size={130} />
-            <div className="flex flex-col gap-2 flex-1 min-w-[140px]">
-              <span className="text-[12px] text-[#86868b] uppercase tracking-wider font-semibold">Live Trend</span>
-              <Sparkline values={hrHistory} color="#ff3b30" height={64} />
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.55)' }}>Live heart rate</span>
+              {connected && (
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ color: '#fff', background: 'var(--zone-red-accent)' }}>
+                  <span className="w-2 h-2 rounded-full bg-white animate-ping" /> LIVE
+                </span>
+              )}
             </div>
-          </div>
-          <div className="p-3.5 rounded-[12px] bg-[#f5f5f7]">
-            <span className="text-[13px] text-[#7a7a7a]">
-              Elevated 6 bpm over your resting baseline (72 bpm). Contributes +4 points to current stress score.
+            <Sparkline values={hrHistory} color={zoneAccent(hrZone)} height={56} />
+            <span className="text-[13px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              Elevated 6 bpm over your 72 bpm resting baseline — contributes +4 to today&apos;s stress score.
             </span>
           </div>
         </div>
+      </header>
 
-        {/* Sleep Breakdown */}
-        <div className="apple-card p-6 flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <span className="text-[17px] font-semibold headline-tight text-[#1d1d1f]">Sleep Architecture</span>
+      {/* ── Sleep architecture (asymmetric) ─────────────────────────────────── */}
+      <section className="grid grid-cols-1 md:grid-cols-[auto_1fr] items-center gap-8 md:gap-12">
+        <div className="flex flex-col items-center gap-3">
+          <CircularGauge value={5.4} max={9} zone="red" label="5.4" sublabel="hrs" size={150} />
+        </div>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-baseline justify-between hairline-b pb-3">
+            <h2 className="text-[22px] headline-display text-ink">Sleep architecture</h2>
             <ZoneChip zone="red" />
           </div>
-          <div className="flex items-end gap-6 flex-wrap">
-            <CircularGauge value={5.4} max={9} zone="red" label="5.4" sublabel="hrs" size={130} />
-            <div className="flex flex-col gap-2 flex-1 min-w-[140px]">
-              <span className="text-[12px] text-[#86868b] uppercase tracking-wider font-semibold">Daily Durations</span>
-              <SleepBars data={sleepData} height={80} />
-            </div>
-          </div>
-          <div className="p-3.5 rounded-[12px] bg-[#f5f5f7]">
-            <span className="text-[13px] text-[#7a7a7a]">
-              Below 6h recovery baseline for 4 nights. Recommend targeting 7.5h before Thursday.
-            </span>
-          </div>
+          <SleepBars data={sleepData} height={92} />
+          <p className="text-[14px] text-ink-muted leading-relaxed max-w-[52ch]">
+            Below your 6-hour recovery baseline for four nights running. Aim for 7.5 hours
+            before Thursday to keep your stress score from climbing further.
+          </p>
         </div>
-      </div>
+      </section>
 
-      {/* Stress Formula Breakdown */}
-      <div className="apple-card p-6 flex flex-col gap-5">
-        <span className="text-[18px] font-semibold headline-tight text-[#1d1d1f]">Oasis Stress Index Formula</span>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            { label: 'Autonomic HR', value: '78 bpm', weight: '40%', icon: <Heart size={18} />, zone: 'amber' as ZoneKey },
-            { label: 'Sleep Quality', value: '5.4 hrs', weight: '35%', icon: <Moon size={18} />, zone: 'red' as ZoneKey },
-            { label: 'Calendar Density', value: '89%', weight: '25%', icon: <Activity size={18} />, zone: 'red' as ZoneKey },
-          ].map(f => (
-            <div key={f.label} className="rounded-[14px] p-4 bg-[#f5f5f7] flex flex-col gap-2.5">
-              <div className="flex items-center gap-2 text-[#7a7a7a]">
-                {f.icon}
-                <span className="text-[13px] font-medium">{f.label}</span>
+      {/* ── Stress index formula (explanatory editorial breakdown) ──────────── */}
+      <section className="flex flex-col gap-6">
+        <div className="flex flex-col gap-1">
+          <span className="eyebrow">How we score it</span>
+          <h2 className="text-[22px] sm:text-[26px] headline-display text-ink">The Oasis stress index</h2>
+        </div>
+
+        <div className="flex flex-col rule-divide">
+          {factors.map(f => (
+            <div key={f.label} className="grid grid-cols-[1fr_auto] sm:grid-cols-[minmax(0,1.4fr)_1fr_auto] items-center gap-4 py-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="flex" style={{ color: zoneAccent(f.zone) }}>{f.icon}</span>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[15px] font-semibold text-ink truncate">{f.label}</span>
+                  <span className="text-[13px] text-ink-faint">{f.value}</span>
+                </div>
               </div>
-              <span className="text-[20px] font-semibold headline-tight text-[#1d1d1f]">{f.value}</span>
-              <div className="flex items-center justify-between">
-                <span className="text-[12px] text-[#86868b]">{f.weight} model weight</span>
-                <ZoneChip zone={f.zone} />
+              <div className="hidden sm:flex items-center gap-3">
+                <div className="rounded-full overflow-hidden flex-1" style={{ height: 6, background: 'var(--hairline)', minWidth: 80 }}>
+                  <div className="bar-fill rounded-full" style={{ height: '100%', width: `${f.weight}%`, background: zoneAccent(f.zone) }} />
+                </div>
+                <span className="text-[13px] font-semibold text-ink-muted tabular-nums w-10 text-right">{f.weight}%</span>
               </div>
+              <ZoneChip zone={f.zone} />
             </div>
           ))}
         </div>
-        <div className="flex items-center justify-between p-4 rounded-[14px] bg-[#fde8e8]">
-          <span className="text-[15px] font-semibold text-[#d70015]">Calculated Stress Score</span>
-          <span className="text-[28px] font-semibold headline-tight text-[#d70015]">62 / 100</span>
+
+        <div className="flex items-center justify-between p-5 rounded-[18px]" style={{ background: 'var(--zone-red-bg)' }}>
+          <div className="flex flex-col">
+            <span className="eyebrow" style={{ color: 'var(--zone-red-text)' }}>Calculated stress score</span>
+            <span className="text-[13px]" style={{ color: 'var(--zone-red-text)', opacity: 0.85 }}>Weighted across all three signals</span>
+          </div>
+          <span className="text-[40px] headline-display" style={{ color: 'var(--zone-red-text)' }}>62<span className="text-[18px]"> / 100</span></span>
         </div>
-      </div>
+      </section>
     </div>
   )
 }
@@ -888,14 +867,15 @@ function LoadPage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-[1100px] mx-auto">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-[28px] sm:text-[36px] font-semibold headline-tight text-[#1d1d1f]">
-          Schedule & Load
+      <header className="flex flex-col gap-3 border-l-2 pl-5 sm:pl-6" style={{ borderColor: 'var(--brand-primary)' }}>
+        <span className="eyebrow">Week of 8–14 September</span>
+        <h1 className="display-hero headline-display text-ink" style={{ fontSize: 'clamp(2.25rem, 7vw, 3.75rem)' }}>
+          Schedule &amp; load
         </h1>
-        <p className="text-[15px] text-[#7a7a7a]">
-          Weekly calendar timeline, workload breakdown, and smart commitment management
+        <p className="text-[16px] text-ink-muted leading-relaxed max-w-[52ch]">
+          Your week timeline, where the pressure is concentrated, and what you can safely move.
         </p>
-      </div>
+      </header>
 
       <Tabs
         defaultTab="schedule"
@@ -937,16 +917,50 @@ function LoadPage() {
           {
             id: 'categories', label: 'Load Categories',
             content: (
-              <div className="flex flex-col gap-4 pt-4">
-                {categories.map(c => (
-                  <div key={c.label} className="apple-card p-5 flex flex-col gap-3">
-                    <LoadBar label={c.label} pct={c.pct} zone={c.zone} />
-                    <p className="text-[13px] text-[#7a7a7a]">{c.detail}</p>
-                  </div>
-                ))}
-                <div className="rounded-[14px] p-4 flex gap-3 bg-[#fde8e8] border-l-4 border-[#ff3b30]">
-                  <AlertTriangle size={20} className="text-[#ff3b30] shrink-0 mt-0.5" />
-                  <p className="text-[14px] text-[#d70015]">
+              <div className="flex flex-col gap-8 pt-6">
+                {/* Lead category — emphasized */}
+                {(() => {
+                  const lead = categories[0]
+                  return (
+                    <div className="flex flex-col gap-4">
+                      <span className="eyebrow">Highest load right now</span>
+                      <div className="flex items-baseline justify-between gap-4">
+                        <h3 className="text-[26px] sm:text-[32px] headline-display text-ink">{lead.label}</h3>
+                        <span className="text-[40px] headline-display tabular-nums" style={{ color: zoneAccent(lead.zone) }}>{lead.pct}%</span>
+                      </div>
+                      <div className="rounded-full overflow-hidden" style={{ height: 10, background: 'var(--hairline)' }}>
+                        <div className="bar-fill rounded-full" style={{ height: '100%', width: `${lead.pct}%`, background: zoneAccent(lead.zone) }} />
+                      </div>
+                      <p className="text-[14px] text-ink-muted leading-relaxed max-w-[56ch]">{lead.detail}</p>
+                    </div>
+                  )
+                })()}
+
+                {/* Remaining categories — compact ranked rows */}
+                <div className="flex flex-col rule-divide">
+                  {categories.slice(1).map((c, i) => (
+                    <div key={c.label} className="flex items-center gap-4 py-4">
+                      <span className="text-[13px] font-semibold text-ink-faint tabular-nums w-6">{i + 2}</span>
+                      <div className="flex flex-col gap-2 flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-[15px] font-semibold text-ink truncate">{c.label}</span>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-[14px] font-semibold tabular-nums" style={{ color: zoneAccent(c.zone) }}>{c.pct}%</span>
+                            <ZoneChip zone={c.zone} />
+                          </div>
+                        </div>
+                        <div className="rounded-full overflow-hidden" style={{ height: 6, background: 'var(--hairline)' }}>
+                          <div className="bar-fill rounded-full" style={{ height: '100%', width: `${c.pct}%`, background: zoneAccent(c.zone) }} />
+                        </div>
+                        <p className="text-[12px] text-ink-faint">{c.detail}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-[14px] p-4 flex gap-3 border-l-4" style={{ background: 'var(--zone-red-bg)', borderColor: 'var(--zone-red-accent)' }}>
+                  <AlertTriangle size={20} className="shrink-0 mt-0.5" style={{ color: 'var(--zone-red-accent)' }} />
+                  <p className="text-[14px]" style={{ color: 'var(--zone-red-text)' }}>
                     Two primary domains exceed 85%. Taking on additional obligations will cascade into severe fatigue.
                   </p>
                 </div>
@@ -1078,44 +1092,33 @@ function RecoveryPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1100px] mx-auto">
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-[28px] sm:text-[36px] font-semibold headline-tight text-[#1d1d1f]">
-            Recovery Plan
+    <div className="flex flex-col gap-14 sm:gap-20 max-w-[880px] mx-auto pb-4">
+
+      {/* ── Calm centered hero ──────────────────────────────────────────────── */}
+      <header className="flex flex-col items-center text-center gap-6 pt-4">
+        <span className="eyebrow">Recovery plan</span>
+        <CircularGauge value={energy} zone={currentZone} label={String(energy)} sublabel="/ 100" size={188} />
+        <div className="flex flex-col items-center gap-4 max-w-[44ch]">
+          <h1 className="text-[26px] sm:text-[34px] headline-display text-ink leading-snug">
+            Restore your energy above 45 to leave the fatigue zone.
           </h1>
-          <p className="text-[15px] text-[#7a7a7a]">
-            Target threshold: restore live energy above 45 pts to exit fatigue zone
+          <p className="text-[15px] text-ink-muted leading-relaxed">
+            Check off small restorative actions below. Each one nudges your autonomic
+            recovery up in real time — no single big fix required.
           </p>
+          {energy >= 45 && (
+            <div className="inline-flex items-center gap-2 text-[13px] font-semibold px-3.5 py-1.5 rounded-full" style={{ color: 'var(--zone-green-text)', background: 'var(--zone-green-bg)' }}>
+              <CheckCircle size={15} /> You&apos;re back in the stable zone.
+            </div>
+          )}
         </div>
-        <ZoneChip zone={currentZone} size="lg" />
-      </div>
+      </header>
 
-      {/* Live Recovery Metric */}
-      <div className="apple-card p-6 flex items-center justify-between flex-wrap gap-6">
-        <div className="flex items-center gap-6 flex-wrap">
-          <CircularGauge value={energy} zone={currentZone} label={String(energy)} sublabel="/ 100" size={136} />
-          <div className="flex flex-col gap-1.5 max-w-sm">
-            <span className="text-[17px] font-semibold headline-tight text-[#1d1d1f]">Live Energy Rebound</span>
-            <p className="text-[13px] text-[#7a7a7a] leading-relaxed">
-              Check off your daily restorative actions below to track your autonomic recovery in real-time.
-            </p>
-            {energy >= 45 && (
-              <div className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#1b8a3e] bg-[#eaf8ee] px-3 py-1 rounded-full mt-1">
-                <CheckCircle size={15} /> Exit condition fulfilled — returned to stable zone.
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Daily Restoration Check-ins */}
-      {days.map(d => (
-        <div key={d.date} className="flex flex-col gap-3">
-          <span className="text-[12px] font-semibold uppercase tracking-wider text-[#86868b] px-1">
-            {d.date}
-          </span>
-          <div className="flex flex-col gap-2.5">
+      {/* ── Daily restoration check-ins (light checklist) ───────────────────── */}
+      <section className="flex flex-col gap-10">
+        {days.map(d => (
+          <div key={d.date} className="flex flex-col gap-1">
+            <span className="eyebrow hairline-b pb-3 mb-1">{d.date}</span>
             {d.items.map(item => {
               const done = ticked[item.id]
               return (
@@ -1124,60 +1127,56 @@ function RecoveryPage() {
                   onClick={() => setTicked(p => ({ ...p, [item.id]: !p[item.id] }))}
                   role="checkbox"
                   aria-checked={!!done}
-                  className="apple-card p-4 flex items-center gap-3.5 text-left transition-all duration-200"
-                  style={{
-                    background: done ? '#eaf8ee' : 'var(--canvas-white)',
-                    borderColor: done ? 'rgba(52, 199, 89, 0.4)' : 'var(--hairline)',
-                    cursor: 'pointer',
-                  }}
+                  className="focus-ring flex items-center gap-4 text-left py-4 hairline-b transition-colors"
+                  style={{ cursor: 'pointer', background: 'none', border: 'none', borderBottom: '1px solid var(--hairline)' }}
                 >
                   <div style={{
-                    width: 24, height: 24, borderRadius: 999, flexShrink: 0,
-                    background: done ? '#34c759' : 'transparent',
-                    border: `1.5px solid ${done ? '#34c759' : 'var(--hairline)'}`,
+                    width: 26, height: 26, borderRadius: 999, flexShrink: 0,
+                    background: done ? 'var(--zone-green-accent)' : 'transparent',
+                    border: `1.5px solid ${done ? 'var(--zone-green-accent)' : 'var(--hairline)'}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                   }}>
-                    {done && <Check size={14} className="text-white tick-in stroke-[2.5]" />}
+                    {done && <Check size={15} className="text-white tick-in stroke-[2.5]" />}
                   </div>
-                  <span className="text-[15px] font-medium flex-1" style={{ color: done ? '#1b8a3e' : '#1d1d1f' }}>
+                  <span className="text-[16px] font-medium flex-1" style={{ color: done ? 'var(--ink-muted-48)' : 'var(--ink)', textDecoration: done ? 'line-through' : 'none' }}>
                     {item.label}
                   </span>
-                  <span className="text-[13px] font-semibold" style={{ color: done ? '#1b8a3e' : '#86868b' }}>
+                  <span className="text-[13px] font-semibold tabular-nums" style={{ color: done ? 'var(--zone-green-text)' : 'var(--ink-muted-30)' }}>
                     {item.gain} pts
                   </span>
                 </button>
               )
             })}
           </div>
-        </div>
-      ))}
+        ))}
+      </section>
 
-      {/* Communication Assistant Card */}
-      <div className="apple-card p-6 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles size={18} className="text-[#0066cc]" />
-            <span className="text-[17px] font-semibold headline-tight text-[#1d1d1f]">
-              Communication Assist: Decline Template
+      {/* ── Communication assist (quiet card) ───────────────────────────────── */}
+      <section className="apple-card p-6 flex flex-col gap-4" style={{ background: 'var(--surface-pearl)' }}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <Sparkles size={18} className="text-brand" />
+            <span className="text-[16px] font-semibold headline-tight text-ink">
+              Need to say no? Here&apos;s a script.
             </span>
           </div>
-          <button className="apple-btn-secondary py-1 px-3 text-[13px]" onClick={() => setShowComm(p => !p)}>
-            {showComm ? 'Hide' : 'Expand'}
+          <button className="apple-btn-secondary py-1.5 px-4 text-[13px]" onClick={() => setShowComm(p => !p)}>
+            {showComm ? 'Hide' : 'Show'}
           </button>
         </div>
 
         {showComm && (
-          <div className="p-4 rounded-[14px] bg-[#f5f5f7] flex flex-col gap-3">
-            <p className="text-[14px] text-[#1d1d1f] italic leading-relaxed">
-              "Hi team, thank you for considering me for this opportunity. After reviewing my academic milestones and project commitments for this semester, I won't be able to take on extra shifts right now to maintain high quality deliverables."
+          <div className="p-4 rounded-[14px] bg-surface flex flex-col gap-3" style={{ border: '1px solid var(--hairline)' }}>
+            <p className="text-[15px] text-ink-2 italic leading-relaxed">
+              &ldquo;Hi team, thank you for considering me for this opportunity. After reviewing my academic milestones and project commitments for this semester, I won&apos;t be able to take on extra shifts right now to maintain high quality deliverables.&rdquo;
             </p>
             <button className="apple-btn-primary self-start text-[13px] py-1.5 px-3.5" onClick={copyTemplate}>
-              {copied ? <><Check size={14} /> Copied</> : <><Copy size={14} /> Copy to Clipboard</>}
+              {copied ? <><Check size={14} /> Copied</> : <><Copy size={14} /> Copy to clipboard</>}
             </button>
           </div>
         )}
-      </div>
+      </section>
     </div>
   )
 }
