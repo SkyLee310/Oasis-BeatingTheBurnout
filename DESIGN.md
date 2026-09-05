@@ -152,9 +152,10 @@ Motion easing is `--ease: cubic-bezier(0.16, 1, 0.3, 1)` everywhere. A
 
 ## Components
 
-All in `src/App.tsx`. Note we deliberately use **only `ThemeProvider`** from
-`@figma/astraui` — nav, avatar, badges, tabs and chat are hand-built so nothing
-renders in the kit's own idiom.
+Primitives are published from `src/ds`; screens live in `src/pages`, feature UI in
+`src/features`, and the shell and navigation in `src/App.tsx`. Note we deliberately
+use **only `ThemeProvider`** from `@figma/astraui` — nav, avatar, badges, tabs and
+chat are hand-built so nothing renders in the kit's own idiom.
 
 | Class / component | What it is |
 |---|---|

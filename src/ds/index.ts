@@ -1,6 +1,7 @@
 // ─── Oasis design system ──────────────────────────────────────────────────────
 // The published surface of the Oasis DS. Everything a screen should reach for
-// lives here; pages and navigation stay in src/App.tsx.
+// lives here; screens live in src/pages, feature UI in src/features, and the
+// shell and navigation in src/App.tsx.
 //
 // Design rules and rationale: see DESIGN.md at the repo root.
 
