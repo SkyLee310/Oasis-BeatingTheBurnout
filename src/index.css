@@ -1,321 +1,450 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import '../node_modules/@figma/astraui/dist/styles.css';
 @import 'tailwindcss';
 
-/* ── Apple Design Tokens (from DESIGN.md) ─────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   OASIS DESIGN LANGUAGE — "Soft-Bold Wellness"
+   Derived from four reference boards:
+     · pastel bento wellness cards  (Capi Creative)
+     · flat-colour mood blobs       (Suntera)
+     · neo-brutalist black strokes  (Explicai)
+     · heavy display type + chips   (mood picker)
+
+   THE FIVE RULES
+     1. Cream canvas, pastel fills, saturated accents. No gradients on chrome.
+     2. Every surface is outlined: 2px solid ink. Never a hairline, never a blur.
+     3. Depth comes from a hard offset shadow (4px 4px 0 ink), not a soft one.
+     4. Type jumps hard: Archivo 800 display, Jakarta 500 body. Nothing between.
+     5. Radius is generous (18/24/32) or a full pill. Nothing is square.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 :root {
-  /* Brand & Action Colors */
-  --brand-primary:         #0066cc;
-  --brand-focus:           #0071e3;
-  --brand-primary-on-dark: #2997ff;
-  --on-brand:              #ffffff;
+  /* ── Ink — also the colour of every stroke in the system ─────────────────── */
+  --ink:              #14140f;
+  --ink-2:            #46443c;
+  --ink-muted:        #83817a;
+  --ink-faint:        #a8a69c;
+  --on-ink:           #ffffff;
 
-  /* Reconcile the AstraUI kit brand ramp to the app's blue so kit
-     components (Button, Tabs, Badge, PromptPane) never fall back to purple */
-  --brand-hover:           #0071e3;
-  --brand-dark:            #004a99;
-  --brand-secondary:       #cfe2ff;
-  --brand-tertiary:        #eaf3ff;
-  --brand-muted:           #5a8fd6;
+  /* ── Canvas & surfaces ───────────────────────────────────────────────────── */
+  --canvas:           #f6f2e8;
+  --surface:          #ffffff;
+  --surface-2:        #fbf8f0;
 
-  /* Typography & Ink */
-  --ink:                   #1d1d1f;
-  --ink-muted-80:          #333333;
-  --ink-muted-48:          #7a7a7a;
-  --ink-muted-30:          #86868b;
+  /* ── Pastel fills (bento tiles, soft panels) ─────────────────────────────── */
+  --mint:             #d7edbb;
+  --mint-deep:        #b6de8e;
+  --sky:              #c6e4f5;
+  --sky-deep:         #9ad0ee;
+  --blush:            #fbd5dc;
+  --blush-deep:       #f7b4c0;
+  --butter:           #fbe6a2;
+  --butter-deep:      #f8d765;
+  --lilac:            #ded7f5;
 
-  /* Canvas & Surfaces */
-  --canvas-parchment:      #f5f5f7;
-  --canvas-white:          #ffffff;
-  --surface-pearl:         #fafafc;
-  --surface-tile-1:        #272729;
-  --surface-tile-2:        #2a2a2c;
-  --surface-tile-3:        #252527;
-  --surface-black:         #000000;
-  --surface-chip-trans:    rgba(210, 210, 215, 0.64);
+  /* ── Saturated accents (illustration, emphasis, mascot) ──────────────────── */
+  --bold-orange:      #f2542d;
+  --bold-yellow:      #f7d046;
+  --bold-blue:        #2e6be6;
+  --bold-green:       #2e7d4f;
+  --bold-pink:        #ef5da8;
 
-  /* Hairlines & Borders */
-  --hairline:              rgba(0, 0, 0, 0.08);
-  --hairline-dark:         rgba(255, 255, 255, 0.12);
-  --divider-soft:          #f0f0f0;
+  /* ── Action model ─────────────────────────────────────────────────────────
+     Primary action is INK (a black pill); selection is YELLOW. Copied from the
+     references — it keeps action colour from ever colliding with the
+     red/amber/green health semantics. */
+  --action:           #14140f;
+  --action-hover:     #2e2e24;
+  --highlight:        #f7d046;
 
-  /* Zone semantic tokens (Apple Health style) */
-  --zone-red-text:         #d70015;
-  --zone-red-bg:           #fde8e8;
-  --zone-red-accent:       #ff3b30;
+  /* Reconcile the AstraUI kit ramp so kit components inherit this language
+     instead of falling back to their own purple. */
+  --brand-primary:    #14140f;
+  --brand-focus:      #14140f;
+  --brand-hover:      #2e2e24;
+  --brand-dark:       #000000;
+  --brand-secondary:  #f7d046;
+  --brand-tertiary:   #fbf1c6;
+  --brand-muted:      #83817a;
+  --on-brand:         #ffffff;
 
-  --zone-amber-text:       #b25e02;
-  --zone-amber-bg:         #fef4e5;
-  --zone-amber-accent:     #ff9500;
+  /* ── Health zones — pastel fill, ink-dark text, saturated accent ─────────── */
+  --zone-green-bg:     #d7edbb;
+  --zone-green-text:   #1f5a33;
+  --zone-green-accent: #4fa45f;
 
-  --zone-green-text:       #1b8a3e;
-  --zone-green-bg:         #eaf8ee;
-  --zone-green-accent:     #34c759;
+  --zone-amber-bg:     #fbe6a2;
+  --zone-amber-text:   #7a4e00;
+  --zone-amber-accent: #f2a529;
+
+  --zone-red-bg:       #fbd5dc;
+  --zone-red-text:     #9e1f2b;
+  --zone-red-accent:   #f2542d;
+
+  /* ── Geometry ────────────────────────────────────────────────────────────── */
+  --r-xl:   32px;
+  --r-lg:   24px;
+  --r-md:   18px;
+  --r-sm:   12px;
+  --r-pill: 999px;
+
+  /* ── Stroke & depth ──────────────────────────────────────────────────────── */
+  --sw:             2px;
+  --sw-thin:        1.5px;
+  --sw-thick:       3px;
+  --stroke:         2px solid var(--ink);
+  --stroke-thin:    1.5px solid var(--ink);
+  --shadow-hard:    4px 4px 0 var(--ink);
+  --shadow-hard-sm: 3px 3px 0 var(--ink);
+  --shadow-hard-lg: 6px 6px 0 var(--ink);
+
+  /* ── Motion ──────────────────────────────────────────────────────────────── */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Dark mode adjustments */
+/* Dark mode: canvas goes ink, strokes invert to cream, pastels stay as accent
+   fills so the language survives the flip. */
 .dark {
-  --canvas-parchment:      #1c1c1e;
-  --canvas-white:          #2c2c2e;
-  --surface-pearl:         #3a3a3c;
-  --ink:                   #ffffff;
-  --ink-muted-80:          #e5e5ea;
-  --ink-muted-48:          #aeaeb2;
-  --hairline:              rgba(255, 255, 255, 0.12);
+  --ink:          #f6f2e8;
+  --ink-2:        #ddd8c9;
+  --ink-muted:    #a5a296;
+  --ink-faint:    #7d7b71;
+  --on-ink:       #14140f;
 
-  --zone-red-text:         #ff6961;
-  --zone-red-bg:           rgba(255, 59, 48, 0.15);
-  --zone-amber-text:       #ffd60a;
-  --zone-amber-bg:         rgba(255, 149, 0, 0.15);
-  --zone-green-text:       #30d158;
-  --zone-green-bg:         rgba(52, 199, 89, 0.15);
+  --canvas:       #16160f;
+  --surface:      #22211a;
+  --surface-2:    #2b2a21;
+
+  --action:       #f7d046;
+  --action-hover: #ffe071;
+  --on-brand:     #14140f;
+
+  --brand-primary: #f7d046;
+  --brand-focus:   #f7d046;
+  --brand-hover:   #ffe071;
+
+  --zone-green-bg:   rgba(79, 164, 95, 0.22);
+  --zone-green-text: #a7e0b3;
+  --zone-amber-bg:   rgba(242, 165, 41, 0.22);
+  --zone-amber-text: #f8d765;
+  --zone-red-bg:     rgba(242, 84, 45, 0.22);
+  --zone-red-text:   #f9b3a2;
 }
 
-/* Shared focus ring */
-.focus-ring:focus-visible {
-  outline: 2px solid var(--brand-focus);
-  outline-offset: 2px;
-}
+/* ═══ Base ══════════════════════════════════════════════════════════════════ */
 
 html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: var(--canvas-parchment);
+  background-color: var(--canvas);
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Inter', system-ui, sans-serif;
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Typography & Tracking ────────────────────────────────────────────────── */
-/* Display/headline type uses Instrument Sans (the kit display face, wired via
-   the Google Fonts import above) so rendering is deterministic across machines. */
-.headline-tight {
-  font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
-  letter-spacing: -0.022em;
-  font-weight: 600;
+/* Brutalist focus: a hard ink ring, offset so it reads as a second stroke. */
+.focus-ring:focus-visible,
+button:focus-visible,
+[role='button']:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: inherit;
 }
 
-.headline-display {
-  font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
-  letter-spacing: -0.028em;
-  font-weight: 600;
-  line-height: 1.04;
-}
+/* ═══ Typography ════════════════════════════════════════════════════════════
+   Two faces only. Archivo 700–900 carries every display moment; Plus Jakarta
+   Sans 400–700 carries everything you actually read. There is no 600-weight
+   middle ground — the references get their energy from the size of that gap. */
 
-.caption-tight {
-  letter-spacing: -0.012em;
-}
-
-/* ── Editorial utilities (token-backed, no raw hex) ───────────────────────── */
-.eyebrow {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+.t-hero {
+  font-family: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.5rem, 8.5vw, 4.75rem);
+  line-height: 0.9;
+  letter-spacing: -0.035em;
   text-transform: uppercase;
-  color: var(--ink-muted-48);
 }
-.text-ink        { color: var(--ink); }
-.text-ink-2      { color: var(--ink-muted-80); }
-.text-ink-muted  { color: var(--ink-muted-48); }
-.text-ink-faint  { color: var(--ink-muted-30); }
-.text-brand      { color: var(--brand-primary); }
-.bg-canvas       { background-color: var(--canvas-parchment); }
-.bg-surface      { background-color: var(--canvas-white); }
-.bg-pearl        { background-color: var(--surface-pearl); }
-.hairline-b      { border-bottom: 1px solid var(--hairline); }
-.hairline-t      { border-top: 1px solid var(--hairline); }
-.rule-divide > * + * { border-top: 1px solid var(--hairline); }
-.editorial-dark {
-  background: linear-gradient(155deg, var(--surface-tile-1), var(--surface-tile-3));
-  color: #ffffff;
-  border-radius: 26px;
-}
-.display-hero {
-  font-size: clamp(2.75rem, 9vw, 5.25rem);
+
+.t-display {
+  font-family: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.75rem, 4.5vw, 2.5rem);
   line-height: 0.98;
+  letter-spacing: -0.03em;
 }
 
-/* ── Apple Cards & Surfaces ───────────────────────────────────────────────── */
-.apple-card {
-  background-color: var(--canvas-white);
-  border-radius: 18px;
-  border: 1px solid var(--hairline);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
+.t-title {
+  font-family: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.12;
+  letter-spacing: -0.022em;
 }
 
-.apple-card-interactive:hover {
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+.t-sub {
+  font-family: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.2;
+  letter-spacing: -0.018em;
 }
 
-.apple-dark-card {
-  background-color: var(--surface-tile-1);
-  color: #ffffff;
-  border-radius: 18px;
-  border: 1px solid var(--hairline-dark);
+/* Big numbers — the bento tiles and gauges live on this. */
+.t-stat {
+  font-family: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
 }
 
-.apple-frosted {
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  background-color: rgba(245, 245, 247, 0.82);
-}
-
-/* ── Apple Buttons & CTAs ─────────────────────────────────────────────────── */
-.apple-btn-primary {
-  background-color: var(--brand-primary);
-  color: #ffffff;
-  border-radius: 9999px;
-  font-weight: 400;
-  padding: 10px 20px;
-  font-size: 15px;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s ease;
-}
-
-.apple-btn-primary:hover {
-  background-color: var(--brand-focus);
-}
-
-.apple-btn-primary:active {
-  transform: scale(0.96);
-}
-
-.apple-btn-secondary {
-  background-color: var(--surface-pearl);
-  color: var(--ink);
-  border-radius: 9999px;
-  font-weight: 400;
-  padding: 10px 20px;
-  font-size: 15px;
-  border: 1px solid var(--hairline);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s ease;
-}
-
-.apple-btn-secondary:hover {
-  background-color: #f0f0f2;
-}
-
-.apple-btn-secondary:active {
-  transform: scale(0.96);
-}
-
-/* ── Zone chip transitions ────────────────────────────────────────────────── */
-.zone-chip {
-  transition: background 300ms ease-out, color 300ms ease-out;
-  display: inline-flex;
-  align-items: center;
-  border-radius: 9999px;
+.t-eyebrow {
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  padding: 4px 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--ink-muted);
 }
-.zone-chip-lg {
+
+.t-body  { font-size: 15px; font-weight: 500; line-height: 1.55; }
+.t-label { font-size: 13px; font-weight: 600; line-height: 1.35; }
+.t-micro { font-size: 11.5px; font-weight: 600; line-height: 1.3; }
+
+.text-ink       { color: var(--ink); }
+.text-ink-2     { color: var(--ink-2); }
+.text-ink-muted { color: var(--ink-muted); }
+.text-ink-faint { color: var(--ink-faint); }
+
+.bg-canvas    { background-color: var(--canvas); }
+.bg-surface   { background-color: var(--surface); }
+.bg-surface-2 { background-color: var(--surface-2); }
+
+/* ═══ Cards & tiles ═════════════════════════════════════════════════════════
+   One rule: outline, do not shade. `.card-pop` adds the hard offset shadow and
+   is reserved for the one element on screen you want picked up first. */
+
+.card {
+  background-color: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: var(--r-lg);
+}
+
+.card-pop { box-shadow: var(--shadow-hard); }
+.card-xl  { border-radius: var(--r-xl); }
+
+/* Pastel bento tile — the Capi Creative grid unit. */
+.tile {
+  border: 2px solid var(--ink);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.tile-mint   { background-color: var(--mint); }
+.tile-sky    { background-color: var(--sky); }
+.tile-blush  { background-color: var(--blush); }
+.tile-butter { background-color: var(--butter); }
+.tile-lilac  { background-color: var(--lilac); }
+.tile-cream  { background-color: var(--surface-2); }
+
+/* Interactive surfaces lift into their own shadow rather than glowing. */
+.press { transition: transform 0.16s var(--ease), box-shadow 0.16s var(--ease); }
+.press:hover  { transform: translate(-2px, -2px); box-shadow: var(--shadow-hard); }
+.press:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+
+/* Ink panel — the inverse surface, used once per page at most. */
+.panel-ink {
+  background-color: var(--ink);
+  color: var(--on-ink);
+  border: 2px solid var(--ink);
+  border-radius: var(--r-xl);
+}
+.panel-ink .t-eyebrow { color: rgba(246, 242, 232, 0.62); }
+
+/* ═══ Buttons ═══════════════════════════════════════════════════════════════
+   Primary = ink pill. Secondary = outlined pill on the surface. Accent = a
+   saturated fill that still carries the ink stroke, so nothing floats free. */
+
+.btn {
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.006em;
+  border-radius: var(--r-pill);
+  padding: 11px 20px;
+  border: 2px solid var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: transform 0.16s var(--ease), background-color 0.16s var(--ease),
+              box-shadow 0.16s var(--ease);
+}
+
+.btn-primary {
+  background-color: var(--action);
+  color: var(--on-brand);
+  box-shadow: var(--shadow-hard-sm);
+}
+.btn-primary:hover  { background-color: var(--action-hover); transform: translate(-1px, -1px); box-shadow: var(--shadow-hard); }
+.btn-primary:active { transform: translate(2px, 2px); box-shadow: none; }
+
+.btn-secondary {
+  background-color: var(--surface);
+  color: var(--ink);
+}
+.btn-secondary:hover  { background-color: var(--surface-2); transform: translate(-1px, -1px); box-shadow: var(--shadow-hard-sm); }
+.btn-secondary:active { transform: translate(1px, 1px); box-shadow: none; }
+
+.btn-accent {
+  background-color: var(--highlight);
+  color: var(--ink);
+  box-shadow: var(--shadow-hard-sm);
+}
+.btn-accent:hover  { transform: translate(-1px, -1px); box-shadow: var(--shadow-hard); }
+.btn-accent:active { transform: translate(2px, 2px); box-shadow: none; }
+
+.btn-sm { padding: 7px 14px; font-size: 12.5px; border-width: 1.5px; }
+
+/* Circular icon button — the close / next / refresh affordance. */
+.btn-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--ink);
+  background: var(--surface);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.16s var(--ease), background-color 0.16s var(--ease);
+}
+.btn-icon:hover  { background: var(--highlight); transform: translate(-1px, -1px); }
+.btn-icon:active { transform: translate(1px, 1px); }
+
+/* ═══ Chips ═════════════════════════════════════════════════════════════════
+   The most characteristic component in the references: a pill that is outlined
+   when idle and floods with a flat colour when chosen. */
+
+.chip {
+  display: inline-flex;
+  width: fit-content;    /* never let a column flex parent stretch a pill */
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
   font-size: 12px;
-  padding: 5px 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding: 5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s var(--ease), transform 0.16s var(--ease);
 }
-.zone-red   { background: var(--zone-red-bg);   color: var(--zone-red-text); }
-.zone-amber { background: var(--zone-amber-bg); color: var(--zone-amber-text); }
+.chip:hover          { background-color: var(--surface-2); }
+.chip-selected       { background-color: var(--highlight); }
+.chip-selected:hover { background-color: var(--highlight); }
+.chip-lg { font-size: 13px; padding: 8px 16px; border-width: 2px; }
+
+/* Static status chip (not clickable) — zone colours flood the fill. */
+.zone-chip {
+  display: inline-flex;
+  width: fit-content;    /* never let a column flex parent stretch a pill */
+  align-items: center;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--ink);
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 4px 11px;
+  text-transform: uppercase;
+  transition: background 300ms var(--ease), color 300ms var(--ease);
+}
+.zone-chip-lg { font-size: 12px; padding: 6px 15px; border-width: 2px; }
 .zone-green { background: var(--zone-green-bg); color: var(--zone-green-text); }
+.zone-amber { background: var(--zone-amber-bg); color: var(--zone-amber-text); }
+.zone-red   { background: var(--zone-red-bg);   color: var(--zone-red-text); }
 
-/* ── Energy bar fill ──────────────────────────────────────────────────────── */
-.bar-fill { transition: width 600ms cubic-bezier(0.16, 1, 0.3, 1); }
+/* ═══ Bars, tracks & dividers ═══════════════════════════════════════════════ */
 
-/* ── Screen-size helpers ──────────────────────────────────────────────────── */
-.hide-mobile  { display: flex; }
-.show-mobile  { display: none; }
+/* Every progress track is a stroked capsule with a flat fill inside. */
+.track {
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  overflow: hidden;
+  padding: 2px;
+}
+.bar-fill {
+  border-radius: var(--r-pill);
+  transition: width 600ms var(--ease), height 600ms var(--ease);
+}
 
+.rule-divide > * + * { border-top: 1.5px solid var(--ink); }
+.rule-b { border-bottom: 2px solid var(--ink); }
+.rule-t { border-top: 2px solid var(--ink); }
+
+/* ═══ Mascot ════════════════════════════════════════════════════════════════ */
+.blob-float { animation: blobFloat 5s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes blobFloat {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-6px) rotate(1deg); }
+}
+
+/* ═══ Screen-size helpers ═══════════════════════════════════════════════════ */
+.hide-mobile { display: flex; }
+.show-mobile { display: none; }
 @media (max-width: 767px) {
   .hide-mobile { display: none !important; }
   .show-mobile { display: flex !important; }
 }
 
-/* ── Welcome card ────────────────────────────────────────────────────────── */
-.welcome-card-body {
-  padding: 20px 24px;
-}
-@media (max-width: 640px) {
-  .welcome-card-body {
-    padding: 16px;
-  }
-}
-
-/* ── Checkin tick animation ───────────────────────────────────────────────── */
+/* ═══ Animation ═════════════════════════════════════════════════════════════ */
 @keyframes tickIn {
   0%   { transform: scale(0.5); opacity: 0; }
   70%  { transform: scale(1.15); }
-  100% { transform: scale(1);   opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
-.tick-in { animation: tickIn 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.tick-in { animation: tickIn 220ms var(--ease) forwards; }
 
-/* ── Voice Assistant Expand Transition ────────────────────────────────────── */
 @keyframes voiceBackdropFade {
-  0%   { opacity: 0; backdrop-filter: blur(0px); }
-  100% { opacity: 1; backdrop-filter: blur(8px); }
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
 }
-
 @keyframes voiceSheetExpand {
-  0% {
-    opacity: 0;
-    transform: translateY(50px) scale(0.25);
-    border-radius: 999px;
-    transform-origin: 50% 100%;
-  }
-  40% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    border-radius: 24px 24px 0 0;
-    transform-origin: 50% 100%;
-  }
+  0%   { opacity: 0; transform: translateY(60px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
+.voice-backdrop     { animation: voiceBackdropFade 0.24s var(--ease) forwards; }
+.voice-sheet-expand { animation: voiceSheetExpand 0.32s var(--ease) forwards; will-change: transform, opacity; }
 
-.voice-backdrop {
-  animation: voiceBackdropFade 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.voice-sheet-expand {
-  animation: voiceSheetExpand 0.36s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: transform, opacity, border-radius;
-}
-
-/* ── Dashboard Section Page Transition ────────────────────────────────────── */
 @keyframes pageSectionTransition {
-  0% {
-    opacity: 0;
-    transform: translateY(8px) scale(0.992);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  0%   { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
+.page-section-enter { animation: pageSectionTransition 0.28s var(--ease) forwards; will-change: transform, opacity; }
 
-.page-section-enter {
-  animation: pageSectionTransition 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: transform, opacity;
-}
-
-/* ── Respect reduced-motion preferences ───────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
