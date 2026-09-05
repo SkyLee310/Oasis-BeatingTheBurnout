@@ -451,3 +451,62 @@ button:focus-visible,
     scroll-behavior: auto !important;
   }
 }
+
+/* ═══ Ambient temperature ═══════════════════════════════════════════════════
+   The canvas warms as load comes off and cools as it piles on, so the app says
+   how you are doing before you read a single number. One inherited scalar,
+   --temp (0 = warm, 1 = cold), set once on the app root from tempFor(energy)
+   in src/logic/energy.ts. The endpoints and the mixing live here, so no
+   component ever learns a colour and DESIGN.md's "no hex in a component" rule
+   still holds.
+
+   Gated behind [data-ambient] deliberately: without that attribute every token
+   below resolves to exactly its :root value, so the published DS package and
+   its previews render byte-identically to before.
+
+   What does NOT move: zone colours, pastel tiles, chips, buttons and the
+   mascot. Saturated hue keeps meaning "how are you doing" and nothing else —
+   an overloaded screen goes cool and grey with the hot red ZoneChip sitting on
+   top of it. Temperature is never the only signal either; the number, the
+   ZoneChip label and the mascot expression all still say it in words.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@property --temp {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+:root {
+  --canvas-warm:    #f6f2e8;  /* identical to --canvas — warm is the resting state */
+  --canvas-cold:    #e6eaef;
+  --surface-warm:   #ffffff;
+  --surface-cold:   #f3f6fa;
+  --surface-2-warm: #fbf8f0;
+  --surface-2-cold: #edf1f6;
+}
+
+/* Dark mode needs no second formula — it overrides the endpoints and the same
+   mix re-resolves underneath. */
+.dark {
+  --canvas-warm:    #16160f;
+  --canvas-cold:    #101419;
+  --surface-warm:   #22211a;
+  --surface-cold:   #1b2026;
+  --surface-2-warm: #2b2a21;
+  --surface-2-cold: #232a31;
+}
+
+[data-ambient] {
+  --canvas:    color-mix(in oklab, var(--canvas-warm),    var(--canvas-cold)    calc(var(--temp) * 100%));
+  --surface:   color-mix(in oklab, var(--surface-warm),   var(--surface-cold)   calc(var(--temp) * 100%));
+  --surface-2: color-mix(in oklab, var(--surface-2-warm), var(--surface-2-cold) calc(var(--temp) * 100%));
+
+  background-color: var(--canvas);
+
+  /* @property makes --temp a genuinely animatable number, so declining a
+     request cross-fades the whole screen instead of snapping. The
+     prefers-reduced-motion block above already zeroes every transition —
+     the colour still changes there, it just stops animating. */
+  transition: --temp 600ms var(--ease);
+}
