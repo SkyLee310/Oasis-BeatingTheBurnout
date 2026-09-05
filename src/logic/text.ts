@@ -10,3 +10,10 @@
  */
 export const lowerFirst = (s: string) =>
   /^[A-Z][a-z]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s
+
+/**
+ * Drop the trailing 'due' a deadline title carries — "DS Assignment 2 due"
+ * becomes "DS Assignment 2" — so it can be spliced into a sentence that
+ * supplies its own verb without stuttering ("…due is due in the same week").
+ */
+export const withoutDue = (s: string) => s.replace(/\s+(?:due|deadline)$/i, '')

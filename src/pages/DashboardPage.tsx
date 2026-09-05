@@ -12,7 +12,7 @@ import { useEnergy, useOasis } from '../state/store'
 import { commitmentCost, projectEnergy, zoneFor } from '../logic/energy'
 import { dateOf, dayOf, longDate, shortDate } from '../logic/dates'
 import { lowerFirst } from '../logic/text'
-import CommitmentCheck from '../features/decision/CommitmentCheck'
+import DecisionSheet from '../features/decision/DecisionSheet'
 
 // ─── Daily reflections ────────────────────────────────────────────────────────
 const DAILY_QUOTES = [
@@ -90,7 +90,7 @@ export default function DashboardPage({ onGoLoad, onGoRecovery }: {
 
   // The open ask. Priced through projectEnergy so the figure quoted here is
   // exactly the one the dashboard will show if it is accepted — one formula,
-  // nothing to drift. src/logic/decision.ts will take this over.
+  // nothing to drift.
   const pending = state.requests.find(r => r.status === 'pending')
   const pendingAfter = pending
     ? projectEnergy(state, {
@@ -302,7 +302,7 @@ export default function DashboardPage({ onGoLoad, onGoRecovery }: {
               <TrendingUp size={16} strokeWidth={SW} /> Run impact check
             </button>
 
-            {showCommit && <CommitmentCheck onClose={() => setShowCommit(false)} />}
+            {showCommit && <DecisionSheet req={pending} onClose={() => setShowCommit(false)} />}
           </aside>
         )}
       </section>

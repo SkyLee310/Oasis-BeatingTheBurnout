@@ -44,3 +44,12 @@ export function addDays(iso: string, days: number) {
 /** 'Thursday 11 Sep' — a plan heading, where the year is noise. */
 export const planDate = (iso: string) =>
   `${at(iso).toLocaleDateString('en-GB', { weekday: 'long' })} ${dateOf(iso)} ${monthOf(iso)}`
+
+/**
+ * The next `dow` (0 = Sunday) on or after `iso`. 'Friday' asked on a Wednesday
+ * is two days out; asked on a Saturday it is six days out, not yesterday —
+ * nobody means last Friday when they ask you to cover a shift.
+ */
+export function nextDow(iso: string, dow: number) {
+  return addDays(iso, (dow - at(iso).getDay() + 7) % 7)
+}

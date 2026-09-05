@@ -4,7 +4,7 @@
 // move the number on all the others and on the widget.
 //
 // Dates are ISO 'YYYY-MM-DD' throughout so they sort and compare as strings.
-// The demo week is Mon 8 – Sun 14 Sep 2026, anchored on Wed 10 Sep.
+// The demo week is Mon 7 – Sun 13 Sep 2026, anchored on Wed 9 Sep.
 
 import type { EventKind, ZoneKey } from '../ds'
 
