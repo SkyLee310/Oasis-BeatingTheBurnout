@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
+
+import { useSheet } from '../shell/useSheet'
 import { ArrowLeft, Check, Sparkles, X } from 'lucide-react'
 
 import { SW } from '../../ds'
@@ -37,12 +39,9 @@ export default function DecisionSheet({
   const [phase, setPhase] = useState<Phase>(seeded ? 'verdict' : 'intake')
   const [sent, setSent] = useState<Tone | null>(null)
 
-  // Escape closes, the way every other dismissable surface in the app does.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  // Escape closes, focus lands inside on open and returns to the trigger on
+  // close. No trap: this panel sits in the page, it does not cover it.
+  const ref = useSheet<HTMLDivElement>(onClose)
 
   const v = useMemo(() => (req ? analyzeRequest(req, state) : null), [req, state])
 
@@ -88,11 +87,17 @@ export default function DecisionSheet({
   }
 
   return (
-    <div className="card card-pop p-5 sm:p-6 flex flex-col gap-6 mt-3">
+    <div
+      ref={ref}
+      role="dialog"
+      aria-labelledby="decision-sheet-title"
+      tabIndex={-1}
+      className="card card-pop p-5 sm:p-6 flex flex-col gap-6 mt-3"
+    >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Sparkles size={18} strokeWidth={SW} />
-          <span className="t-sub text-ink">
+          <span className="t-sub text-ink" id="decision-sheet-title">
             {phase === 'intake' ? 'Share a chat'
               : phase === 'done' ? 'Logged'
               : 'Should you take this on?'}

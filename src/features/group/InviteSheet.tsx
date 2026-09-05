@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+
+import { useSheet } from '../shell/useSheet'
 import { Check, Copy, Link2, MessageCircle, X } from 'lucide-react'
 
 import { SW, Tag } from '../../ds'
@@ -20,6 +22,9 @@ export default function InviteSheet({
 }) {
   const [copied, setCopied] = useState<'link' | 'message' | null>(null)
 
+  // Same contract as every other dismissable surface: Esc out, focus returned.
+  const ref = useSheet<HTMLDivElement>(onClose)
+
   const url = joinUrl(project.code)
   const message = inviteMessage(project, url)
 
@@ -39,11 +44,17 @@ export default function InviteSheet({
   }
 
   return (
-    <div className="card card-pop p-5 sm:p-6 flex flex-col gap-5">
+    <div
+      ref={ref}
+      role="dialog"
+      aria-labelledby="invite-sheet-title"
+      tabIndex={-1}
+      className="card card-pop p-5 sm:p-6 flex flex-col gap-5"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <Tag tone="yellow">INVITE</Tag>
-          <h3 className="t-title text-ink">
+          <h3 className="t-title text-ink" id="invite-sheet-title">
             {member ? `Add ${member.name} to the project` : 'Add your teammates'}
           </h3>
         </div>
