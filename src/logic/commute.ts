@@ -18,6 +18,16 @@ export const MODE_LABEL: Record<CommuteMode, string> = {
   lrt: 'Train / LRT',
 }
 
+/**
+ * One clock time, in the three shapes a student portal actually emits: `14:00`,
+ * `2pm`, `0900`. Ordered longest-first on purpose — a leading `\d{1,2}` caps at
+ * two digits, so on `0900-1100` the engine slid forward and matched the *tail*
+ * of the first time against the *head* of the second (`00`–`11`), which
+ * toMinutes then rejected. Every compact four-digit line came back unreadable.
+ */
+const TIME = String.raw`\d{1,2}:\d{2}\s*(?:am|pm)?|\d{3,4}|\d{1,2}\s*(?:am|pm)`
+const TIME_RANGE = new RegExp(String.raw`(${TIME})\s*(?:-|–|to)\s*(${TIME})`, 'i')
+
 const DAY_INDEX: Record<string, number> = {
   MON: 0, TUE: 1, WED: 2, THU: 3, FRI: 4, SAT: 5, SUN: 6,
 }
@@ -88,8 +98,7 @@ export function parseTimetable(text: string): ParseResult {
     const dayMatch = /^([A-Za-z]{3})/.exec(line)
     const day = dayMatch ? DAY_INDEX[dayMatch[1].toUpperCase()] : undefined
 
-    const timeMatch = /(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*(?:-|–|to)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i
-      .exec(line)
+    const timeMatch = TIME_RANGE.exec(line)
 
     const start = timeMatch ? toMinutes(timeMatch[1]) : null
     const end = timeMatch ? toMinutes(timeMatch[2]) : null
