@@ -243,6 +243,15 @@ idle animation for small instances.
 - The mascot carries `role="img"` and a zone-specific `aria-label`.
 - Tab rows use `role="tablist"` / `role="tab"` / `aria-selected`; checklists use
   `role="checkbox"` / `aria-checked`; the band toggle uses `role="switch"`.
+- Every dismissable surface uses `useSheet()` (`src/features/shell/useSheet.ts`):
+  focus in on open, `Escape` to close, focus returned to the trigger. Pass
+  `{ trap: true }` **only** for a surface that covers the screen behind a
+  backdrop — trapping focus in an inline panel the page is visible around holds
+  a keyboard user inside content they can see past. Inline panels take
+  `role="dialog"` + `aria-labelledby` and no `aria-modal`; overlays take all three.
+- New mobile controls are ≥44×44px. Results that appear without a navigation —
+  a verdict, a recomputed score, a parse readout — sit in an `aria-live="polite"`
+  region.
 
 ---
 
@@ -258,3 +267,5 @@ idle animation for small instances.
 8. No hex literals — token or nothing.
 9. Read colour from `--canvas` / `--surface`, never a fixed cream. The ambient
    scale moves them, and anything hardcoded will drift off the page around it.
+10. Anything dismissable goes through `useSheet()`; anything that changes a
+    number without a page change announces it with `aria-live="polite"`.
