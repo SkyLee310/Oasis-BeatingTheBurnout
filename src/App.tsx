@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react'
 import { ThemeProvider } from '@figma/astraui'
 import {
-  Activity, Brain, Calendar, Home, Mic, Settings, Shield, X,
+  Brain, Calendar, Home, Mic, Settings, Shield, Users, X,
 } from 'lucide-react'
 
 // ─── Design system ────────────────────────────────────────────────────────────
@@ -16,18 +16,34 @@ import DashboardPage from './pages/DashboardPage'
 import SmartBandPage from './pages/BandPage'
 import LoadPage from './pages/LoadPage'
 import RecoveryPage from './pages/RecoveryPage'
+import GroupPage from './pages/GroupPage'
+import JoinLanding from './features/group/JoinLanding'
 import VoiceAssistantPanel from './features/assistant/VoiceAssistantPanel'
 
 // ─── App-only types ───────────────────────────────────────────────────────────
-type Page = 'dashboard' | 'band' | 'load' | 'recovery'
+type Page = 'dashboard' | 'band' | 'load' | 'recovery' | 'group'
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 const NAV_ITEMS: { id: Page; icon: React.ReactNode; label: string; short: string }[] = [
   { id: 'dashboard', icon: <Home size={20} strokeWidth={SW} />, label: 'Dashboard', short: 'Home' },
   { id: 'load', icon: <Calendar size={20} strokeWidth={SW} />, label: 'Schedule & load', short: 'Schedule' },
+  { id: 'group', icon: <Users size={20} strokeWidth={SW} />, label: 'Group project', short: 'Group' },
   { id: 'recovery', icon: <Shield size={20} strokeWidth={SW} />, label: 'Recovery', short: 'Recover' },
-  { id: 'band', icon: <Activity size={20} strokeWidth={SW} />, label: 'Smart band', short: 'Band' },
 ]
+
+// Smart band keeps its page — it is reached from the Home card rather than the
+// bar, because the group project earns the fourth slot and a wearable readout
+// is something you check once a day, not something you navigate to.
+
+/**
+ * Routing, such as it is: one read of the query string at mount. ?join=<code>
+ * replaces the whole shell with the invite landing, which is what makes the
+ * download loop demonstrable on a second phone.
+ */
+function joinCode(): string | null {
+  if (typeof window === 'undefined') return null
+  return new URLSearchParams(window.location.search).get('join')
+}
 
 function SideRail({ page, onPage }: { page: Page; onPage: (p: Page) => void }) {
   return (
@@ -166,6 +182,7 @@ export default function App() {
 function AppShell() {
   const [page, setPage] = useState<Page>('dashboard')
   const [showVoice, setShowVoice] = useState(false)
+  const [join, setJoin] = useState<string | null>(joinCode)
 
   // One number for the whole app. src/index.css mixes the canvas and surface
   // tokens from it; nothing below here knows a colour changed.
@@ -173,11 +190,24 @@ function AppShell() {
 
   const renderPage = () => {
     switch (page) {
-      case 'dashboard': return <DashboardPage onGoLoad={() => setPage('load')} onGoRecovery={() => setPage('recovery')} />
+      case 'dashboard': return <DashboardPage onGoLoad={() => setPage('load')} onGoRecovery={() => setPage('recovery')} onGoBand={() => setPage('band')} />
       case 'band':      return <SmartBandPage />
       case 'load':      return <LoadPage />
       case 'recovery':  return <RecoveryPage />
+      case 'group':     return <GroupPage />
     }
+  }
+
+  // The invite link arrives cold — no shell, no nav, just the project.
+  if (join !== null) {
+    return (
+      <div data-ambient className="h-full overflow-y-auto" style={{ '--temp': temp } as CSSProperties}>
+        <JoinLanding
+          code={join}
+          onEnter={() => { setJoin(null); setPage('group') }}
+        />
+      </div>
+    )
   }
 
   return (

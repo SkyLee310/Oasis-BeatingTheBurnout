@@ -45,8 +45,8 @@ const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const HR_TRACE = [-4, -2, 1, 4, 0, 2, -1, 0, 3, 0, -2, 1]
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
-export default function DashboardPage({ onGoLoad, onGoRecovery }: {
-  onGoLoad: () => void; onGoRecovery: () => void
+export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand }: {
+  onGoLoad: () => void; onGoRecovery: () => void; onGoBand: () => void
 }) {
   const [showCommit, setShowCommit] = useState(false)
   const [quoteIdx, setQuoteIdx] = useState(0)
@@ -153,7 +153,9 @@ export default function DashboardPage({ onGoLoad, onGoRecovery }: {
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <h2 className="t-title text-ink">Live biometrics</h2>
-          <span className="t-micro" style={{ color: 'var(--ink-muted)' }}>Synced from Smart Band · 2m ago</span>
+          <button className="chip focus-ring" onClick={onGoBand} style={{ minHeight: 34 }}>
+            Synced 2m ago · Open device <ChevronRight size={13} strokeWidth={SW} />
+          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
