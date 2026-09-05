@@ -129,6 +129,22 @@
   --zone-amber-text: #f8d765;
   --zone-red-bg:     rgba(242, 84, 45, 0.22);
   --zone-red-text:   #f9b3a2;
+
+  /* The pastels are restated, not inherited. A tile keeps its background when
+     the theme flips but --ink does not keep its colour, so the light pastels
+     ended up carrying near-white text: the energy tile measured 1.11:1, which
+     is text you cannot read. These are the same six hues at a depth that holds
+     light ink — 6.5:1 at the lightest, AAA for --ink and --ink-2 alike — so
+     every consumer (.tile-*, the DS Tag, and the inline pastel surfaces) is
+     corrected at the token without touching a single call site. */
+  --mint:             #2f4d2a;
+  --mint-deep:        #3a5f31;
+  --sky:              #20415a;
+  --blush:            #5a2b38;
+  --butter:           #54431a;
+  --lilac:            #3c3560;
+  --highlight:        #5a4610;
+  --bold-orange:      #7a2a14;
 }
 
 /* ═══ Base ══════════════════════════════════════════════════════════════════ */
