@@ -503,10 +503,12 @@ button:focus-visible,
   --surface-2: color-mix(in oklab, var(--surface-2-warm), var(--surface-2-cold) calc(var(--temp) * 100%));
 
   background-color: var(--canvas);
-
-  /* @property makes --temp a genuinely animatable number, so declining a
-     request cross-fades the whole screen instead of snapping. The
-     prefers-reduced-motion block above already zeroes every transition —
-     the colour still changes there, it just stops animating. */
-  transition: --temp 600ms var(--ease);
 }
+
+/* No CSS transition on any of this, deliberately. Chromium pins both
+   `transition: --temp` and a `transition: background-color` whose value comes
+   from a color-mix() in a custom property — the value simply stops advancing.
+   The 600ms cross-fade is stepped onto --temp a frame at a time instead, in
+   src/features/shell/useAmbientTemp.ts, which re-resolves the mix each frame
+   and works. The hook honours prefers-reduced-motion itself, so the colour
+   still changes there; it just arrives in one step. */

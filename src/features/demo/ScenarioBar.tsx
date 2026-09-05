@@ -54,9 +54,14 @@ export default function ScenarioBar({ startOpen = false }: { startOpen?: boolean
 
   return (
     <div
-      className="fixed left-1/2 z-50 flex flex-col gap-3 p-4"
+      // Above the mobile nav (70px) and the mic button that overhangs it (20px);
+      // back down to the corner once the nav is gone at 768px.
+      className={
+        'fixed left-1/2 z-50 flex flex-col gap-3 p-4 '
+        + 'bottom-[calc(env(safe-area-inset-bottom)+102px)] '
+        + 'md:bottom-[max(16px,env(safe-area-inset-bottom))]'
+      }
       style={{
-        bottom: 'max(16px, env(safe-area-inset-bottom))',
         transform: 'translateX(-50%)',
         width: 'min(560px, calc(100vw - 24px))',
         background: 'var(--surface)',
@@ -90,7 +95,6 @@ export default function ScenarioBar({ startOpen = false }: { startOpen?: boolean
             key={s.key}
             className={`chip focus-ring ${state.scenario === s.key ? 'chip-selected' : ''}`}
             aria-pressed={state.scenario === s.key}
-            title={s.note}
             onClick={() => dispatch({ type: 'setScenario', scenario: s.key })}
             style={{ minHeight: 44 }}
           >

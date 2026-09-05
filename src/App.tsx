@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react'
+import { useState } from 'react'
 import { ThemeProvider } from '@figma/astraui'
 import {
   Calendar, HelpCircle, Home, Mic, Shield, Users,
@@ -22,6 +22,7 @@ import WidgetPreview from './features/widget/WidgetPreview'
 import WidgetView from './features/widget/WidgetView'
 import HowItWorksPage from './pages/HowItWorksPage'
 import ScenarioBar, { demoMode } from './features/demo/ScenarioBar'
+import { useAmbientTemp } from './features/shell/useAmbientTemp'
 import VoiceAssistantPanel from './features/assistant/VoiceAssistantPanel'
 import VoiceSheet from './features/assistant/VoiceSheet'
 
@@ -208,6 +209,8 @@ function AppShell() {
   // One number for the whole app. src/index.css mixes the canvas and surface
   // tokens from it; nothing below here knows a colour changed.
   const { temp } = useEnergy()
+  // --temp is stepped onto this node frame by frame; see useAmbientTemp.
+  const ambient = useAmbientTemp<HTMLDivElement>(temp)
 
   const renderPage = () => {
     switch (page) {
@@ -224,7 +227,7 @@ function AppShell() {
   // The widget opens without the shell — it is a glance, not a session.
   if (widget) {
     return (
-      <div data-ambient className="h-full overflow-y-auto" style={{ '--temp': temp } as CSSProperties}>
+      <div ref={ambient} data-ambient className="h-full overflow-y-auto">
         <WidgetView onOpen={() => setWidget(false)} />
       </div>
     )
@@ -233,7 +236,7 @@ function AppShell() {
   // The invite link arrives cold — no shell, no nav, just the project.
   if (join !== null) {
     return (
-      <div data-ambient className="h-full overflow-y-auto" style={{ '--temp': temp } as CSSProperties}>
+      <div ref={ambient} data-ambient className="h-full overflow-y-auto">
         <JoinLanding
           code={join}
           onEnter={() => { setJoin(null); setPage('group') }}
@@ -243,7 +246,7 @@ function AppShell() {
   }
 
   return (
-    <div data-ambient className="h-full" style={{ '--temp': temp } as CSSProperties}>
+    <div ref={ambient} data-ambient className="h-full">
       <div className="flex h-full overflow-hidden bg-canvas">
         <SideRail page={page} onPage={setPage} />
 
