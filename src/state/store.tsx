@@ -49,6 +49,10 @@ export type Action =
   | { type: 'assignTask'; taskId: string; memberId: string | null }
   | { type: 'toggleTaskDone'; taskId: string }
 
+/** What each sleep answer means in hours. Rough on purpose — a student rating
+ *  last night out of three is not reporting to two decimal places. */
+const REPORTED_SLEEP: Record<1 | 2 | 3, number> = { 1: 4.5, 2: 6, 3: 7.5 }
+
 // ─── Reducer ──────────────────────────────────────────────────────────────────
 // Pure: no Date.now(), no crypto.randomUUID(). Ids and timestamps are derived
 // from what is already in the action or in state, so the same actions always
@@ -109,8 +113,18 @@ export function reducer(s: OasisState, a: Action): OasisState {
       return { ...s, commute: { ...s.commute, skippedDays: skipped } }
     }
 
-    case 'checkIn':
-      return { ...s, checkIn: a.checkIn }
+    case 'checkIn': {
+      // A check-in that does not move anything is a survey, not a feature. The
+      // sleep answer overwrites last night's figure — the same number the sleep
+      // factor already reads — so the score updates for a reason the user can
+      // point at rather than through a hidden sixth term.
+      const reported = REPORTED_SLEEP[a.checkIn.slept]
+      const sleepHours = s.recovery.sleepHours.length === 0
+        ? [reported]
+        : [...s.recovery.sleepHours.slice(0, -1), reported]
+
+      return { ...s, checkIn: a.checkIn, recovery: { ...s.recovery, sleepHours } }
+    }
 
     case 'setMemberStatus':
       return {

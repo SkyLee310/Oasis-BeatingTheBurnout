@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  AlertTriangle, Calendar, ChevronRight, Clock, Heart, Moon,
+  AlertTriangle, Calendar, ChevronRight, Clock, Heart, HelpCircle, Moon,
   Quote, RefreshCw, Shield, Smartphone, TrendingUp, Zap,
 } from 'lucide-react'
 
@@ -12,6 +12,7 @@ import { useEnergy, useOasis } from '../state/store'
 import { commitmentCost, projectEnergy, zoneFor } from '../logic/energy'
 import { dateOf, dayOf, longDate, shortDate } from '../logic/dates'
 import { lowerFirst } from '../logic/text'
+import DailyCheck from '../features/checkin/DailyCheck'
 import DecisionSheet from '../features/decision/DecisionSheet'
 
 // ─── Daily reflections ────────────────────────────────────────────────────────
@@ -45,10 +46,13 @@ const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const HR_TRACE = [-4, -2, 1, 4, 0, 2, -1, 0, 3, 0, -2, 1]
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
-export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoPhone }: {
-  onGoLoad: () => void; onGoRecovery: () => void; onGoBand: () => void; onGoPhone: () => void
+export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoPhone, onGoHow }: {
+  onGoLoad: () => void; onGoRecovery: () => void; onGoBand: () => void
+  onGoPhone: () => void; onGoHow: () => void
 }) {
   const [showCommit, setShowCommit] = useState(false)
+  // Dismissing is local, not stored: skipping today should not skip tomorrow.
+  const [checkHidden, setCheckHidden] = useState(false)
   const [quoteIdx, setQuoteIdx] = useState(0)
   const [isRotating, setIsRotating] = useState(false)
 
@@ -108,6 +112,13 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoPh
   return (
     <div className="flex flex-col gap-10 sm:gap-14 max-w-[1140px] mx-auto pb-4">
 
+      {/* ── Daily check ─────────────────────────────────────────────────────── */}
+      {/* Above the fold, because it is the reason to open the app — and gone for
+          the rest of the day the moment it is answered or waved off. */}
+      {!checkHidden && state.checkIn?.date !== state.today && (
+        <DailyCheck onDismiss={() => setCheckHidden(true)} />
+      )}
+
       {/* ── Hero ────────────────────────────────────────────────────────────── */}
       <header className="flex flex-col gap-7">
         <div className="flex items-center gap-3">
@@ -139,12 +150,23 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoPh
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-2 sm:gap-6">
-            <OasisBlob zone={zone} size={124} />
-            <CircularGauge
-              value={energy} zone={zone}
-              label={String(energy)} sublabel="/ 100 ENERGY" size={168}
-            />
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex items-center justify-center gap-2 sm:gap-6">
+              <OasisBlob zone={zone} size={124} />
+              <CircularGauge
+                value={energy} zone={zone}
+                label={String(energy)} sublabel="/ 100 ENERGY" size={168}
+              />
+            </div>
+            {/* No number without its working, one tap away. */}
+            <button
+              className="chip focus-ring"
+              onClick={onGoHow}
+              style={{ minHeight: 34 }}
+              aria-label="How this energy score is worked out"
+            >
+              <HelpCircle size={13} strokeWidth={SW} /> How is this worked out?
+            </button>
           </div>
         </div>
       </header>

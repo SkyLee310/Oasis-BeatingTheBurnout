@@ -20,10 +20,12 @@ import GroupPage from './pages/GroupPage'
 import JoinLanding from './features/group/JoinLanding'
 import WidgetPreview from './features/widget/WidgetPreview'
 import WidgetView from './features/widget/WidgetView'
+import HowItWorksPage from './pages/HowItWorksPage'
+import ScenarioBar, { demoMode } from './features/demo/ScenarioBar'
 import VoiceAssistantPanel from './features/assistant/VoiceAssistantPanel'
 
 // ─── App-only types ───────────────────────────────────────────────────────────
-type Page = 'dashboard' | 'band' | 'load' | 'recovery' | 'group' | 'phone'
+type Page = 'dashboard' | 'band' | 'load' | 'recovery' | 'group' | 'phone' | 'how'
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 const NAV_ITEMS: { id: Page; icon: React.ReactNode; label: string; short: string }[] = [
@@ -192,6 +194,7 @@ function AppShell() {
   const [showVoice, setShowVoice] = useState(false)
   const [join, setJoin] = useState<string | null>(joinCode)
   const [widget, setWidget] = useState(widgetMode)
+  const [demo] = useState(demoMode)
 
   // One number for the whole app. src/index.css mixes the canvas and surface
   // tokens from it; nothing below here knows a colour changed.
@@ -199,12 +202,13 @@ function AppShell() {
 
   const renderPage = () => {
     switch (page) {
-      case 'dashboard': return <DashboardPage onGoLoad={() => setPage('load')} onGoRecovery={() => setPage('recovery')} onGoBand={() => setPage('band')} onGoPhone={() => setPage('phone')} />
+      case 'dashboard': return <DashboardPage onGoLoad={() => setPage('load')} onGoRecovery={() => setPage('recovery')} onGoBand={() => setPage('band')} onGoPhone={() => setPage('phone')} onGoHow={() => setPage('how')} />
       case 'band':      return <SmartBandPage />
       case 'load':      return <LoadPage />
       case 'recovery':  return <RecoveryPage />
       case 'group':     return <GroupPage />
       case 'phone':     return <WidgetPreview onBack={() => setPage('dashboard')} />
+      case 'how':       return <HowItWorksPage onBack={() => setPage('dashboard')} />
     }
   }
 
@@ -295,6 +299,9 @@ function AppShell() {
         onOpenVoice={() => setShowVoice(prev => !prev)}
         isVoiceOpen={showVoice}
       />
+
+      {/* Scaffolding, deliberately last and deliberately hidden. */}
+      <ScenarioBar startOpen={demo} />
     </div>
   )
 }
