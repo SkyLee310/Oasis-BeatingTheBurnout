@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
   AlertTriangle, Calendar, ChevronRight, Clock, Heart, Moon,
-  Quote, RefreshCw, Shield, TrendingUp, Zap,
+  Quote, RefreshCw, Shield, Smartphone, TrendingUp, Zap,
 } from 'lucide-react'
 
 import {
@@ -45,8 +45,8 @@ const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const HR_TRACE = [-4, -2, 1, 4, 0, 2, -1, 0, 3, 0, -2, 1]
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
-export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand }: {
-  onGoLoad: () => void; onGoRecovery: () => void; onGoBand: () => void
+export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoPhone }: {
+  onGoLoad: () => void; onGoRecovery: () => void; onGoBand: () => void; onGoPhone: () => void
 }) {
   const [showCommit, setShowCommit] = useState(false)
   const [quoteIdx, setQuoteIdx] = useState(0)
@@ -308,6 +308,31 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand }: {
           </aside>
         )}
       </section>
+
+      {/* ── On your phone ───────────────────────────────────────────────────── */}
+      <button
+        onClick={onGoPhone}
+        className="card focus-ring flex items-center gap-4 p-5 text-left w-full"
+        style={{ cursor: 'pointer' }}
+      >
+        <span
+          className="flex items-center justify-center shrink-0"
+          style={{
+            width: 44, height: 44, borderRadius: 'var(--r-md)',
+            background: 'var(--sky)', border: '2px solid var(--ink)',
+          }}
+        >
+          <Smartphone size={20} strokeWidth={SW} />
+        </span>
+        <span className="flex flex-col gap-0.5 flex-1 min-w-0">
+          <span className="t-sub text-ink">On your phone</span>
+          <span className="t-micro" style={{ color: 'var(--ink-2)', lineHeight: 1.5 }}>
+            Add Oasis to your home screen and the number is one glance away — no
+            opening the app, no signal needed.
+          </span>
+        </span>
+        <ChevronRight size={18} strokeWidth={SW} className="shrink-0" />
+      </button>
     </div>
   )
 }

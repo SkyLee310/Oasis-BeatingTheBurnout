@@ -1,0 +1,16 @@
+{
+  "name": "Oasis — energy before burnout",
+  "short_name": "Oasis",
+  "description": "See what a yes costs before you give it. Oasis reads your week, prices every request, and helps you say no.",
+  "start_url": "./?view=widget",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f2e8",
+  "theme_color": "#f6f2e8",
+  "categories": ["health", "education", "productivity"],
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

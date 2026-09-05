@@ -18,10 +18,12 @@ import LoadPage from './pages/LoadPage'
 import RecoveryPage from './pages/RecoveryPage'
 import GroupPage from './pages/GroupPage'
 import JoinLanding from './features/group/JoinLanding'
+import WidgetPreview from './features/widget/WidgetPreview'
+import WidgetView from './features/widget/WidgetView'
 import VoiceAssistantPanel from './features/assistant/VoiceAssistantPanel'
 
 // ─── App-only types ───────────────────────────────────────────────────────────
-type Page = 'dashboard' | 'band' | 'load' | 'recovery' | 'group'
+type Page = 'dashboard' | 'band' | 'load' | 'recovery' | 'group' | 'phone'
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 const NAV_ITEMS: { id: Page; icon: React.ReactNode; label: string; short: string }[] = [
@@ -43,6 +45,12 @@ const NAV_ITEMS: { id: Page; icon: React.ReactNode; label: string; short: string
 function joinCode(): string | null {
   if (typeof window === 'undefined') return null
   return new URLSearchParams(window.location.search).get('join')
+}
+
+/** ?view=widget — what the installed app opens to. Read once, at mount. */
+function widgetMode(): boolean {
+  if (typeof window === 'undefined') return false
+  return new URLSearchParams(window.location.search).get('view') === 'widget'
 }
 
 function SideRail({ page, onPage }: { page: Page; onPage: (p: Page) => void }) {
@@ -183,6 +191,7 @@ function AppShell() {
   const [page, setPage] = useState<Page>('dashboard')
   const [showVoice, setShowVoice] = useState(false)
   const [join, setJoin] = useState<string | null>(joinCode)
+  const [widget, setWidget] = useState(widgetMode)
 
   // One number for the whole app. src/index.css mixes the canvas and surface
   // tokens from it; nothing below here knows a colour changed.
@@ -190,12 +199,22 @@ function AppShell() {
 
   const renderPage = () => {
     switch (page) {
-      case 'dashboard': return <DashboardPage onGoLoad={() => setPage('load')} onGoRecovery={() => setPage('recovery')} onGoBand={() => setPage('band')} />
+      case 'dashboard': return <DashboardPage onGoLoad={() => setPage('load')} onGoRecovery={() => setPage('recovery')} onGoBand={() => setPage('band')} onGoPhone={() => setPage('phone')} />
       case 'band':      return <SmartBandPage />
       case 'load':      return <LoadPage />
       case 'recovery':  return <RecoveryPage />
       case 'group':     return <GroupPage />
+      case 'phone':     return <WidgetPreview onBack={() => setPage('dashboard')} />
     }
+  }
+
+  // The widget opens without the shell — it is a glance, not a session.
+  if (widget) {
+    return (
+      <div data-ambient className="h-full overflow-y-auto" style={{ '--temp': temp } as CSSProperties}>
+        <WidgetView onOpen={() => setWidget(false)} />
+      </div>
+    )
   }
 
   // The invite link arrives cold — no shell, no nav, just the project.
