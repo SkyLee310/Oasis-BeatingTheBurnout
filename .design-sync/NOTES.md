@@ -5,13 +5,18 @@ Persisted so a resumed run does not re-derive any of this.
 ## Run status
 
 - **Built and verified locally; not yet uploaded.** No `projectId` —
-  `DesignSync` could not authorize in a non-interactive session. Nothing was
-  uploaded and no Claude Design project was created, so the next run is still a
-  first-time import (§0 and §1 of the skill apply in full).
+  `DesignSync` still cannot authorize (checked again in a later session,
+  same result). Nothing was uploaded and no Claude Design project was
+  created, so the next run is still a first-time import (§0 and §1 of the
+  skill apply in full).
 - The local half is **complete and at the done-bar**: the bundle builds clean,
-  `package-validate.mjs` exits 0 with `10/10 previews render cleanly`, and all
-  32 story cells across 10 components are graded `good` in
-  `.design-sync/.cache/review/*.grade.json`.
+  the driver's validate stage exits 0 with `10/10 previews render cleanly`,
+  and all 32 story cells across 10 components are graded `good` in
+  `.design-sync/.cache/review/*.grade.json` — all carried forward unchanged
+  across the conventions-header rebuild (see below).
+- The README now carries an authored conventions header (see "Conventions
+  header" below) — that was the last local task. Nothing is left before
+  upload except getting `DesignSync` authorized.
 - **Unblock the upload** by running `/design-login` once from an interactive
   `claude` terminal on this machine; headless runs then reuse that auth. After
   that, a re-run picks up from the built `ds-bundle/` — the expensive part is
@@ -75,6 +80,22 @@ follow its five rules — every surface takes a 2px ink stroke, primary action i
 ink-black, selection is yellow `#f7d046`, and colour is reserved for health
 meaning (green/amber/red zones).
 
+## Conventions header
+
+`.design-sync/conventions.md` (~3.8 KB) is a distilled, build-validated
+version of `DESIGN.md`'s five rules, wired in via `cfg.readmeHeader` and
+stitched onto the generated `ds-bundle/README.md`. It exists because
+`DESIGN.md` itself never reaches the design agent — `guidelines/` stays
+empty (nothing matches `guidelinesGlob`), so this header is the only carrier
+of the design language for the design agent. Every class/token/prop name in
+it is grep-confirmed against the compiled `_ds_bundle.css`/`_ds_bundle.js`,
+per the skill's "validate before shipping" rule.
+
+If `DESIGN.md` changes, re-derive this file by hand — it is not
+auto-generated from it — and re-run the full driver afterward so the receipt
+and upload plan describe the header-bearing build (a bare converter run
+without the driver wipes `.sync-diff.json` and the receipt artifacts).
+
 ## Running the converter scripts (important)
 
 The skill's scripts live in an **ephemeral, content-addressed** bundled-skills
@@ -90,6 +111,25 @@ repo and install their deps there, isolated from the repo's pnpm lockfile:
     cd .ds-sync && npm i esbuild ts-morph @types/react playwright
 
 `.ds-sync/` is gitignored. Re-create it on any machine that runs a sync.
+
+`resync.mjs` resolves `.design-sync/` relative to the process's **current
+working directory**, not relative to `--config`'s path. Always invoke it from
+the repo root:
+
+    node .ds-sync/resync.mjs --config .design-sync/config.json --node-modules ./node_modules --out ./ds-bundle
+
+Running it from inside `.ds-sync/` (even with a `../`-relative `--config`)
+fails immediately with `no .design-sync/ under …/.ds-sync`.
+
+`npm i playwright` installs the JS package but not the browser binary — the
+validate stage's render check needs an actual Chromium download, a separate
+and much larger step that the `.ds-sync/` dep reinstall above does not cover:
+
+    cd .ds-sync && npx playwright install chromium
+
+Do this once per machine/environment (it installs to
+`%LOCALAPPDATA%\ms-playwright\`, outside both node_modules trees) whenever
+the driver reports `[RENDER_SKIPPED] ... Executable doesn't exist`.
 
 ## Previews
 
