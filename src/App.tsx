@@ -10,6 +10,8 @@ import {
 // navigation that switches between them.
 import { Initials, OasisBlob, SW } from './ds'
 
+import { OasisProvider } from './state/store'
+
 import DashboardPage from './pages/DashboardPage'
 import SmartBandPage from './pages/BandPage'
 import LoadPage from './pages/LoadPage'
@@ -165,71 +167,73 @@ export default function App() {
   }
 
   return (
-    <ThemeProvider>
-      <div className="flex h-full overflow-hidden bg-canvas">
-        <SideRail page={page} onPage={setPage} />
+    <OasisProvider>
+      <ThemeProvider>
+        <div className="flex h-full overflow-hidden bg-canvas">
+          <SideRail page={page} onPage={setPage} />
 
-        <div className="flex flex-1 overflow-hidden">
-          <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-9" style={{ paddingBottom: 96 }}>
-            <div key={page} className="page-section-enter min-h-full">
-              {renderPage()}
-            </div>
-          </div>
-
-          {/* Voice panel — desktop column */}
-          <div
-            className="hide-mobile flex-col shrink-0"
-            style={{ width: 360, minWidth: 320, maxWidth: 400, borderLeft: '2px solid var(--ink)' }}
-          >
-            <VoiceAssistantPanel />
-          </div>
-
-          {/* Voice panel — mobile sheet */}
-          {showVoice && (
-            <div
-              className="show-mobile fixed inset-0 z-50 flex-col voice-backdrop"
-              style={{ background: 'rgba(20, 20, 15, 0.45)' }}
-              onClick={() => setShowVoice(false)}
-            >
-              <div
-                className="absolute bottom-0 left-0 right-0 voice-sheet-expand"
-                style={{
-                  height: '82vh', overflow: 'hidden',
-                  background: 'var(--surface)',
-                  borderTop: '2px solid var(--ink)',
-                  borderRadius: 'var(--r-xl) var(--r-xl) 0 0',
-                }}
-                onClick={e => e.stopPropagation()}
-              >
-                <div className="flex items-center justify-between px-5 py-4 rule-b">
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className="flex items-center justify-center shrink-0"
-                      style={{ width: 34, height: 34, borderRadius: 999, background: 'var(--highlight)', border: '2px solid var(--ink)' }}
-                    >
-                      <Brain size={18} strokeWidth={SW} style={{ color: 'var(--ink)' }} />
-                    </span>
-                    <span className="t-sub text-ink">Oasis AI</span>
-                  </div>
-                  <button className="btn-icon focus-ring" onClick={() => setShowVoice(false)} aria-label="Close Oasis AI">
-                    <X size={17} strokeWidth={SW} />
-                  </button>
-                </div>
-                <div style={{ height: 'calc(82vh - 67px)' }}>
-                  <VoiceAssistantPanel showHeader={false} />
-                </div>
+          <div className="flex flex-1 overflow-hidden">
+            <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-9" style={{ paddingBottom: 96 }}>
+              <div key={page} className="page-section-enter min-h-full">
+                {renderPage()}
               </div>
             </div>
-          )}
-        </div>
-      </div>
 
-      <MobileNav
-        page={page}
-        onPage={setPage}
-        onOpenVoice={() => setShowVoice(prev => !prev)}
-        isVoiceOpen={showVoice}
-      />
-    </ThemeProvider>
+            {/* Voice panel — desktop column */}
+            <div
+              className="hide-mobile flex-col shrink-0"
+              style={{ width: 360, minWidth: 320, maxWidth: 400, borderLeft: '2px solid var(--ink)' }}
+            >
+              <VoiceAssistantPanel />
+            </div>
+
+            {/* Voice panel — mobile sheet */}
+            {showVoice && (
+              <div
+                className="show-mobile fixed inset-0 z-50 flex-col voice-backdrop"
+                style={{ background: 'rgba(20, 20, 15, 0.45)' }}
+                onClick={() => setShowVoice(false)}
+              >
+                <div
+                  className="absolute bottom-0 left-0 right-0 voice-sheet-expand"
+                  style={{
+                    height: '82vh', overflow: 'hidden',
+                    background: 'var(--surface)',
+                    borderTop: '2px solid var(--ink)',
+                    borderRadius: 'var(--r-xl) var(--r-xl) 0 0',
+                  }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between px-5 py-4 rule-b">
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        className="flex items-center justify-center shrink-0"
+                        style={{ width: 34, height: 34, borderRadius: 999, background: 'var(--highlight)', border: '2px solid var(--ink)' }}
+                      >
+                        <Brain size={18} strokeWidth={SW} style={{ color: 'var(--ink)' }} />
+                      </span>
+                      <span className="t-sub text-ink">Oasis AI</span>
+                    </div>
+                    <button className="btn-icon focus-ring" onClick={() => setShowVoice(false)} aria-label="Close Oasis AI">
+                      <X size={17} strokeWidth={SW} />
+                    </button>
+                  </div>
+                  <div style={{ height: 'calc(82vh - 67px)' }}>
+                    <VoiceAssistantPanel showHeader={false} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <MobileNav
+          page={page}
+          onPage={setPage}
+          onOpenVoice={() => setShowVoice(prev => !prev)}
+          isVoiceOpen={showVoice}
+        />
+      </ThemeProvider>
+    </OasisProvider>
   )
 }
