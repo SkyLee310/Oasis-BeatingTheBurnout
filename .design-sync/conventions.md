@@ -14,7 +14,7 @@ const { StatTile, Sparkline, SW } = window.OasisDS;
 ReactDOM.createRoot(document.getElementById('ds-root')).render(<StatTile ... />);
 ```
 
-Fonts (Archivo, Plus Jakarta Sans) load at runtime from a Google Fonts `@import` baked into `styles.css` — a network dependency, not a shipped file. Don't substitute a different display face if they're slow to load.
+Fonts (Archivo 700/800, Plus Jakarta Sans 500–800) ship as real `.woff2` files under `fonts/`, loaded via `styles.css`'s `@import "./fonts/fonts.css"` — no network dependency for the design agent's renders. Don't substitute a different display face.
 
 ## The idiom: bespoke utility classes + CSS custom properties, never hex literals
 

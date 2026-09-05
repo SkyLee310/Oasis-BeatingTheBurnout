@@ -4,23 +4,22 @@ Persisted so a resumed run does not re-derive any of this.
 
 ## Run status
 
-- **Built and verified locally; not yet uploaded.** No `projectId` —
-  `DesignSync` still cannot authorize (checked again in a later session,
-  same result). Nothing was uploaded and no Claude Design project was
-  created, so the next run is still a first-time import (§0 and §1 of the
-  skill apply in full).
-- The local half is **complete and at the done-bar**: the bundle builds clean,
-  the driver's validate stage exits 0 with `10/10 previews render cleanly`,
-  and all 32 story cells across 10 components are graded `good` in
-  `.design-sync/.cache/review/*.grade.json` — all carried forward unchanged
-  across the conventions-header rebuild (see below).
-- The README now carries an authored conventions header (see "Conventions
-  header" below) — that was the last local task. Nothing is left before
-  upload except getting `DesignSync` authorized.
-- **Unblock the upload** by running `/design-login` once from an interactive
-  `claude` terminal on this machine; headless runs then reuse that auth. After
-  that, a re-run picks up from the built `ds-bundle/` — the expensive part is
-  already done.
+- **Uploaded.** Target is the "Sky Favourite" project
+  (`projectId: 328b98d0-a649-4158-a573-5a6d44d76d37`, recorded in
+  `.design-sync/config.json`) — created fresh once `/design-login` unblocked
+  `DesignSync` (that was the only actual blocker in the earlier stuck state;
+  the local bundle had already been done and verified for a while).
+- First upload used the incremental path (project was empty): sentinel →
+  one batch carrying the shared base files + all 10 components (all
+  verified in one pass) → sentinel re-arm.
+- A second upload (font-hosting fix, see below) used the **atomic path**,
+  since `projectId` was already pinned from the first run. `list_files`
+  before `finalize_plan` confirmed the remote tree matched local
+  `ds-bundle/` component-for-component, so `deletes: []` was correct —
+  nothing was ever removed, only `fonts/**` added.
+- The bundle stays at the done-bar: `10/10 previews render cleanly`, all 32
+  story cells graded `good`, carried forward unchanged across both the
+  conventions-header rebuild and the font-hosting rebuild.
 
 ## Shape
 
@@ -95,6 +94,47 @@ If `DESIGN.md` changes, re-derive this file by hand — it is not
 auto-generated from it — and re-run the full driver afterward so the receipt
 and upload plan describe the header-bearing build (a bare converter run
 without the driver wipes `.sync-diff.json` and the receipt artifacts).
+
+## Fonts
+
+`src/index.css:1` loads Archivo + Plus Jakarta Sans for the **live app** via
+a Google Fonts `@import` — fine for the app itself (real internet access),
+but the exported DS bundle needs guaranteed-available files: `extractFonts`
+(`.ds-sync/lib/css.mjs`) only ever sees genuine local
+`@font-face { url(...) }` blocks, never a remote `@import`. Before this was
+fixed, `package-validate.mjs` rated that gap `[FONT_REMOTE]` — informational,
+not a failure — but Claude Design's own renderer flagged it as "missing
+brand fonts" anyway, since `fonts/` was empty in the upload.
+
+Fixed via `cfg.extraFonts` (`.design-sync/config.json`), the sanctioned
+config field for brand fonts the DS's own compiled CSS doesn't ship inline:
+
+- `.design-sync/fonts-src/fonts.css` — hand-authored, six `@font-face`
+  rules (Archivo 700/800, Plus Jakarta Sans 500/600/700/800 — exactly the
+  weights grep-confirmed in `ds-bundle/_ds_bundle.css`; the app's own
+  `@import` pulls a wider range for parts of `src/App.tsx` outside the 10
+  published primitives, deliberately not matched here).
+- `.design-sync/fonts-src/archivo-variable.woff2` and
+  `plus-jakarta-sans-variable.woff2` — fetched straight from
+  `fonts.gstatic.com` (the same files a browser would fetch via the app's
+  own `@import`). Both families are variable fonts, so Google serves ONE
+  file per family for every weight — each `@font-face` block above points
+  at the same file, mirroring Google's own CSS2 API output.
+- `extractFonts` re-scans this CSS, resolves the two `url()`s relative to
+  the CSS file's own directory, copies both into `ds-bundle/fonts/`, and
+  `styles.css` picks up `@import "./fonts/fonts.css"` ahead of
+  `_ds_bundle.css`. A driver re-run picks up any change here — no special
+  rebuild flag needed.
+
+**Known accepted warning**: validate still reports
+`[FONT_REMOTE] "Instrument Sans"` — traced to
+`@figma/astraui/dist/styles.css` (imported at `src/index.css:2`), a
+third-party UI-kit dependency's own base styles, not an Oasis brand font.
+DESIGN.md never names it as a type family and it doesn't appear in any of
+the 10 published previews (render check stayed 10/10 clean before and after
+this fix), so it's deliberately left un-hosted. If Claude Design ever flags
+missing fonts again, check this first before re-diagnosing from scratch —
+it may just be this one, already-understood case.
 
 ## Running the converter scripts (important)
 
