@@ -22,7 +22,10 @@
   /* ── Ink — also the colour of every stroke in the system ─────────────────── */
   --ink:              #14140f;
   --ink-2:            #46443c;
-  --ink-muted:        #83817a;
+  /* Darkened from #83817a, which measured 2.9-3.6:1 everywhere it was used —
+     and it is used for t-micro and t-eyebrow at 11px, where AA wants 4.5. Now
+     4.6:1 at worst, still plainly a step lighter than --ink-2. */
+  --ink-muted:        #63625b;
   --ink-faint:        #a8a69c;
   --on-ink:           #ffffff;
 
@@ -107,7 +110,9 @@
 .dark {
   --ink:          #f6f2e8;
   --ink-2:        #ddd8c9;
-  --ink-muted:    #a5a296;
+  /* Lifted from #a5a296 for the same reason the light value was darkened, and
+     against the deeper pastels above: 4.8:1 at worst now. */
+  --ink-muted:    #c0bdb1;
   --ink-faint:    #7d7b71;
   --on-ink:       #14140f;
 
@@ -286,7 +291,10 @@ button:focus-visible,
   border: 2px solid var(--ink);
   border-radius: var(--r-xl);
 }
-.panel-ink .t-eyebrow { color: rgba(246, 242, 232, 0.62); }
+/* 62% of whatever sits on ink, never a cream literal. In dark mode --ink *is*
+   the cream, so the literal put a cream eyebrow on a cream panel: 1:1, text you
+   cannot see at all. Derived, it flips with the panel and measures 4.9:1. */
+.panel-ink .t-eyebrow { color: color-mix(in srgb, var(--on-ink) 62%, transparent); }
 
 /* ═══ Buttons ═══════════════════════════════════════════════════════════════
    Primary = ink pill. Secondary = outlined pill on the surface. Accent = a

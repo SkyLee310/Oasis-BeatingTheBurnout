@@ -168,7 +168,9 @@ export default function LoadPage() {
           <div className="card card-pop p-6 flex flex-col gap-5">
             {categories.slice(1).map((c, i) => (
               <div key={c.key} className="flex items-start gap-4">
-                <span className="t-stat" style={{ fontSize: 18, color: 'var(--ink-faint)', width: 24 }}>{i + 2}</span>
+                {/* The rank is information — it is what makes this a ranked list — so it
+                    is muted rather than faint. --ink-faint measured 2.25:1 here. */}
+                <span className="t-stat" style={{ fontSize: 18, color: 'var(--ink-muted)', width: 24 }}>{i + 2}</span>
                 <div className="flex flex-col gap-2 flex-1 min-w-0">
                   <LoadBar label={c.label} pct={c.pct} zone={c.zone} />
                   <p className="t-micro" style={{ color: 'var(--ink-muted)' }}>{c.detail}</p>

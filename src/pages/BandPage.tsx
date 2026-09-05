@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Activity, BatteryCharging, Clock, Heart, Moon, Zap } from 'lucide-react'
+import { Activity, ArrowLeft, BatteryCharging, Clock, Heart, Moon, Zap } from 'lucide-react'
 
 import {
   CircularGauge, OasisBlob, SW, SleepBars, Sparkline, ZoneChip,
@@ -25,7 +25,7 @@ const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const RECOVERY_BASELINE_HOURS = 6
 
 // ─── Smart Band ───────────────────────────────────────────────────────────────
-export default function SmartBandPage() {
+export default function SmartBandPage({ onBack }: { onBack: () => void }) {
   const state = useOasis()
   const { energy, factors } = useEnergy()
   const stress = 100 - energy
@@ -65,6 +65,11 @@ export default function SmartBandPage() {
 
   return (
     <div className="flex flex-col gap-10 sm:gap-14 max-w-[1140px] mx-auto pb-4">
+      {/* The band is not in the nav, so without this the only way out is to guess
+          that Home is the way back. The other two off-nav pages both have one. */}
+      <button className="chip focus-ring self-start" onClick={onBack} style={{ minHeight: 34 }}>
+        <ArrowLeft size={13} strokeWidth={SW} /> Back
+      </button>
 
       {/* ── Device hero ─────────────────────────────────────────────────────── */}
       <header className="panel-ink p-6 sm:p-9 flex flex-col gap-7">
@@ -72,12 +77,12 @@ export default function SmartBandPage() {
           <div className="flex flex-col gap-1.5">
             <span className="t-eyebrow" style={{ color: 'var(--highlight)' }}>Connected device</span>
             <div className="flex items-center gap-2.5">
-              <span className="t-display" style={{ color: 'var(--on-ink)', fontSize: 'clamp(1.5rem,4vw,2rem)' }}>
+              <h1 className="t-display" style={{ color: 'var(--on-ink)', fontSize: 'clamp(1.5rem,4vw,2rem)' }}>
                 Xiaomi Smart Band 8 Pro
-              </span>
+              </h1>
               <BatteryCharging size={19} strokeWidth={SW} style={{ color: 'var(--mint-deep)' }} />
             </div>
-            <span className="t-micro" style={{ color: 'rgba(246,242,232,0.65)' }}>
+            <span className="t-micro" style={{ color: 'color-mix(in srgb, var(--on-ink) 65%, transparent)' }}>
               {connected ? 'Streaming live telemetry every 2 seconds' : 'Last synchronized today at 08:14'}
             </span>
           </div>
@@ -112,7 +117,7 @@ export default function SmartBandPage() {
             <OasisBlob zone={hrZone} size={104} />
             <div className="flex items-baseline gap-2">
               <span className="t-stat" style={{ color: 'var(--on-ink)', fontSize: 'clamp(3rem, 11vw, 5rem)' }}>{hr}</span>
-              <span className="t-label" style={{ color: 'rgba(246,242,232,0.65)' }}>bpm</span>
+              <span className="t-label" style={{ color: 'color-mix(in srgb, var(--on-ink) 65%, transparent)' }}>bpm</span>
             </div>
           </div>
 
@@ -133,7 +138,7 @@ export default function SmartBandPage() {
               )}
             </div>
             <Sparkline values={hrHistory} zone={hrZone} height={60} />
-            <span className="t-micro" style={{ color: 'rgba(246,242,232,0.65)', lineHeight: 1.5 }}>
+            <span className="t-micro" style={{ color: 'color-mix(in srgb, var(--on-ink) 65%, transparent)', lineHeight: 1.5 }}>
               Resting {restingHr} bpm against your own {hrBaseline} bpm baseline — {overBaseline >= 0 ? `+${overBaseline}` : overBaseline} bpm,
               worth {Math.round(factors.find(f => f.key === "physiological")?.cost ?? 0)} points of today&apos;s stress score.
             </span>

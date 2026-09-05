@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
-  AlertTriangle, Calendar, ChevronRight, Clock, Heart, HelpCircle, Moon,
-  Quote, RefreshCw, Shield, Smartphone, TrendingUp, Zap,
+  AlertTriangle, Calendar, ChevronRight, Clock, Heart, HelpCircle,
+  MessageSquare, Moon, Quote, RefreshCw, Shield, Smartphone, TrendingUp, Zap,
 } from 'lucide-react'
 
 import {
@@ -51,6 +51,10 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoPh
   onGoPhone: () => void; onGoHow: () => void
 }) {
   const [showCommit, setShowCommit] = useState(false)
+  // The other way in. Same sheet, different phase: with no request passed it
+  // opens at the intake, which is the only route to it — the rail below only
+  // exists when someone has already asked.
+  const [showIntake, setShowIntake] = useState(false)
   // Dismissing is local, not stored: skipping today should not skip tomorrow.
   const [checkHidden, setCheckHidden] = useState(false)
   const [quoteIdx, setQuoteIdx] = useState(0)
@@ -329,6 +333,45 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoPh
             {showCommit && <DecisionSheet req={pending} onClose={() => setShowCommit(false)} />}
           </aside>
         )}
+      </section>
+
+      {/* ── Share a chat ────────────────────────────────────────────────── */}
+      {/* The rail above is there only when a request is already waiting. This is
+          the door for the ask that just landed, so it stays on the page in every
+          scenario — pending or not. */}
+      <section className="flex flex-col gap-4">
+        <button
+          onClick={() => setShowIntake(v => !v)}
+          aria-expanded={showIntake}
+          className="card focus-ring flex items-center gap-4 p-5 text-left w-full"
+          style={{ cursor: 'pointer' }}
+        >
+          <span
+            className="flex items-center justify-center shrink-0"
+            style={{
+              width: 44, height: 44, borderRadius: 'var(--r-md)',
+              background: 'var(--butter)', border: '2px solid var(--ink)',
+            }}
+          >
+            <MessageSquare size={20} strokeWidth={SW} />
+          </span>
+          <span className="flex flex-col gap-0.5 flex-1 min-w-0">
+            <span className="t-sub text-ink">Just been asked to do something?</span>
+            <span className="t-micro" style={{ color: 'var(--ink-2)', lineHeight: 1.5 }}>
+              Share the chat here and Oasis prices it against your week before you
+              answer — then writes the reply for you.
+            </span>
+          </span>
+          <ChevronRight
+            size={18} strokeWidth={SW} className="shrink-0"
+            style={{
+              transform: showIntake ? 'rotate(90deg)' : 'none',
+              transition: 'transform 0.16s var(--ease)',
+            }}
+          />
+        </button>
+
+        {showIntake && <DecisionSheet onClose={() => setShowIntake(false)} />}
       </section>
 
       {/* ── On your phone ───────────────────────────────────────────────────── */}
