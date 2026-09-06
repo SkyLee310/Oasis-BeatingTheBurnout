@@ -239,7 +239,14 @@ function AppShell() {
       <div ref={ambient} data-ambient className="h-full overflow-y-auto">
         <JoinLanding
           code={join}
-          onEnter={() => { setJoin(null); setPage('group') }}
+          onEnter={() => {
+            // Drop ?join= on the way in. Without this the first reload after
+            // joining lands back on the invite screen, asking a teammate to
+            // join a project they are already on.
+            window.history.replaceState(null, '', window.location.pathname)
+            setJoin(null)
+            setPage('group')
+          }}
         />
       </div>
     )
