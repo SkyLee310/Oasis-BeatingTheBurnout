@@ -1,0 +1,154 @@
+import type { GroupProject, Member, ProjectTask } from '../state/types'
+
+// ─── Group fairness ───────────────────────────────────────────────────────────
+// The complaint about university group work is never "we have no task list" —
+// it is "I am doing most of it and nobody will say so out loud". So this module
+// measures the split in *task weight*, not task count (a five-point model
+// implementation is not one slide deck), and turns the result into a message
+// somebody can actually paste into the group chat. Naming the imbalance is the
+// part students find hard; the arithmetic is the easy half.
+//
+// Everything here is pure and derived from the project, so the Group page, the
+// invite sheet and the join landing all read the same numbers.
+
+/** One member's slice of the project, in weight and in percent. */
+export interface Share {
+  member: Member
+  /** Total weight assigned to them, done or not. */
+  weight: number
+  /** The weight they have already finished. */
+  done: number
+  /** Their share of all *assigned* weight, 0–100. */
+  pct: number
+  /** Carrying more than 1.5× an even split. */
+  over: boolean
+}
+
+export interface Balance {
+  shares: Share[]
+  /** Weight that has an owner. */
+  assigned: number
+  /** An even split of the assigned weight, in weight units. */
+  fair: number
+  /** Tasks nobody has picked up — the other half of the problem. */
+  unassigned: ProjectTask[]
+  /** Whoever is carrying the most, when that is more than their share. */
+  overloaded: Share | null
+}
+
+/** Anyone above this multiple of an even split is flagged. */
+const OVER_AT = 1.5
+
+const weightOf = (tasks: ProjectTask[]) => tasks.reduce((sum, t) => sum + t.weight, 0)
+
+/**
+ * Who is carrying what. Members who have not joined still appear — a teammate
+ * who never installed the app is exactly the person the split is hiding behind.
+ */
+export function balance(project: GroupProject): Balance {
+  const { members, tasks } = project
+
+  const unassigned = tasks.filter(t => t.assignee === null)
+  const assigned = weightOf(tasks) - weightOf(unassigned)
+  const fair = members.length > 0 ? assigned / members.length : 0
+
+  const shares: Share[] = members.map(member => {
+    const mine = tasks.filter(t => t.assignee === member.id)
+    const weight = weightOf(mine)
+    return {
+      member,
+      weight,
+      done: weightOf(mine.filter(t => t.done)),
+      pct: assigned > 0 ? Math.round((weight / assigned) * 100) : 0,
+      over: fair > 0 && weight > fair * OVER_AT,
+    }
+  })
+
+  const heaviest = shares.reduce<Share | null>(
+    (top, s) => (s.over && (!top || s.weight > top.weight) ? s : top),
+    null,
+  )
+
+  return { shares, assigned, fair, unassigned, overloaded: heaviest }
+}
+
+/** The lightest-loaded member who could take work — never the person already over. */
+function lightest(b: Balance): Share | null {
+  const candidates = b.shares.filter(s => !s.over)
+  return candidates.reduce<Share | null>(
+    (low, s) => (!low || s.weight < low.weight ? s : low),
+    null,
+  )
+}
+
+/**
+ * The message. Written the way a student would actually raise it — states the
+ * numbers first so it reads as a fact rather than a complaint, names one
+ * specific task to move, and ends with a question so somebody has to answer.
+ */
+export function proposeRebalance(project: GroupProject): string {
+  const b = balance(project)
+  const lines: string[] = [`${project.name} — quick check on the split:`]
+
+  for (const s of b.shares) {
+    if (s.member.status === 'none') {
+      lines.push(`• ${s.member.name} — not on the sheet yet`)
+    } else {
+      lines.push(`• ${s.member.name} — ${s.weight} of ${b.assigned} points (${s.pct}%)`)
+    }
+  }
+
+  const over = b.overloaded
+  const light = lightest(b)
+
+  if (over) {
+    // Hand over the heaviest thing they have not started; finished work cannot move.
+    const movable = project.tasks
+      .filter(t => t.assignee === over.member.id && !t.done)
+      .sort((a, z) => z.weight - a.weight)[0]
+
+    if (movable && light) {
+      lines.push(
+        '',
+        `${over.member.name} is on ${over.pct}% of the work. Can "${movable.title}" move to ${light.member.name}?`,
+      )
+    } else if (movable) {
+      lines.push('', `${over.member.name} is on ${over.pct}%. Can someone take "${movable.title}"?`)
+    }
+  }
+
+  if (b.unassigned.length > 0) {
+    const names = b.unassigned.map(t => `"${t.title}"`).join(', ')
+    lines.push(
+      '',
+      b.unassigned.length === 1
+        ? `Still nobody on ${names} — who wants it?`
+        : `Still nobody on ${names}. Can we claim these today?`,
+    )
+  }
+
+  if (!over && b.unassigned.length === 0) {
+    lines.push('', 'Split looks even — nothing to move.')
+  }
+
+  return lines.join('\n')
+}
+
+/** The invite link. Relative to wherever the app is served, so it works on a phone. */
+export function joinUrl(code: string): string {
+  if (typeof window === 'undefined') return `?join=${code}`
+  const { origin, pathname } = window.location
+  return `${origin}${pathname}?join=${code}`
+}
+
+/** What gets sent into the group chat alongside the link. */
+export function inviteMessage(project: GroupProject, url: string): string {
+  return [
+    `Putting ${project.name} into Oasis so we can all see the split.`,
+    "It shows who has what — nobody sees anyone's personal stress score.",
+    url,
+  ].join('\n')
+}
+
+/** WhatsApp deep link. Opens the app on a phone and the web client on desktop. */
+export const waLink = (message: string) => `https://wa.me/?text=${encodeURIComponent(message)}`

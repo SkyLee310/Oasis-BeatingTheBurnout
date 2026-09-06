@@ -24,3 +24,8 @@ ds-bundle/
 .design-sync/.cache/
 .design-sync/learnings/
 .design-sync/node_modules
+
+# Agent workspace state. launch.json is the shared dev-server config and is
+# checked in so anyone can open the preview; everything else here is scratch.
+/.claude/*
+!/.claude/launch.json

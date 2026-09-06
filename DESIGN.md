@@ -99,6 +99,42 @@ and rings.
 In code: `zoneAccent(zone)` returns the accent var, `zoneTile(zone)` returns the
 matching tile class. Use them — do not re-derive the mapping.
 
+### Ambient temperature — the canvas moves with the score
+
+The one thing the whole app shares. **Low load reads warm; overloaded reads cold.**
+`--canvas` is already a warm cream, so warm is the resting state and cold is a
+desaturated, blue-shifted version of the same token. *Cold room, hot alarm*: an
+overloaded screen goes cool and grey with the hot red `ZoneChip` sitting on top of it.
+
+One inherited scalar carries it. `tempFor(energy)` in
+[src/logic/energy.ts](src/logic/energy.ts) returns `0` (warm) at 60 energy and `1`
+(cold) at 20, and `App.tsx` sets it on the app root exactly once:
+
+```tsx
+<div data-ambient style={{ '--temp': temp } as CSSProperties}>
+```
+
+The endpoints and the mixing live in the **Ambient temperature** block at the bottom of
+`src/index.css` — `--canvas-warm` / `--canvas-cold` and the same pair for `--surface`
+and `--surface-2`, combined with `color-mix(in oklab, …)`. **No component ever learns
+that a colour moved**, so the no-hex-in-a-component rule still holds.
+
+Four things this is built to protect:
+
+- **Only canvas and surfaces move.** Zone colours, pastel tiles, chips, buttons and the
+  mascot are fixed. Saturated hue keeps meaning "how are you doing" and nothing else.
+- **The mix is gated behind `[data-ambient]`.** Without that attribute every token
+  resolves to exactly its `:root` value — which is why the published DS package and its
+  previews render unchanged.
+- **`@property --temp` makes it a real animatable number**, so the screen cross-fades
+  over 600ms on `--ease` instead of snapping. The `prefers-reduced-motion` block still
+  zeroes it: the colour changes, it just stops animating.
+- **Temperature never carries meaning alone.** The number, the `ZoneChip` label and the
+  mascot expression all still say it in words.
+
+Dark mode needs no second formula — `.dark` overrides the two endpoints and the same
+mix re-resolves.
+
 ---
 
 ## Type
@@ -207,6 +243,15 @@ idle animation for small instances.
 - The mascot carries `role="img"` and a zone-specific `aria-label`.
 - Tab rows use `role="tablist"` / `role="tab"` / `aria-selected`; checklists use
   `role="checkbox"` / `aria-checked`; the band toggle uses `role="switch"`.
+- Every dismissable surface uses `useSheet()` (`src/features/shell/useSheet.ts`):
+  focus in on open, `Escape` to close, focus returned to the trigger. Pass
+  `{ trap: true }` **only** for a surface that covers the screen behind a
+  backdrop — trapping focus in an inline panel the page is visible around holds
+  a keyboard user inside content they can see past. Inline panels take
+  `role="dialog"` + `aria-labelledby` and no `aria-modal`; overlays take all three.
+- New mobile controls are ≥44×44px. Results that appear without a navigation —
+  a verdict, a recomputed score, a parse readout — sit in an `aria-live="polite"`
+  region.
 
 ---
 
@@ -220,3 +265,7 @@ idle animation for small instances.
 6. Health state = zone token + a labelled `ZoneChip`.
 7. Icons at `strokeWidth={SW}`.
 8. No hex literals — token or nothing.
+9. Read colour from `--canvas` / `--surface`, never a fixed cream. The ambient
+   scale moves them, and anything hardcoded will drift off the page around it.
+10. Anything dismissable goes through `useSheet()`; anything that changes a
+    number without a page change announces it with `aria-live="polite"`.

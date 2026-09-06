@@ -2,53 +2,97 @@ import { useState } from 'react'
 import { AlertTriangle, ArrowUpRight, Calendar, Check, CheckCircle } from 'lucide-react'
 
 import {
-  CALENDAR_WEEK, KIND_STYLE, LoadBar, OasisBlob, SW, Tag, WeekCalendar,
-  ZoneChip, zoneAccent, zoneTile,
+  KIND_STYLE, LoadBar, OasisBlob, SW, Tag, WeekCalendar,
+  ZoneChip, ZONE_LABEL, zoneAccent, zoneTile,
 } from '../ds'
 import type { CalDay, EventKind, ZoneKey } from '../ds'
+import { useDispatch, useEnergy, useOasis } from '../state/store'
+import { seedFor } from '../state/seed'
+import { commitmentCost, projectEnergy, zoneFor } from '../logic/energy'
+import { addDays, dateOf, shortDate } from '../logic/dates'
+import { weekDays, weekLabel } from '../logic/week'
 import DayDetail from '../features/schedule/DayDetail'
+import CommutePanel from '../features/commute/CommutePanel'
 
 // ─── Schedule & load ──────────────────────────────────────────────────────────
-type LoadTab = 'schedule' | 'categories' | 'tasks' | 'commitment'
+type LoadTab = 'schedule' | 'categories' | 'tasks' | 'commute' | 'commitment'
+
+/** Deferring buys you the weekend. Two days is the window a submission
+ *  extension normally allows without penalty. */
+const DEFER_DAYS = 2
+
+/** How heavy one task is on its own — a fifth of the whole budget reads red, a
+ *  tenth amber. Separate from zoneFor(), which scores a week rather than a task. */
+const taskZone = (cost: number): ZoneKey =>
+  cost >= 20 ? 'red' : cost >= 10 ? 'amber' : 'green'
 
 export default function LoadPage() {
+  const state = useOasis()
+  const dispatch = useDispatch()
+  const { energy, factors } = useEnergy()
+
   const [tab, setTab] = useState<LoadTab>('schedule')
-  const [selectedDay, setSelectedDay] = useState<CalDay | null>(
-    CALENDAR_WEEK.find(d => d.isToday) ?? null
+  // The week is derived, so the selection is held as a date rather than as a
+  // CalDay object — otherwise deferring a task would leave the open day detail
+  // showing a copy of the week from before the move. Opens on today; null is
+  // closed.
+  const [selectedDate, setSelectedDate] = useState<number | null>(
+    () => dateOf(state.today),
   )
   const [commitPhase, setCommitPhase] = useState<'idle' | 'result'>('idle')
   const [hrs, setHrs] = useState(12)
   const [showAfter, setShowAfter] = useState(false)
-  const [deferred, setDeferred] = useState(false)
 
-  const categories = [
-    { label: 'Cognitive & Academics', pct: 91, zone: 'red' as ZoneKey, detail: 'DS Assignment 2 + LinAlg exam prep overlapping' },
-    { label: 'Calendar Density', pct: 87, zone: 'red' as ZoneKey, detail: '89% occupied slots — less than 30 mins contiguous break' },
-    { label: 'Physical Recovery', pct: 54, zone: 'amber' as ZoneKey, detail: 'Sleep averaging 5.4h — below optimal recovery baseline' },
-    { label: 'Life Administration', pct: 42, zone: 'amber' as ZoneKey, detail: 'Admin commitments accumulating from last week' },
-    { label: 'Social Engagements', pct: 38, zone: 'green' as ZoneKey, detail: 'Restored to calm, sustainable frequency' },
-  ]
+  const days = weekDays(state)
+  const selectedDay = days.find(d => d.date === selectedDate) ?? null
 
-  const tasks = [
-    { label: 'Linear Algebra Quiz Preparation', due: 'Due Wed 10 Sep', cost: -8, zone: 'red' as ZoneKey, movable: false, reason: 'Non-negotiable exam deadline.' },
-    { label: 'DS Assignment 2 Programming', due: 'Due Fri 12 Sep', cost: -12, zone: 'amber' as ZoneKey, movable: false, reason: 'High-weight project — start immediately.' },
-    { label: 'Web Systems Laboratory Module', due: 'Due Thu 11 Sep', cost: -6, zone: 'amber' as ZoneKey, movable: false, reason: 'Estimated 2.5h effort.' },
-    { label: 'Ethics in Tech Case Reading', due: deferred ? 'Deferred to Sat 13 Sep' : 'Due Fri 12 Sep', cost: -4, zone: 'green' as ZoneKey, movable: true, reason: 'Assignment submission window allows 2-day deferral without penalty.' },
-  ]
+  // The five factors, heaviest first — the same five the dashboard gauge and
+  // the band page read. "Load categories" is this list with a bar on it.
+  const categories = [...factors]
+    .sort((a, b) => b.ratio - a.ratio)
+    .map(f => ({
+      key: f.key,
+      label: f.label,
+      pct: Math.min(100, Math.round(f.ratio * 100)),
+      zone: f.zone,
+      detail: f.detail,
+    }))
+
+  const lead = categories[0]
+  const overloaded = categories.filter(c => c.zone === 'red')
+
+  // What a task has actually been moved to, versus where the week started.
+  // seedFor is pure, so this is a derivation and not a second source of truth.
+  const seeded = new Map(seedFor(state.scenario).commitments.map(c => [c.id, c.date]))
+
+  // Everything with real effort behind it, priciest first. Cost is measured
+  // against this week specifically — the same 2h reading is worth more when
+  // the rest of the week is already full.
+  const tasks = state.commitments
+    .filter(c => c.hours > 0 && c.kind !== 'rest')
+    .map(c => ({ ...c, cost: commitmentCost(state, c.id), moved: seeded.get(c.id) !== c.date }))
+    .sort((a, b) => b.cost - a.cost)
+    .slice(0, 5)
 
   const tabs: { id: LoadTab; label: string }[] = [
     { id: 'schedule', label: 'Weekly schedule' },
     { id: 'categories', label: 'Load categories' },
     { id: 'tasks', label: 'Smart deferral' },
+    { id: 'commute', label: 'Commute' },
     { id: 'commitment', label: 'Simulator' },
   ]
 
-  const lead = categories[0]
+  // The simulator prices a candidate through the same function the dashboard
+  // uses, so "projected" and "what you'd actually see" can never disagree.
+  const projected = projectEnergy(state, {
+    id: 'sim-candidate', title: `Simulated commitment (+${hrs}h)`, kind: 'commitment',
+    date: state.today, time: 'all day', hours: hrs, movable: false, origin: 'seed',
+  })
 
   return (
     <div className="flex flex-col gap-7 max-w-[1100px] mx-auto pb-4">
       <header className="flex flex-col gap-4">
-        <Tag tone="yellow"><Calendar size={13} strokeWidth={SW} /> WEEK OF 8–14 SEPTEMBER</Tag>
+        <Tag tone="yellow"><Calendar size={13} strokeWidth={SW} />{weekLabel(state.today)}</Tag>
         <h1 className="t-hero text-ink">Schedule<br />&amp; load</h1>
         <p className="t-body max-w-[52ch]" style={{ color: 'var(--ink-2)' }}>
           Your week timeline, where the pressure is concentrated, and what you can safely move.
@@ -94,9 +138,15 @@ export default function LoadPage() {
             </div>
           </div>
 
-          <WeekCalendar selectedDate={selectedDay?.date ?? null} onDayClick={setSelectedDay} />
+          <WeekCalendar
+            days={days}
+            selectedDate={selectedDay?.date ?? null}
+            onDayClick={(d: CalDay) => setSelectedDate(d.date)}
+          />
 
-          {selectedDay && <DayDetail day={selectedDay} onClose={() => setSelectedDay(null)} />}
+          {selectedDay && selectedDay.events.length > 0 && (
+            <DayDetail day={selectedDay} onClose={() => setSelectedDate(null)} />
+          )}
         </div>
       )}
 
@@ -117,8 +167,10 @@ export default function LoadPage() {
 
           <div className="card card-pop p-6 flex flex-col gap-5">
             {categories.slice(1).map((c, i) => (
-              <div key={c.label} className="flex items-start gap-4">
-                <span className="t-stat" style={{ fontSize: 18, color: 'var(--ink-faint)', width: 24 }}>{i + 2}</span>
+              <div key={c.key} className="flex items-start gap-4">
+                {/* The rank is information — it is what makes this a ranked list — so it
+                    is muted rather than faint. --ink-faint measured 2.25:1 here. */}
+                <span className="t-stat" style={{ fontSize: 18, color: 'var(--ink-muted)', width: 24 }}>{i + 2}</span>
                 <div className="flex flex-col gap-2 flex-1 min-w-0">
                   <LoadBar label={c.label} pct={c.pct} zone={c.zone} />
                   <p className="t-micro" style={{ color: 'var(--ink-muted)' }}>{c.detail}</p>
@@ -129,11 +181,13 @@ export default function LoadPage() {
 
           <div
             className="flex gap-3 p-5"
-            style={{ background: 'var(--blush)', border: '2px solid var(--ink)', borderRadius: 'var(--r-lg)', boxShadow: 'var(--shadow-hard)' }}
+            style={{ background: overloaded.length ? 'var(--blush)' : 'var(--mint)', border: '2px solid var(--ink)', borderRadius: 'var(--r-lg)', boxShadow: 'var(--shadow-hard)' }}
           >
             <AlertTriangle size={20} strokeWidth={SW} className="shrink-0 mt-0.5" style={{ color: 'var(--ink)' }} />
             <p className="t-label" style={{ color: 'var(--ink)', lineHeight: 1.5 }}>
-              Two primary domains exceed 85%. Taking on additional obligations will cascade into severe fatigue.
+              {overloaded.length === 0
+                ? `Nothing is in the red right now. You have room to take something on — check the simulator first.`
+                : `${overloaded.length === 1 ? "One domain is" : `${overloaded.length} domains are`} in the red: ${overloaded.map(c => c.label.toLowerCase()).join(", ")}. Taking on more here cascades into the rest of the week.`}
             </p>
           </div>
         </div>
@@ -142,36 +196,56 @@ export default function LoadPage() {
       {/* ── Smart deferral ──────────────────────────────────────────────────── */}
       {tab === 'tasks' && (
         <div className="flex flex-col gap-4 page-section-enter">
-          {deferred && (
+          {tasks.some(t => t.moved) && (
             <div
               className="flex gap-3 p-4"
               style={{ background: 'var(--mint)', border: '2px solid var(--ink)', borderRadius: 'var(--r-lg)', boxShadow: 'var(--shadow-hard)' }}
+              role="status"
             >
               <CheckCircle size={20} strokeWidth={SW} className="shrink-0 mt-0.5" style={{ color: 'var(--ink)' }} />
               <span className="t-label" style={{ color: 'var(--ink)', lineHeight: 1.5 }}>
-                Ethics reading deferred to Saturday — frees 4 energy units on Friday.
+                {tasks.filter(t => t.moved).map(t => t.title).join(', ')} moved back — you are on{' '}
+                {energy} energy, {ZONE_LABEL[zoneFor(energy)].toLowerCase()}.
               </span>
             </div>
           )}
 
+          {tasks.length === 0 && (
+            <div className="card p-6">
+              <p className="t-body" style={{ color: 'var(--ink-2)' }}>
+                Nothing with real effort behind it this week. Add a class timetable or share a
+                request to see what it would cost.
+              </p>
+            </div>
+          )}
+
           {tasks.map(t => (
-            <div key={t.label} className="card card-pop p-5 flex items-start justify-between gap-4 flex-wrap">
+            <div key={t.id} className="card card-pop p-5 flex items-start justify-between gap-4 flex-wrap">
               <div className="flex flex-col items-start gap-1.5 flex-1 min-w-[220px]">
-                <span className="t-sub text-ink">{t.label}</span>
-                <ZoneChip zone={t.zone} />
-                <span className="t-micro" style={{ color: 'var(--ink)', fontWeight: 800 }}>{t.due}</span>
-                <span className="t-micro" style={{ color: 'var(--ink-muted)' }}>{t.reason}</span>
+                <span className="t-sub text-ink">{t.title}</span>
+                <ZoneChip zone={taskZone(t.cost)} />
+                <span className="t-micro" style={{ color: 'var(--ink)', fontWeight: 800 }}>
+                  {t.moved ? 'Moved to' : 'Due'} {shortDate(t.date)}
+                </span>
+                <span className="t-micro" style={{ color: 'var(--ink-muted)' }}>
+                  {t.reason ?? `Estimated ${t.hours}h of effort.`}
+                </span>
               </div>
               <div className="flex flex-col items-end gap-2.5 shrink-0">
                 <span className="t-stat text-ink" style={{ fontSize: 22 }}>
-                  {t.cost}<span className="t-micro"> pts</span>
+                  −{t.cost}<span className="t-micro"> pts</span>
                 </span>
-                {t.movable && !deferred && (
-                  <button className="btn btn-accent btn-sm focus-ring" onClick={() => setDeferred(true)}>
-                    Defer task
+                {t.movable && !t.moved && (
+                  <button
+                    className="btn btn-accent btn-sm focus-ring"
+                    onClick={() => dispatch({
+                      type: 'deferCommitment', id: t.id, toDate: addDays(t.date, DEFER_DAYS),
+                    })}
+                  >
+                    Defer {DEFER_DAYS} days
                   </button>
                 )}
-                {t.movable && deferred && <Tag tone="green"><Check size={12} strokeWidth={SW} /> DEFERRED</Tag>}
+                {t.movable && t.moved && <Tag tone="green"><Check size={12} strokeWidth={SW} /> DEFERRED</Tag>}
               </div>
             </div>
           ))}
@@ -179,11 +253,13 @@ export default function LoadPage() {
       )}
 
       {/* ── Commitment simulator ────────────────────────────────────────────── */}
+      {tab === 'commute' && <CommutePanel />}
+
       {tab === 'commitment' && (
         <div className="flex flex-col gap-4 page-section-enter">
           <div className="card card-pop p-6 flex flex-col gap-5">
             <div className="flex items-center gap-3">
-              <OasisBlob zone={showAfter ? 'red' : 'amber'} size={64} float={false} />
+              <OasisBlob zone={zoneFor(showAfter ? projected : energy)} size={64} float={false} />
               <div className="flex flex-col">
                 <span className="t-sub text-ink">Simulate new commitment</span>
                 <span className="t-micro" style={{ color: 'var(--ink-muted)' }}>
@@ -216,13 +292,13 @@ export default function LoadPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="tile tile-butter card-pop">
                 <span className="t-eyebrow" style={{ color: 'var(--ink)' }}>Current energy</span>
-                <span className="t-stat text-ink" style={{ fontSize: 52 }}>38</span>
-                <ZoneChip zone="amber" />
+                <span className="t-stat text-ink" style={{ fontSize: 52 }}>{energy}</span>
+                <ZoneChip zone={zoneFor(energy)} />
               </div>
               <div className="tile tile-blush card-pop">
                 <span className="t-eyebrow" style={{ color: 'var(--ink)' }}>Projected with +{hrs} hrs</span>
-                <span className="t-stat text-ink" style={{ fontSize: 52 }}>{showAfter ? 22 : 38}</span>
-                <ZoneChip zone={showAfter ? 'red' : 'amber'} />
+                <span className="t-stat text-ink" style={{ fontSize: 52 }}>{showAfter ? projected : energy}</span>
+                <ZoneChip zone={zoneFor(showAfter ? projected : energy)} />
               </div>
             </div>
           )}

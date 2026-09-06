@@ -22,7 +22,10 @@
   /* ── Ink — also the colour of every stroke in the system ─────────────────── */
   --ink:              #14140f;
   --ink-2:            #46443c;
-  --ink-muted:        #83817a;
+  /* Darkened from #83817a, which measured 2.9-3.6:1 everywhere it was used —
+     and it is used for t-micro and t-eyebrow at 11px, where AA wants 4.5. Now
+     4.6:1 at worst, still plainly a step lighter than --ink-2. */
+  --ink-muted:        #63625b;
   --ink-faint:        #a8a69c;
   --on-ink:           #ffffff;
 
@@ -107,7 +110,9 @@
 .dark {
   --ink:          #f6f2e8;
   --ink-2:        #ddd8c9;
-  --ink-muted:    #a5a296;
+  /* Lifted from #a5a296 for the same reason the light value was darkened, and
+     against the deeper pastels above: 4.8:1 at worst now. */
+  --ink-muted:    #c0bdb1;
   --ink-faint:    #7d7b71;
   --on-ink:       #14140f;
 
@@ -129,6 +134,22 @@
   --zone-amber-text: #f8d765;
   --zone-red-bg:     rgba(242, 84, 45, 0.22);
   --zone-red-text:   #f9b3a2;
+
+  /* The pastels are restated, not inherited. A tile keeps its background when
+     the theme flips but --ink does not keep its colour, so the light pastels
+     ended up carrying near-white text: the energy tile measured 1.11:1, which
+     is text you cannot read. These are the same six hues at a depth that holds
+     light ink — 6.5:1 at the lightest, AAA for --ink and --ink-2 alike — so
+     every consumer (.tile-*, the DS Tag, and the inline pastel surfaces) is
+     corrected at the token without touching a single call site. */
+  --mint:             #2f4d2a;
+  --mint-deep:        #3a5f31;
+  --sky:              #20415a;
+  --blush:            #5a2b38;
+  --butter:           #54431a;
+  --lilac:            #3c3560;
+  --highlight:        #5a4610;
+  --bold-orange:      #7a2a14;
 }
 
 /* ═══ Base ══════════════════════════════════════════════════════════════════ */
@@ -270,7 +291,10 @@ button:focus-visible,
   border: 2px solid var(--ink);
   border-radius: var(--r-xl);
 }
-.panel-ink .t-eyebrow { color: rgba(246, 242, 232, 0.62); }
+/* 62% of whatever sits on ink, never a cream literal. In dark mode --ink *is*
+   the cream, so the literal put a cream eyebrow on a cream panel: 1:1, text you
+   cannot see at all. Derived, it flips with the panel and measures 4.9:1. */
+.panel-ink .t-eyebrow { color: color-mix(in srgb, var(--on-ink) 62%, transparent); }
 
 /* ═══ Buttons ═══════════════════════════════════════════════════════════════
    Primary = ink pill. Secondary = outlined pill on the surface. Accent = a
@@ -451,3 +475,64 @@ button:focus-visible,
     scroll-behavior: auto !important;
   }
 }
+
+/* ═══ Ambient temperature ═══════════════════════════════════════════════════
+   The canvas warms as load comes off and cools as it piles on, so the app says
+   how you are doing before you read a single number. One inherited scalar,
+   --temp (0 = warm, 1 = cold), set once on the app root from tempFor(energy)
+   in src/logic/energy.ts. The endpoints and the mixing live here, so no
+   component ever learns a colour and DESIGN.md's "no hex in a component" rule
+   still holds.
+
+   Gated behind [data-ambient] deliberately: without that attribute every token
+   below resolves to exactly its :root value, so the published DS package and
+   its previews render byte-identically to before.
+
+   What does NOT move: zone colours, pastel tiles, chips, buttons and the
+   mascot. Saturated hue keeps meaning "how are you doing" and nothing else —
+   an overloaded screen goes cool and grey with the hot red ZoneChip sitting on
+   top of it. Temperature is never the only signal either; the number, the
+   ZoneChip label and the mascot expression all still say it in words.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@property --temp {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+:root {
+  --canvas-warm:    #f6f2e8;  /* identical to --canvas — warm is the resting state */
+  --canvas-cold:    #e6eaef;
+  --surface-warm:   #ffffff;
+  --surface-cold:   #f3f6fa;
+  --surface-2-warm: #fbf8f0;
+  --surface-2-cold: #edf1f6;
+}
+
+/* Dark mode needs no second formula — it overrides the endpoints and the same
+   mix re-resolves underneath. */
+.dark {
+  --canvas-warm:    #16160f;
+  --canvas-cold:    #101419;
+  --surface-warm:   #22211a;
+  --surface-cold:   #1b2026;
+  --surface-2-warm: #2b2a21;
+  --surface-2-cold: #232a31;
+}
+
+[data-ambient] {
+  --canvas:    color-mix(in oklab, var(--canvas-warm),    var(--canvas-cold)    calc(var(--temp) * 100%));
+  --surface:   color-mix(in oklab, var(--surface-warm),   var(--surface-cold)   calc(var(--temp) * 100%));
+  --surface-2: color-mix(in oklab, var(--surface-2-warm), var(--surface-2-cold) calc(var(--temp) * 100%));
+
+  background-color: var(--canvas);
+}
+
+/* No CSS transition on any of this, deliberately. Chromium pins both
+   `transition: --temp` and a `transition: background-color` whose value comes
+   from a color-mix() in a custom property — the value simply stops advancing.
+   The 600ms cross-fade is stepped onto --temp a frame at a time instead, in
+   src/features/shell/useAmbientTemp.ts, which re-resolves the mix each frame
+   and works. The hook honours prefers-reduced-motion itself, so the colour
+   still changes there; it just arrives in one step. */

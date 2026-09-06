@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ThemeProvider } from '@figma/astraui'
 import {
-  Activity, Brain, Calendar, Home, Mic, Settings, Shield, X,
+  Calendar, HelpCircle, Home, Mic, Shield, Users,
 } from 'lucide-react'
 
 // ─── Design system ────────────────────────────────────────────────────────────
@@ -10,22 +10,52 @@ import {
 // navigation that switches between them.
 import { Initials, OasisBlob, SW } from './ds'
 
+import { OasisProvider, useEnergy } from './state/store'
+
 import DashboardPage from './pages/DashboardPage'
 import SmartBandPage from './pages/BandPage'
 import LoadPage from './pages/LoadPage'
 import RecoveryPage from './pages/RecoveryPage'
+import GroupPage from './pages/GroupPage'
+import JoinLanding from './features/group/JoinLanding'
+import WidgetPreview from './features/widget/WidgetPreview'
+import WidgetView from './features/widget/WidgetView'
+import HowItWorksPage from './pages/HowItWorksPage'
+import ScenarioBar, { demoMode } from './features/demo/ScenarioBar'
+import { useAmbientTemp } from './features/shell/useAmbientTemp'
 import VoiceAssistantPanel from './features/assistant/VoiceAssistantPanel'
+import VoiceSheet from './features/assistant/VoiceSheet'
 
 // ─── App-only types ───────────────────────────────────────────────────────────
-type Page = 'dashboard' | 'band' | 'load' | 'recovery'
+type Page = 'dashboard' | 'band' | 'load' | 'recovery' | 'group' | 'phone' | 'how'
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 const NAV_ITEMS: { id: Page; icon: React.ReactNode; label: string; short: string }[] = [
   { id: 'dashboard', icon: <Home size={20} strokeWidth={SW} />, label: 'Dashboard', short: 'Home' },
   { id: 'load', icon: <Calendar size={20} strokeWidth={SW} />, label: 'Schedule & load', short: 'Schedule' },
+  { id: 'group', icon: <Users size={20} strokeWidth={SW} />, label: 'Group project', short: 'Group' },
   { id: 'recovery', icon: <Shield size={20} strokeWidth={SW} />, label: 'Recovery', short: 'Recover' },
-  { id: 'band', icon: <Activity size={20} strokeWidth={SW} />, label: 'Smart band', short: 'Band' },
 ]
+
+// Smart band keeps its page — it is reached from the Home card rather than the
+// bar, because the group project earns the fourth slot and a wearable readout
+// is something you check once a day, not something you navigate to.
+
+/**
+ * Routing, such as it is: one read of the query string at mount. ?join=<code>
+ * replaces the whole shell with the invite landing, which is what makes the
+ * download loop demonstrable on a second phone.
+ */
+function joinCode(): string | null {
+  if (typeof window === 'undefined') return null
+  return new URLSearchParams(window.location.search).get('join')
+}
+
+/** ?view=widget — what the installed app opens to. Read once, at mount. */
+function widgetMode(): boolean {
+  if (typeof window === 'undefined') return false
+  return new URLSearchParams(window.location.search).get('view') === 'widget'
+}
 
 function SideRail({ page, onPage }: { page: Page; onPage: (p: Page) => void }) {
   return (
@@ -63,8 +93,16 @@ function SideRail({ page, onPage }: { page: Page; onPage: (p: Page) => void }) {
       </div>
 
       <div className="flex flex-col items-center gap-3">
-        <button className="btn-icon focus-ring" aria-label="Settings" style={{ width: 40, height: 40 }}>
-          <Settings size={18} strokeWidth={SW} />
+        {/* Was a dead settings button. A control that does nothing is worse
+            than no control at all when you reach it with a keyboard. */}
+        <button
+          className="btn-icon focus-ring"
+          aria-label="Where the numbers come from"
+          aria-current={page === 'how' ? 'page' : undefined}
+          onClick={() => onPage('how')}
+          style={{ width: 40, height: 40 }}
+        >
+          <HelpCircle size={18} strokeWidth={SW} />
         </button>
         <Initials size={40} />
       </div>
@@ -80,13 +118,15 @@ function MobileNav({
   onOpenVoice: () => void
   isVoiceOpen: boolean
 }) {
+  // No aria-label here, unlike the side rail: the short text below is visible,
+  // so it is already the accessible name. Naming this "Recovery" while the
+  // label reads "Recover" breaks voice control — you say what you can see.
   const renderItem = (it: typeof NAV_ITEMS[number]) => {
     const active = page === it.id
     return (
       <button
         key={it.id}
         onClick={() => onPage(it.id)}
-        aria-label={it.label}
         aria-current={active ? 'page' : undefined}
         className="focus-ring flex flex-col items-center justify-center flex-1 gap-1"
         style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '6px 0', fontFamily: 'inherit' }}
@@ -152,29 +192,85 @@ function MobileNav({
 
 // ─── App root ─────────────────────────────────────────────────────────────────
 export default function App() {
+  return (
+    <OasisProvider>
+      <ThemeProvider>
+        <AppShell />
+      </ThemeProvider>
+    </OasisProvider>
+  )
+}
+
+function AppShell() {
   const [page, setPage] = useState<Page>('dashboard')
   const [showVoice, setShowVoice] = useState(false)
+  const [join, setJoin] = useState<string | null>(joinCode)
+  const [widget, setWidget] = useState(widgetMode)
+  const [demo] = useState(demoMode)
+
+  // One number for the whole app. src/index.css mixes the canvas and surface
+  // tokens from it; nothing below here knows a colour changed.
+  const { temp } = useEnergy()
+  // --temp is stepped onto this node frame by frame; see useAmbientTemp.
+  const ambient = useAmbientTemp<HTMLDivElement>(temp)
 
   const renderPage = () => {
     switch (page) {
-      case 'dashboard': return <DashboardPage onGoLoad={() => setPage('load')} onGoRecovery={() => setPage('recovery')} />
-      case 'band':      return <SmartBandPage />
+      case 'dashboard': return <DashboardPage onGoLoad={() => setPage('load')} onGoRecovery={() => setPage('recovery')} onGoBand={() => setPage('band')} onGoPhone={() => setPage('phone')} onGoHow={() => setPage('how')} />
+      case 'band':      return <SmartBandPage onBack={() => setPage('dashboard')} />
       case 'load':      return <LoadPage />
       case 'recovery':  return <RecoveryPage />
+      case 'group':     return <GroupPage />
+      case 'phone':     return <WidgetPreview onBack={() => setPage('dashboard')} />
+      case 'how':       return <HowItWorksPage onBack={() => setPage('dashboard')} />
     }
   }
 
+  // The widget opens without the shell — it is a glance, not a session.
+  if (widget) {
+    return (
+      <div ref={ambient} data-ambient className="h-full overflow-y-auto">
+        <main>
+          <WidgetView onOpen={() => setWidget(false)} />
+        </main>
+      </div>
+    )
+  }
+
+  // The invite link arrives cold — no shell, no nav, just the project.
+  if (join !== null) {
+    return (
+      <div ref={ambient} data-ambient className="h-full overflow-y-auto">
+        <main>
+          <JoinLanding
+            code={join}
+            onEnter={() => {
+              // Drop ?join= on the way in. Without this the first reload after
+              // joining lands back on the invite screen, asking a teammate to
+              // join a project they are already on.
+              window.history.replaceState(null, '', window.location.pathname)
+              setJoin(null)
+              setPage('group')
+            }}
+          />
+        </main>
+      </div>
+    )
+  }
+
   return (
-    <ThemeProvider>
+    <div ref={ambient} data-ambient className="h-full">
       <div className="flex h-full overflow-hidden bg-canvas">
         <SideRail page={page} onPage={setPage} />
 
         <div className="flex flex-1 overflow-hidden">
-          <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-9" style={{ paddingBottom: 96 }}>
+          {/* The one main landmark. The skip link injected by site.json jumps to
+              #root; this is what makes "skip to content" skip anything. */}
+          <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-9" style={{ paddingBottom: 96 }}>
             <div key={page} className="page-section-enter min-h-full">
               {renderPage()}
             </div>
-          </div>
+          </main>
 
           {/* Voice panel — desktop column */}
           <div
@@ -185,42 +281,7 @@ export default function App() {
           </div>
 
           {/* Voice panel — mobile sheet */}
-          {showVoice && (
-            <div
-              className="show-mobile fixed inset-0 z-50 flex-col voice-backdrop"
-              style={{ background: 'rgba(20, 20, 15, 0.45)' }}
-              onClick={() => setShowVoice(false)}
-            >
-              <div
-                className="absolute bottom-0 left-0 right-0 voice-sheet-expand"
-                style={{
-                  height: '82vh', overflow: 'hidden',
-                  background: 'var(--surface)',
-                  borderTop: '2px solid var(--ink)',
-                  borderRadius: 'var(--r-xl) var(--r-xl) 0 0',
-                }}
-                onClick={e => e.stopPropagation()}
-              >
-                <div className="flex items-center justify-between px-5 py-4 rule-b">
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className="flex items-center justify-center shrink-0"
-                      style={{ width: 34, height: 34, borderRadius: 999, background: 'var(--highlight)', border: '2px solid var(--ink)' }}
-                    >
-                      <Brain size={18} strokeWidth={SW} style={{ color: 'var(--ink)' }} />
-                    </span>
-                    <span className="t-sub text-ink">Oasis AI</span>
-                  </div>
-                  <button className="btn-icon focus-ring" onClick={() => setShowVoice(false)} aria-label="Close Oasis AI">
-                    <X size={17} strokeWidth={SW} />
-                  </button>
-                </div>
-                <div style={{ height: 'calc(82vh - 67px)' }}>
-                  <VoiceAssistantPanel showHeader={false} />
-                </div>
-              </div>
-            </div>
-          )}
+          {showVoice && <VoiceSheet onClose={() => setShowVoice(false)} />}
         </div>
       </div>
 
@@ -230,6 +291,9 @@ export default function App() {
         onOpenVoice={() => setShowVoice(prev => !prev)}
         isVoiceOpen={showVoice}
       />
-    </ThemeProvider>
+
+      {/* Scaffolding, deliberately last and deliberately hidden. */}
+      <ScenarioBar startOpen={demo} />
+    </div>
   )
 }
