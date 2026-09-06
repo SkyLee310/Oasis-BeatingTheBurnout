@@ -118,13 +118,15 @@ function MobileNav({
   onOpenVoice: () => void
   isVoiceOpen: boolean
 }) {
+  // No aria-label here, unlike the side rail: the short text below is visible,
+  // so it is already the accessible name. Naming this "Recovery" while the
+  // label reads "Recover" breaks voice control — you say what you can see.
   const renderItem = (it: typeof NAV_ITEMS[number]) => {
     const active = page === it.id
     return (
       <button
         key={it.id}
         onClick={() => onPage(it.id)}
-        aria-label={it.label}
         aria-current={active ? 'page' : undefined}
         className="focus-ring flex flex-col items-center justify-center flex-1 gap-1"
         style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '6px 0', fontFamily: 'inherit' }}
@@ -228,7 +230,9 @@ function AppShell() {
   if (widget) {
     return (
       <div ref={ambient} data-ambient className="h-full overflow-y-auto">
-        <WidgetView onOpen={() => setWidget(false)} />
+        <main>
+          <WidgetView onOpen={() => setWidget(false)} />
+        </main>
       </div>
     )
   }
@@ -237,17 +241,19 @@ function AppShell() {
   if (join !== null) {
     return (
       <div ref={ambient} data-ambient className="h-full overflow-y-auto">
-        <JoinLanding
-          code={join}
-          onEnter={() => {
-            // Drop ?join= on the way in. Without this the first reload after
-            // joining lands back on the invite screen, asking a teammate to
-            // join a project they are already on.
-            window.history.replaceState(null, '', window.location.pathname)
-            setJoin(null)
-            setPage('group')
-          }}
-        />
+        <main>
+          <JoinLanding
+            code={join}
+            onEnter={() => {
+              // Drop ?join= on the way in. Without this the first reload after
+              // joining lands back on the invite screen, asking a teammate to
+              // join a project they are already on.
+              window.history.replaceState(null, '', window.location.pathname)
+              setJoin(null)
+              setPage('group')
+            }}
+          />
+        </main>
       </div>
     )
   }
@@ -258,11 +264,13 @@ function AppShell() {
         <SideRail page={page} onPage={setPage} />
 
         <div className="flex flex-1 overflow-hidden">
-          <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-9" style={{ paddingBottom: 96 }}>
+          {/* The one main landmark. The skip link injected by site.json jumps to
+              #root; this is what makes "skip to content" skip anything. */}
+          <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-9" style={{ paddingBottom: 96 }}>
             <div key={page} className="page-section-enter min-h-full">
               {renderPage()}
             </div>
-          </div>
+          </main>
 
           {/* Voice panel — desktop column */}
           <div
