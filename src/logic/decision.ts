@@ -393,10 +393,16 @@ export function replyFor(req: IncomingRequest, v: Verdict, tone: Tone): string {
         'If that works, tell me which part is most useful and I will take that piece.',
       ].join('\n\n')
 
+    // Accepting stays available even against a decline verdict — it is your
+    // week, not ours. But the message must not claim room we have just told
+    // you that you do not have, so the middle sentence follows the verdict
+    // rather than the tone: saying yes to a full week says so out loud.
     case 'accept':
       return [
         `Hi ${asker} — yes, I can do this.`,
-        `Taking on ${what} at around ${v.commitment.hours} hours a week. I have the room for it.`,
+        v.decision === 'accept'
+          ? `Taking on ${what} at around ${v.commitment.hours} hours a week. I have the room for it.`
+          : `Taking on ${what} at around ${v.commitment.hours} hours a week. It is a tight one — ${because} — so I will need to keep to those hours.`,
         'Send the details over whenever you are ready.',
       ].join('\n\n')
   }
