@@ -48,6 +48,7 @@ export type Action =
   | { type: 'setMemberStatus'; memberId: string; status: MemberStatus }
   | { type: 'assignTask'; taskId: string; memberId: string | null }
   | { type: 'toggleTaskDone'; taskId: string }
+  | { type: 'toggleCommitmentDone'; id: string }
 
 /** What each sleep answer means in hours. Rough on purpose — a student rating
  *  last night out of three is not reporting to two decimal places. */
@@ -154,6 +155,13 @@ export function reducer(s: OasisState, a: Action): OasisState {
           tasks: s.project.tasks.map(t =>
             t.id === a.taskId ? { ...t, done: !t.done } : t),
         },
+      }
+
+    case 'toggleCommitmentDone':
+      return {
+        ...s,
+        commitments: s.commitments.map(c =>
+          c.id === a.id ? { ...c, done: !c.done } : c),
       }
   }
 }

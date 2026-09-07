@@ -34,9 +34,9 @@ const HEADLINE: Record<ZoneKey, [string, string]> = {
 }
 
 const LEAD: Record<ZoneKey, string> = {
-  green: 'Nothing on your plate is outrunning your recovery right now.',
-  amber: 'Your week is filling faster than you are clearing it.',
-  red:   'This week is asking for more than it can give back.',
+  green: 'Recovery is solid.',
+  amber: 'Schedule is near capacity.',
+  red:   'Overload detected.',
 }
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -140,9 +140,7 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoPh
               {HEADLINE[zone][0]}<br />{HEADLINE[zone][1]}
             </h1>
             <p className="t-body max-w-[46ch]" style={{ color: 'var(--ink-2)' }}>
-              {LEAD[zone]} The biggest drain is{' '}
-              <strong style={{ fontWeight: 700 }}>{top.label.toLowerCase()}</strong> —{' '}
-              {lowerFirst(top.detail)}.
+              {LEAD[zone]} Top drain: <strong style={{ fontWeight: 700 }}>{top.label}</strong> ({top.value}).
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <button className="btn btn-primary focus-ring" onClick={onGoRecovery}>
@@ -244,7 +242,7 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoPh
 
           {upcoming.length === 0 ? (
             <p className="t-body py-3" style={{ color: 'var(--ink-2)' }}>
-              Nothing due between now and Sunday. This is the week to get ahead — or to rest.
+              Nothing due this week. Great time to recharge.
             </p>
           ) : (
             <div className="flex flex-col rule-divide">
