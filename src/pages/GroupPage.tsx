@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
-  AlertTriangle, Check, MessageSquare, Scale, Shield, UserPlus, Users,
+  AlertTriangle, Check, MessageCircle, Scale, Shield, UserPlus, Users,
 } from 'lucide-react'
 
 import { Initials, SW, Tag } from '../ds'
 import type { Share } from '../logic/group'
-import { balance, proposeRebalance } from '../logic/group'
+import { balance } from '../logic/group'
 import { longDate } from '../logic/dates'
 import { useDispatch, useOasis } from '../state/store'
 import type { Member } from '../state/types'
 import InviteSheet from '../features/group/InviteSheet'
+import WhatsAppMessageSheet from '../features/group/WhatsAppMessageSheet'
 
 // ─── Group ────────────────────────────────────────────────────────────────────
 // Group assignments go wrong in two specific ways: the split is lopsided and
@@ -35,22 +36,7 @@ export default function GroupPage() {
   const b = balance(project)
 
   const [inviting, setInviting] = useState<Member | 'all' | null>(null)
-  const [copied, setCopied] = useState(false)
-
-  useEffect(() => {
-    if (!copied) return
-    const id = setTimeout(() => setCopied(false), 2000)
-    return () => clearTimeout(id)
-  }, [copied])
-
-  const copyProposal = async () => {
-    try {
-      await navigator.clipboard.writeText(proposeRebalance(project))
-      setCopied(true)
-    } catch {
-      // Blocked in some embedded previews; the text is on screen either way.
-    }
-  }
+  const [showWhatsApp, setShowWhatsApp] = useState(false)
 
   const you = b.shares.find(s => s.member.status === 'you')
 
@@ -112,10 +98,8 @@ export default function GroupPage() {
           </div>
 
           <div className="flex gap-3 flex-wrap pt-1">
-            <button className="btn btn-primary focus-ring" onClick={copyProposal}>
-              {copied
-                ? <><Check size={16} strokeWidth={SW} /> Copied</>
-                : <><MessageSquare size={16} strokeWidth={SW} /> Propose a rebalance</>}
+            <button className="btn btn-primary focus-ring" onClick={() => setShowWhatsApp(true)}>
+              <MessageCircle size={16} strokeWidth={SW} /> WhatsApp group message
             </button>
             <button className="btn btn-secondary focus-ring" onClick={() => setInviting('all')}>
               <UserPlus size={16} strokeWidth={SW} /> Invite
@@ -217,6 +201,13 @@ export default function GroupPage() {
           )}
         </section>
       </div>
+
+      {showWhatsApp && (
+        <WhatsAppMessageSheet
+          project={project}
+          onClose={() => setShowWhatsApp(false)}
+        />
+      )}
 
       {inviting && (
         <InviteSheet
