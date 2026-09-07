@@ -20,6 +20,7 @@ import GroupPage from './pages/GroupPage'
 import JoinLanding from './features/group/JoinLanding'
 import WidgetPreview from './features/widget/WidgetPreview'
 import WidgetView from './features/widget/WidgetView'
+import AvatarGallery from './features/avatars/AvatarGallery'
 import HowItWorksPage from './pages/HowItWorksPage'
 import ScenarioBar, { demoMode } from './features/demo/ScenarioBar'
 import { useAmbientTemp } from './features/shell/useAmbientTemp'
@@ -55,6 +56,13 @@ function joinCode(): string | null {
 function widgetMode(): boolean {
   if (typeof window === 'undefined') return false
   return new URLSearchParams(window.location.search).get('view') === 'widget'
+}
+
+/** ?view=avatars — the mascot reference sheet. Not linked from anywhere on
+ *  purpose: it is for the team and for Figma, not for students. */
+function avatarsMode(): boolean {
+  if (typeof window === 'undefined') return false
+  return new URLSearchParams(window.location.search).get('view') === 'avatars'
 }
 
 function SideRail({ page, onPage }: { page: Page; onPage: (p: Page) => void }) {
@@ -206,6 +214,7 @@ function AppShell() {
   const [showVoice, setShowVoice] = useState(false)
   const [join, setJoin] = useState<string | null>(joinCode)
   const [widget, setWidget] = useState(widgetMode)
+  const [avatars] = useState(avatarsMode)
   const [demo] = useState(demoMode)
 
   // One number for the whole app. src/index.css mixes the canvas and surface
@@ -224,6 +233,17 @@ function AppShell() {
       case 'phone':     return <WidgetPreview onBack={() => setPage('dashboard')} />
       case 'how':       return <HowItWorksPage onBack={() => setPage('dashboard')} />
     }
+  }
+
+  // The reference sheet is shell-less too — it is documentation, not a page.
+  if (avatars) {
+    return (
+      <div ref={ambient} data-ambient className="h-full overflow-y-auto">
+        <main>
+          <AvatarGallery />
+        </main>
+      </div>
+    )
   }
 
   // The widget opens without the shell — it is a glance, not a session.
