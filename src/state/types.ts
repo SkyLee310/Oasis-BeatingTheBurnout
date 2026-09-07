@@ -31,6 +31,8 @@ export interface Commitment {
   movable: boolean
   origin: 'seed' | 'chat' | 'timetable' | 'group'
   reason?: string
+  /** Completed status (e.g. checked off assignment or submitted DDL). */
+  done?: boolean
 }
 
 // ─── Recovery signals ─────────────────────────────────────────────────────────
