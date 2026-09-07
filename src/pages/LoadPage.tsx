@@ -41,7 +41,7 @@ export default function LoadPage() {
     () => dateOf(state.today),
   )
   const [commitPhase, setCommitPhase] = useState<'idle' | 'result'>('idle')
-  const [hrs, setHrs] = useState(12)
+  const [hrs, setHrs] = useState(2)
   const [showAfter, setShowAfter] = useState(false)
 
   const days = weekDays(state)
@@ -86,8 +86,8 @@ export default function LoadPage() {
   // The simulator prices a candidate through the same function the dashboard
   // uses, so "projected" and "what you'd actually see" can never disagree.
   const projected = projectEnergy(state, {
-    id: 'sim-candidate', title: `Simulated commitment (+${hrs}h)`, kind: 'commitment',
-    date: state.today, time: 'all day', hours: hrs, movable: false, origin: 'seed',
+    id: 'sim-candidate', title: `Simulated commitment (+${hrs}h/day)`, kind: 'commitment',
+    date: state.today, time: 'daily', hours: hrs * 5, movable: false, origin: 'seed',
   })
 
   return (
@@ -276,13 +276,13 @@ export default function LoadPage() {
             </div>
 
             <div className="flex gap-2 flex-wrap">
-              {[4, 8, 12, 16, 20].map(h => (
+              {[1, 2, 3, 4, 5].map(h => (
                 <button
                   key={h}
                   onClick={() => setHrs(h)}
                   className={`chip chip-lg focus-ring ${hrs === h ? 'chip-selected' : ''}`}
                 >
-                  {h} hrs/week
+                  {h} {h === 1 ? 'hr/day' : 'hrs/day'}
                 </button>
               ))}
             </div>
@@ -303,7 +303,7 @@ export default function LoadPage() {
                 <ZoneChip zone={zoneFor(energy)} />
               </div>
               <div className="tile tile-blush card-pop">
-                <span className="t-eyebrow" style={{ color: 'var(--ink)' }}>Projected with +{hrs} hrs</span>
+                <span className="t-eyebrow" style={{ color: 'var(--ink)' }}>Projected with +{hrs} {hrs === 1 ? 'hr/day' : 'hrs/day'}</span>
                 <span className="t-stat text-ink" style={{ fontSize: 52 }}>{showAfter ? projected : energy}</span>
                 <ZoneChip zone={zoneFor(showAfter ? projected : energy)} />
               </div>
