@@ -31,11 +31,11 @@
 - Produces:
   - Default export `WhatsAppMessageSheet({ project, onClose }: { project: GroupProject; onClose: () => void })`
 
-- [ ] **Step 1: Create `src/features/group/WhatsAppMessageSheet.tsx` with dialog structure, editable message text, copy state, and WhatsApp link**
-- [ ] **Step 2: Run typecheck to verify component compiles**
+- [x] **Step 1: Create `src/features/group/WhatsAppMessageSheet.tsx` with dialog structure, editable message text, copy state, and WhatsApp link**
+- [x] **Step 2: Run typecheck to verify component compiles**
   Run: `npm run typecheck`
   Expected: PASS
-- [ ] **Step 3: Commit component**
+- [x] **Step 3: Commit component**
   Run: `git add src/features/group/WhatsAppMessageSheet.tsx; git commit -m "feat(group): add WhatsAppMessageSheet component"`
 
 ---
@@ -52,11 +52,11 @@
   - Replaces `copyProposal` / "Propose a rebalance" button with `showWhatsApp` state toggle and `<button className="btn btn-primary focus-ring" onClick={() => setShowWhatsApp(true)}><MessageCircle ... /> WhatsApp group message</button>`
   - Mounts `<WhatsAppMessageSheet project={project} onClose={() => setShowWhatsApp(false)} />` when open
 
-- [ ] **Step 1: Update `src/pages/GroupPage.tsx` with new button and sheet state**
-- [ ] **Step 2: Run typecheck to verify clean compilation**
+- [x] **Step 1: Update `src/pages/GroupPage.tsx` with new button and sheet state**
+- [x] **Step 2: Run typecheck to verify clean compilation**
   Run: `npm run typecheck`
   Expected: PASS
-- [ ] **Step 3: Commit changes**
+- [x] **Step 3: Commit changes**
   Run: `git add src/pages/GroupPage.tsx; git commit -m "feat(group): replace propose rebalance with WhatsApp group message sheet"`
 
 ---
@@ -67,8 +67,8 @@
 - Build check: `npm run build`
 - Type check: `npm run typecheck`
 
-- [ ] **Step 1: Run build and typecheck**
+- [x] **Step 1: Run build and typecheck**
   Run: `npm run build; npm run typecheck`
   Expected: PASS with 0 errors
-- [ ] **Step 2: Verify in browser**
+- [x] **Step 2: Verify in browser**
   Check the Group page in the running app, click "WhatsApp group message", verify modal opens, message is readable/editable, "Copy message" updates to "Copied", and "Send on WhatsApp" href matches wa.me schema.
