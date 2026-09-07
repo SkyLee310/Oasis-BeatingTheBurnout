@@ -228,7 +228,10 @@ function ShareRow({ share, onInvite }: { share: Share; onInvite: () => void }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-3">
-        <Initials size={32} initials={member.name.slice(0, 2).toUpperCase()} />
+        <Initials
+          size={32}
+          initials={member.status === 'you' ? undefined : member.name.slice(0, 2).toUpperCase()}
+        />
 
         <div className="flex flex-col gap-0.5 flex-1 min-w-0">
           <span className="t-label text-ink">{member.name}</span>
