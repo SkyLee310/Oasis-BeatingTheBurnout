@@ -60,9 +60,7 @@ export default function WhatsAppMessageSheet({
       </div>
 
       <p className="t-body max-w-[54ch]" style={{ color: 'var(--ink-2)' }}>
-        A diplomatic breakdown of who is carrying what, so you can raise imbalances
-        or share progress without sounding confrontational. You can edit the text
-        below before copying or sending.
+        Ready-to-send group update. Review or edit anytime before sending.
       </p>
 
       {/* ── Message draft ─────────────────────────────────────────────────── */}
@@ -110,8 +108,7 @@ export default function WhatsAppMessageSheet({
       </div>
 
       <p className="t-micro" style={{ color: 'var(--ink-muted)', lineHeight: 1.5 }}>
-        Teammates only see the project tasks and point split. They never see your
-        energy score, sleep, or anything you declined.
+        Only task assignments and points are shared. Personal energy stays private.
       </p>
     </div>
   )
