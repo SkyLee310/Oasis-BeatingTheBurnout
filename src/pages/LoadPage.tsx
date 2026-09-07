@@ -13,6 +13,7 @@ import { addDays, dateOf, shortDate } from '../logic/dates'
 import { weekDays, weekLabel } from '../logic/week'
 import DayDetail from '../features/schedule/DayDetail'
 import CommutePanel from '../features/commute/CommutePanel'
+import AcademicDDLRadar from '../features/schedule/AcademicDDLRadar'
 
 // ─── Schedule & load ──────────────────────────────────────────────────────────
 type LoadTab = 'schedule' | 'categories' | 'tasks' | 'commute' | 'commitment'
@@ -95,7 +96,7 @@ export default function LoadPage() {
         <Tag tone="yellow"><Calendar size={13} strokeWidth={SW} />{weekLabel(state.today)}</Tag>
         <h1 className="t-hero text-ink">Schedule<br />&amp; load</h1>
         <p className="t-body max-w-[52ch]" style={{ color: 'var(--ink-2)' }}>
-          Your week timeline, where the pressure is concentrated, and what you can safely move.
+          Track deadlines, weekly pressure, and flexible tasks.
         </p>
       </header>
 
@@ -117,9 +118,15 @@ export default function LoadPage() {
 
       {/* ── Weekly schedule ─────────────────────────────────────────────────── */}
       {tab === 'schedule' && (
-        <div className="card card-pop p-5 sm:p-6 flex flex-col gap-5 page-section-enter">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <span className="t-sub text-ink">Interactive schedule</span>
+        <div className="flex flex-col gap-5 page-section-enter">
+          <AcademicDDLRadar
+            onSelectDate={date => setSelectedDate(date)}
+            selectedDate={selectedDay?.date ?? null}
+          />
+
+          <div className="card card-pop p-5 sm:p-6 flex flex-col gap-5">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <span className="t-sub text-ink">Interactive schedule</span>
             <div className="flex items-center gap-3 flex-wrap">
               {[
                 { label: 'Deadline', kind: 'deadline' as EventKind },
@@ -144,9 +151,10 @@ export default function LoadPage() {
             onDayClick={(d: CalDay) => setSelectedDate(d.date)}
           />
 
-          {selectedDay && selectedDay.events.length > 0 && (
-            <DayDetail day={selectedDay} onClose={() => setSelectedDate(null)} />
-          )}
+            {selectedDay && selectedDay.events.length > 0 && (
+              <DayDetail day={selectedDay} onClose={() => setSelectedDate(null)} />
+            )}
+          </div>
         </div>
       )}
 
@@ -186,8 +194,8 @@ export default function LoadPage() {
             <AlertTriangle size={20} strokeWidth={SW} className="shrink-0 mt-0.5" style={{ color: 'var(--ink)' }} />
             <p className="t-label" style={{ color: 'var(--ink)', lineHeight: 1.5 }}>
               {overloaded.length === 0
-                ? `Nothing is in the red right now. You have room to take something on — check the simulator first.`
-                : `${overloaded.length === 1 ? "One domain is" : `${overloaded.length} domains are`} in the red: ${overloaded.map(c => c.label.toLowerCase()).join(", ")}. Taking on more here cascades into the rest of the week.`}
+                ? 'All domains healthy. Capacity available.'
+                : `High load: ${overloaded.map(c => c.label).join(', ')} in red zone.`}
             </p>
           </div>
         </div>
@@ -213,8 +221,7 @@ export default function LoadPage() {
           {tasks.length === 0 && (
             <div className="card p-6">
               <p className="t-body" style={{ color: 'var(--ink-2)' }}>
-                Nothing with real effort behind it this week. Add a class timetable or share a
-                request to see what it would cost.
+                No heavy tasks scheduled. All clear.
               </p>
             </div>
           )}

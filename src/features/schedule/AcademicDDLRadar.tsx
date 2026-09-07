@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { AlertCircle, Calendar, Check, Clock } from 'lucide-react'
 
 import { SW, Tag } from '../../ds'
-import { addDays, dayOf } from '../../logic/dates'
+import { addDays, dayOf, dateOf } from '../../logic/dates'
 import { useDispatch, useOasis } from '../../state/store'
 import type { Commitment } from '../../state/types'
 
@@ -12,8 +12,8 @@ import type { Commitment } from '../../state/types'
 // tags, effort estimates, and one-tap completion.
 
 interface AcademicDDLRadarProps {
-  onSelectDate?: (date: string) => void
-  selectedDate?: string | null
+  onSelectDate?: (dateNumber: number) => void
+  selectedDate?: number | null
 }
 
 function parseCourseAndTitle(rawTitle: string): { course: string; title: string } {
@@ -100,19 +100,20 @@ export default function AcademicDDLRadar({
         {deadlines.map(c => {
           const { course, title } = parseCourseAndTitle(c.title)
           const countdown = getCountdown(c.date, c.time, state.today)
-          const isSelected = selectedDate === c.date
+          const dNum = dateOf(c.date)
+          const isSelected = selectedDate === dNum
 
           return (
             <div
               key={c.id}
-              onClick={() => onSelectDate?.(c.date)}
+              onClick={() => onSelectDate?.(dNum)}
               className="group flex flex-col justify-between p-3 transition-all focus-ring"
               tabIndex={0}
               role="button"
               onKeyDown={e => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault()
-                  onSelectDate?.(c.date)
+                  onSelectDate?.(dNum)
                 }
               }}
               style={{
