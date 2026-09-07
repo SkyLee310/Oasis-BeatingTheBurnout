@@ -27,12 +27,12 @@
 - `Action`: add `| { type: 'toggleCommitmentDone'; id: string }`
 - Reducer handles `toggleCommitmentDone` by flipping `c.done`
 
-- [ ] **Step 1: Add `done?: boolean` to `Commitment` in `src/state/types.ts`**
-- [ ] **Step 2: Add `toggleCommitmentDone` action and reducer logic in `src/state/store.tsx`**
-- [ ] **Step 3: Run typecheck to verify state changes compile cleanly**
+- [x] **Step 1: Add `done?: boolean` to `Commitment` in `src/state/types.ts`**
+- [x] **Step 2: Add `toggleCommitmentDone` action and reducer logic in `src/state/store.tsx`**
+- [x] **Step 3: Run typecheck to verify state changes compile cleanly**
   Run: `npm run typecheck`
   Expected: PASS
-- [ ] **Step 4: Commit state updates**
+- [x] **Step 4: Commit state updates**
   Run: `git add src/state/types.ts src/state/store.tsx; git commit -m "feat(state): add toggleCommitmentDone support for assignments"`
 
 ---
@@ -55,9 +55,9 @@
   - List of clean deadline items with checkbox, course badge, title, countdown badge, effort hours
   - Clicking card triggers `onSelectDate(date)`
 
-- [ ] **Step 1: Implement `AcademicDDLRadar.tsx`**
-- [ ] **Step 2: Verify compilation with `npm run typecheck`**
-- [ ] **Step 3: Commit component**
+- [x] **Step 1: Implement `AcademicDDLRadar.tsx`**
+- [x] **Step 2: Verify compilation with `npm run typecheck`**
+- [x] **Step 3: Commit component**
   Run: `git add src/features/schedule/AcademicDDLRadar.tsx; git commit -m "feat(schedule): add AcademicDDLRadar component"`
 
 ---
@@ -71,9 +71,9 @@
 - Mount `<AcademicDDLRadar onSelectDate={(date) => setSelectedDate(date)} />` inside the `'schedule'` tab right above `<WeekCalendar />`
 - Simplify hero copy, tab subtitles, legend labels, and simulator tips into short & sweet phrases
 
-- [ ] **Step 1: Update `src/pages/LoadPage.tsx` with DDL Radar and simplified copy**
-- [ ] **Step 2: Verify compilation with `npm run typecheck`**
-- [ ] **Step 3: Commit LoadPage changes**
+- [x] **Step 1: Update `src/pages/LoadPage.tsx` with DDL Radar and simplified copy**
+- [x] **Step 2: Verify compilation with `npm run typecheck`**
+- [x] **Step 3: Commit LoadPage changes**
   Run: `git add src/pages/LoadPage.tsx; git commit -m "feat(load): integrate AcademicDDLRadar and simplify copy"`
 
 ---
@@ -89,10 +89,10 @@
 - Trim long paragraphs and essays into short, friendly, high-signal sentences.
 - Ensure all disclaimers, warnings, and subtitles are punchy.
 
-- [ ] **Step 1: Simplify copy in `GroupPage.tsx` and `WhatsAppMessageSheet.tsx`**
-- [ ] **Step 2: Simplify copy in `DashboardPage.tsx`**
-- [ ] **Step 3: Verify compilation with `npm run typecheck`**
-- [ ] **Step 4: Commit copy simplification**
+- [x] **Step 1: Simplify copy in `GroupPage.tsx` and `WhatsAppMessageSheet.tsx`**
+- [x] **Step 2: Simplify copy in `DashboardPage.tsx`**
+- [x] **Step 3: Verify compilation with `npm run typecheck`**
+- [x] **Step 4: Commit copy simplification**
   Run: `git add src/pages/GroupPage.tsx src/features/group/WhatsAppMessageSheet.tsx src/pages/DashboardPage.tsx; git commit -m "refactor: simplify wordy copy across group, whatsapp, and dashboard"`
 
 ---
@@ -103,5 +103,5 @@
 - Run: `npm run typecheck`
 - Run: `npm run build`
 
-- [ ] **Step 1: Run typecheck and production build**
-- [ ] **Step 2: Verify in browser at `http://localhost:5173`**
+- [x] **Step 1: Run typecheck and production build**
+- [x] **Step 2: Verify in browser at `http://localhost:5173`**
