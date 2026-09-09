@@ -9,16 +9,16 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </React.StrictMode>,
 )
 
-// ─── Offline ──────────────────────────────────────────────────────────────────
-// Production only: a service worker in dev would serve stale modules over Vite's
-// HMR and cost more time than it saves. The scope is derived from BASE_URL so a
-// subpath deploy registers correctly.
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL })
-      .catch(() => {
-        // No offline support then. Everything still works online, so stay quiet.
-      })
-  })
+// ─── Retiring the service worker ──────────────────────────────────────────────
+// The installable PWA was cut with the rest of the offline story, but a worker
+// already registered on somebody's phone outlives the file that installed it —
+// it would keep serving the old build forever. So the last thing this app does
+// about offline is turn it off, once, on the way in.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations()
+    .then(rs => Promise.all(rs.map(r => r.unregister())))
+    .then(() => caches?.keys().then(ks => Promise.all(ks.map(k => caches.delete(k)))))
+    .catch(() => {
+      // Nothing was registered, or the browser will not say. Either is fine.
+    })
 }

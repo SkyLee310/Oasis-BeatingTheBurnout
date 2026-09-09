@@ -18,8 +18,6 @@ import LoadPage from './pages/LoadPage'
 import RecoveryPage from './pages/RecoveryPage'
 import GroupPage from './pages/GroupPage'
 import JoinLanding from './features/group/JoinLanding'
-import WidgetPreview from './features/widget/WidgetPreview'
-import WidgetView from './features/widget/WidgetView'
 import AvatarGallery from './features/avatars/AvatarGallery'
 import HowItWorksPage from './pages/HowItWorksPage'
 import ScenarioBar, { demoMode } from './features/demo/ScenarioBar'
@@ -28,7 +26,7 @@ import VoiceAssistantPanel from './features/assistant/VoiceAssistantPanel'
 import VoiceSheet from './features/assistant/VoiceSheet'
 
 // ─── App-only types ───────────────────────────────────────────────────────────
-type Page = 'dashboard' | 'band' | 'load' | 'recovery' | 'group' | 'phone' | 'how'
+type Page = 'dashboard' | 'band' | 'load' | 'recovery' | 'group' | 'how'
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 const NAV_ITEMS: { id: Page; icon: React.ReactNode; label: string; short: string }[] = [
@@ -50,12 +48,6 @@ const NAV_ITEMS: { id: Page; icon: React.ReactNode; label: string; short: string
 function joinCode(): string | null {
   if (typeof window === 'undefined') return null
   return new URLSearchParams(window.location.search).get('join')
-}
-
-/** ?view=widget — what the installed app opens to. Read once, at mount. */
-function widgetMode(): boolean {
-  if (typeof window === 'undefined') return false
-  return new URLSearchParams(window.location.search).get('view') === 'widget'
 }
 
 /** ?view=avatars — the mascot reference sheet. Not linked from anywhere on
@@ -213,7 +205,6 @@ function AppShell() {
   const [page, setPage] = useState<Page>('dashboard')
   const [showVoice, setShowVoice] = useState(false)
   const [join, setJoin] = useState<string | null>(joinCode)
-  const [widget, setWidget] = useState(widgetMode)
   const [avatars] = useState(avatarsMode)
   const [demo] = useState(demoMode)
 
@@ -225,12 +216,11 @@ function AppShell() {
 
   const renderPage = () => {
     switch (page) {
-      case 'dashboard': return <DashboardPage onGoLoad={() => setPage('load')} onGoRecovery={() => setPage('recovery')} onGoBand={() => setPage('band')} onGoPhone={() => setPage('phone')} onGoHow={() => setPage('how')} />
+      case 'dashboard': return <DashboardPage onGoLoad={() => setPage('load')} onGoRecovery={() => setPage('recovery')} onGoBand={() => setPage('band')} onGoHow={() => setPage('how')} />
       case 'band':      return <SmartBandPage onBack={() => setPage('dashboard')} />
       case 'load':      return <LoadPage />
       case 'recovery':  return <RecoveryPage />
       case 'group':     return <GroupPage />
-      case 'phone':     return <WidgetPreview onBack={() => setPage('dashboard')} />
       case 'how':       return <HowItWorksPage onBack={() => setPage('dashboard')} />
     }
   }
@@ -241,17 +231,6 @@ function AppShell() {
       <div ref={ambient} data-ambient className="h-full overflow-y-auto">
         <main>
           <AvatarGallery />
-        </main>
-      </div>
-    )
-  }
-
-  // The widget opens without the shell — it is a glance, not a session.
-  if (widget) {
-    return (
-      <div ref={ambient} data-ambient className="h-full overflow-y-auto">
-        <main>
-          <WidgetView onOpen={() => setWidget(false)} />
         </main>
       </div>
     )

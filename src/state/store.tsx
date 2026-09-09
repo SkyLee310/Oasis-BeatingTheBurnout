@@ -3,7 +3,7 @@
 // the whole app is one user's one week — this is not a data-fetching problem.
 //
 // The point of a single store: a chat declined on the Home screen has to move
-// the number on the schedule, on the group page and in the widget at the same
+// the number on the schedule, on the group page and in the inbox at the same
 // time. Every screen reads from here and derives; nothing holds its own copy.
 
 import {
@@ -14,7 +14,7 @@ import {
 import { energyFactors, energyFor, tempFor, zoneFor } from '../logic/energy'
 import { DEFAULT_SCENARIO, seedFor } from './seed'
 import type {
-  Commitment, CommuteState, DailyCheckIn, IncomingRequest,
+  Commitment, DailyCheckIn, IncomingRequest,
   MemberStatus, OasisState, ScenarioKey,
 } from './types'
 
@@ -42,8 +42,6 @@ export type Action =
       /** Points kept by not taking it on — from projectEnergy(), 0 when accepted. */
       energySaved: number
     }
-  | { type: 'setCommute'; patch: Partial<CommuteState> }
-  | { type: 'toggleTrip'; date: string }
   | { type: 'checkIn'; checkIn: DailyCheckIn }
   | { type: 'setMemberStatus'; memberId: string; status: MemberStatus }
   | { type: 'assignTask'; taskId: string; memberId: string | null }
@@ -102,16 +100,6 @@ export function reducer(s: OasisState, a: Action): OasisState {
           ...s.decisions.filter(d => d.id !== `d-${a.id}`),
         ],
       }
-    }
-
-    case 'setCommute':
-      return { ...s, commute: { ...s.commute, ...a.patch } }
-
-    case 'toggleTrip': {
-      const skipped = s.commute.skippedDays.includes(a.date)
-        ? s.commute.skippedDays.filter(d => d !== a.date)
-        : [...s.commute.skippedDays, a.date]
-      return { ...s, commute: { ...s.commute, skippedDays: skipped } }
     }
 
     case 'checkIn': {

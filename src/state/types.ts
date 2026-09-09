@@ -99,6 +99,10 @@ export interface GroupProject {
 }
 
 // ─── Commute ──────────────────────────────────────────────────────────────────
+// Measured, never edited. The commute panel was cut, but the ten points it
+// carries in the energy model were not — a student who spends eighty minutes a
+// day on a bus is genuinely more loaded than one who walks, whether or not
+// there is a screen for it. energy.ts reads this; nothing writes it.
 
 export type CommuteMode = 'bus' | 'car' | 'walk' | 'lrt'
 

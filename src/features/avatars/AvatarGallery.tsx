@@ -3,7 +3,7 @@ import EmotionBlob, { EMOTIONS, type EmotionKey } from './EmotionBlob'
 
 /**
  * Every emotion face on one screen, at the three sizes the app uses them at.
- * Reached at ?view=avatars — the same query-string switch as ?view=widget, so
+ * Reached at ?view=avatars — the same query-string switch as ?join=<code>, so
  * it costs no router and never appears in the nav. It is a reference sheet for
  * the team (and for Figma), not a product screen.
  */

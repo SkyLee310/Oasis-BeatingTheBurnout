@@ -12,11 +12,10 @@ import { commitmentCost, projectEnergy, zoneFor } from '../logic/energy'
 import { addDays, dateOf, shortDate } from '../logic/dates'
 import { weekDays, weekLabel } from '../logic/week'
 import DayDetail from '../features/schedule/DayDetail'
-import CommutePanel from '../features/commute/CommutePanel'
 import AcademicDDLRadar from '../features/schedule/AcademicDDLRadar'
 
 // ─── Schedule & load ──────────────────────────────────────────────────────────
-type LoadTab = 'schedule' | 'categories' | 'tasks' | 'commute' | 'commitment'
+type LoadTab = 'schedule' | 'categories' | 'tasks' | 'commitment'
 
 /** Deferring buys you the weekend. Two days is the window a submission
  *  extension normally allows without penalty. */
@@ -79,7 +78,6 @@ export default function LoadPage() {
     { id: 'schedule', label: 'Weekly schedule' },
     { id: 'categories', label: 'Load categories' },
     { id: 'tasks', label: 'Smart deferral' },
-    { id: 'commute', label: 'Commute' },
     { id: 'commitment', label: 'Simulator' },
   ]
 
@@ -260,8 +258,6 @@ export default function LoadPage() {
       )}
 
       {/* ── Commitment simulator ────────────────────────────────────────────── */}
-      {tab === 'commute' && <CommutePanel />}
-
       {tab === 'commitment' && (
         <div className="flex flex-col gap-4 page-section-enter">
           <div className="card card-pop p-6 flex flex-col gap-5">

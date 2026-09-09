@@ -22,9 +22,9 @@ const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const HR_TRACE = [-4, -2, 1, 4, 0, 2, -1, 0, 3, 0, -2, 1]
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
-export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoPhone, onGoHow }: {
+export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHow }: {
   onGoLoad: () => void; onGoRecovery: () => void; onGoBand: () => void
-  onGoPhone?: () => void; onGoHow: () => void
+  onGoHow: () => void
 }) {
   const [showCommit, setShowCommit] = useState(false)
   // The other way in. Same sheet, different phase: with no request passed it
