@@ -1,17 +1,11 @@
 {
-  "title": "Oasis",
-  "description": "See what a yes costs before you give it. Oasis prices every request against your real week — classes, deadlines, sleep and the commute — and helps you say no.",
+  "title": "oasis",
+  "description": "This browser-based app offers an interactive prototype optimized for mobile and desktop, enabling users to seamlessly test and refine their designs.",
   "robots": {
     "index": false
   },
-  "icons": {
-    "icon": "./icon.svg"
-  },
   "accessibility": {
-    "addBypassLinks": true,
+    "addBypassLinks": false,
     "ignoreReducedMotion": false
-  },
-  "customScripts": {
-    "headEnd": "<link rel=\"manifest\" href=\"./manifest.webmanifest\"><meta name=\"theme-color\" content=\"#f6f2e8\" media=\"(prefers-color-scheme: light)\"><meta name=\"theme-color\" content=\"#16160f\" media=\"(prefers-color-scheme: dark)\"><meta name=\"mobile-web-app-capable\" content=\"yes\"><meta name=\"apple-mobile-web-app-capable\" content=\"yes\"><meta name=\"apple-mobile-web-app-status-bar-style\" content=\"default\"><meta name=\"apple-mobile-web-app-title\" content=\"Oasis\"><link rel=\"apple-touch-icon\" href=\"./icon.svg\">"
   }
 }

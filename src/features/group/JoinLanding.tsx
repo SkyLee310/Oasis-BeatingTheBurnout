@@ -84,10 +84,7 @@ export default function JoinLanding({ code, onEnter }: { code: string; onEnter: 
         <div className="flex flex-wrap gap-2">
           {project.members.map(m => (
             <span key={m.id} className="flex items-center gap-2 chip">
-              <Initials
-                size={22}
-                initials={m.status === 'you' ? undefined : m.name.slice(0, 2).toUpperCase()}
-              />
+              <Initials size={22} initials={m.name.slice(0, 2).toUpperCase()} />
               {m.name}
             </span>
           ))}

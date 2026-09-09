@@ -104,7 +104,7 @@ export default function DailyCheck({ onDismiss }: { onDismiss: () => void }) {
     <section className="card card-pop p-5 flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1.5">
-          <Tag tone="yellow">DAILY CHECK · 10 SECONDS</Tag>
+          <Tag tone="yellow" bg="rgba(254, 230, 133, 0.3)">DAILY CHECK · 10 SECONDS</Tag>
           <h2 className="t-title text-ink">{q.question}</h2>
         </div>
         <button className="btn-icon focus-ring shrink-0" onClick={onDismiss} aria-label="Skip the check-in">
@@ -118,7 +118,10 @@ export default function DailyCheck({ onDismiss }: { onDismiss: () => void }) {
             key={score}
             className="chip chip-lg focus-ring"
             onClick={() => answer(score)}
-            style={{ minHeight: 44 }}
+            style={{
+              minHeight: 44,
+              background: score === 1 ? 'var(--blush)' : score === 2 ? 'var(--color-yellow-100)' : 'var(--color-emerald-200)',
+            }}
           >
             {q.options[score]}
           </button>

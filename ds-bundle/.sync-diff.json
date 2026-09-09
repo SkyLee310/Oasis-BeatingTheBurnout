@@ -1,0 +1,41 @@
+{
+  "styleChanged": false,
+  "anchorUsed": false,
+  "anchorReason": "not_provided",
+  "keyedBy": "renderHashes",
+  "unchanged": [],
+  "changed": [],
+  "added": [
+    "CircularGauge",
+    "Initials",
+    "LoadBar",
+    "OasisBlob",
+    "SleepBars",
+    "Sparkline",
+    "StatTile",
+    "Tag",
+    "WeekCalendar",
+    "ZoneChip"
+  ],
+  "removed": [],
+  "renderChurned": [],
+  "upload": {
+    "any": true,
+    "components": [
+      "CircularGauge",
+      "Initials",
+      "LoadBar",
+      "OasisBlob",
+      "SleepBars",
+      "Sparkline",
+      "StatTile",
+      "Tag",
+      "WeekCalendar",
+      "ZoneChip"
+    ],
+    "deletePaths": [],
+    "bundle": true,
+    "styling": true,
+    "aux": true
+  }
+}

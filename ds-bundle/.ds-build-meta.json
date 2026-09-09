@@ -1,0 +1,9 @@
+{
+  "namespace": "OasisDS",
+  "source": ".@1.0.0",
+  "shape": "package",
+  "provider": null,
+  "componentCount": 10,
+  "skippedStoryIds": [],
+  "runtimeFontPrefixes": []
+}

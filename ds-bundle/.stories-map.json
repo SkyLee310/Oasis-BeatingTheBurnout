@@ -1,0 +1,104 @@
+{
+  "global": "OasisDS",
+  "pkg": ".",
+  "pkgDir": "C:\\Users\\Sky Lee\\Desktop\\My AI Creative Hub\\Oasis",
+  "extraEntries": [],
+  "exported": [
+    "CircularGauge",
+    "Initials",
+    "LoadBar",
+    "OasisBlob",
+    "SW",
+    "SleepBars",
+    "Sparkline",
+    "StatTile",
+    "Tag",
+    "WeekCalendar",
+    "ZoneChip"
+  ],
+  "storybookStatic": null,
+  "keyRecipe": 7,
+  "cfgSliceGlobal": "a139d95ad8ab0a8ba08b44a258c54602e36090304087f48fe923c61aa5a8ae08",
+  "components": [
+    {
+      "name": "CircularGauge",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "cfee4f2a96c43bf3",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "Initials",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "e0f8730e136ad03e",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "LoadBar",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "9616e34b3b148a79",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "OasisBlob",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "e71e8f064e8c776e",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "SleepBars",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "6900c94f05612e7d",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "Sparkline",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "1478f2e58e2a5a45",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "StatTile",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "c5c3be7c1b76dbf1",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "Tag",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "3284809bc1d4d79c",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "WeekCalendar",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "4a4bafc08845a278",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "ZoneChip",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "60491965a4d9029c",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    }
+  ]
+}

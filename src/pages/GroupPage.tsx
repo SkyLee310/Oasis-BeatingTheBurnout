@@ -1,16 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
-  AlertTriangle, Check, MessageCircle, Scale, Shield, UserPlus, Users,
+  AlertTriangle, Check, MessageSquare, Scale, Shield, UserPlus, Users,
 } from 'lucide-react'
 
 import { Initials, SW, Tag } from '../ds'
 import type { Share } from '../logic/group'
-import { balance } from '../logic/group'
+import { balance, proposeRebalance } from '../logic/group'
 import { longDate } from '../logic/dates'
 import { useDispatch, useOasis } from '../state/store'
 import type { Member } from '../state/types'
 import InviteSheet from '../features/group/InviteSheet'
-import WhatsAppMessageSheet from '../features/group/WhatsAppMessageSheet'
 
 // ─── Group ────────────────────────────────────────────────────────────────────
 // Group assignments go wrong in two specific ways: the split is lopsided and
@@ -36,7 +35,22 @@ export default function GroupPage() {
   const b = balance(project)
 
   const [inviting, setInviting] = useState<Member | 'all' | null>(null)
-  const [showWhatsApp, setShowWhatsApp] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    if (!copied) return
+    const id = setTimeout(() => setCopied(false), 2000)
+    return () => clearTimeout(id)
+  }, [copied])
+
+  const copyProposal = async () => {
+    try {
+      await navigator.clipboard.writeText(proposeRebalance(project))
+      setCopied(true)
+    } catch {
+      // Blocked in some embedded previews; the text is on screen either way.
+    }
+  }
 
   const you = b.shares.find(s => s.member.status === 'you')
 
@@ -70,7 +84,9 @@ export default function GroupPage() {
                 : `${b.overloaded.member.name} is carrying ${b.overloaded.pct}% of this project`}
             </span>
             <span className="t-micro" style={{ color: 'var(--ink)', lineHeight: 1.5 }}>
-              Fair share is {Math.round(100 / project.members.length)}% per member based on task effort.
+              An even split across {project.members.length} people is{' '}
+              {Math.round(100 / project.members.length)}% each. Weight counts effort,
+              not task count — a five-point build is not one slide deck.
             </span>
           </div>
         </div>
@@ -96,8 +112,10 @@ export default function GroupPage() {
           </div>
 
           <div className="flex gap-3 flex-wrap pt-1">
-            <button className="btn btn-primary focus-ring" onClick={() => setShowWhatsApp(true)}>
-              <MessageCircle size={16} strokeWidth={SW} /> WhatsApp group message
+            <button className="btn btn-primary focus-ring" onClick={copyProposal}>
+              {copied
+                ? <><Check size={16} strokeWidth={SW} /> Copied</>
+                : <><MessageSquare size={16} strokeWidth={SW} /> Propose a rebalance</>}
             </button>
             <button className="btn btn-secondary focus-ring" onClick={() => setInviting('all')}>
               <UserPlus size={16} strokeWidth={SW} /> Invite
@@ -106,7 +124,8 @@ export default function GroupPage() {
 
           <p className="t-micro flex items-start gap-2" style={{ color: 'var(--ink-muted)', lineHeight: 1.5 }}>
             <Shield size={14} strokeWidth={SW} className="shrink-0 mt-0.5" />
-            Teammates only see project tasks. Personal energy and sleep remain private.
+            Everyone here sees the project split. Nobody sees anyone's energy
+            score, sleep, or what they turned down — that stays on your phone.
           </p>
         </section>
 
@@ -199,13 +218,6 @@ export default function GroupPage() {
         </section>
       </div>
 
-      {showWhatsApp && (
-        <WhatsAppMessageSheet
-          project={project}
-          onClose={() => setShowWhatsApp(false)}
-        />
-      )}
-
       {inviting && (
         <InviteSheet
           project={project}
@@ -225,10 +237,7 @@ function ShareRow({ share, onInvite }: { share: Share; onInvite: () => void }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-3">
-        <Initials
-          size={32}
-          initials={member.status === 'you' ? undefined : member.name.slice(0, 2).toUpperCase()}
-        />
+        <Initials size={32} initials={member.name.slice(0, 2).toUpperCase()} />
 
         <div className="flex flex-col gap-0.5 flex-1 min-w-0">
           <span className="t-label text-ink">{member.name}</span>

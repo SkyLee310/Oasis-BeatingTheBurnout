@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { ThemeProvider } from '@figma/astraui'
 import {
   Calendar, HelpCircle, Home, Mic, Shield, Users,
 } from 'lucide-react'
@@ -10,7 +9,7 @@ import {
 // navigation that switches between them.
 import { Initials, OasisBlob, SW } from './ds'
 
-import { OasisProvider, useEnergy } from './state/store'
+import { useEnergy } from './state/store'
 
 import DashboardPage from './pages/DashboardPage'
 import SmartBandPage from './pages/BandPage'
@@ -72,7 +71,17 @@ function SideRail({ page, onPage }: { page: Page; onPage: (p: Page) => void }) {
       style={{ width: 78, background: 'var(--surface)', borderRight: '2px solid var(--ink)' }}
     >
       <div className="flex flex-col items-center gap-3">
-        <OasisBlob zone="green" size={40} float={false} />
+        <OasisBlob
+          zone="green" size={40} float={false}
+          fillColor="var(--color-amber-200)"
+          strokeColor="rgba(0, 0, 0, 0.55)"
+          strokeLinecap="butt"
+          eyeHighlightFill="var(--color-amber-200)"
+          mouthFill="var(--color-amber-200)"
+          mouthStroke="rgba(0, 0, 0, 0.55)"
+          mouthLinecap="butt"
+          shadow={false}
+        />
 
         <div className="flex flex-col gap-2 mt-2">
           {NAV_ITEMS.map(it => {
@@ -112,7 +121,7 @@ function SideRail({ page, onPage }: { page: Page; onPage: (p: Page) => void }) {
         >
           <HelpCircle size={18} strokeWidth={SW} />
         </button>
-        <Initials size={40} />
+        <Initials size={40} bg="rgba(254, 243, 198, 0.3)" />
       </div>
     </aside>
   )
@@ -200,13 +209,7 @@ function MobileNav({
 
 // ─── App root ─────────────────────────────────────────────────────────────────
 export default function App() {
-  return (
-    <OasisProvider>
-      <ThemeProvider>
-        <AppShell />
-      </ThemeProvider>
-    </OasisProvider>
-  )
+  return <AppShell />
 }
 
 function AppShell() {

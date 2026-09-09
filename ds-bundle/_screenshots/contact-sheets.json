@@ -1,0 +1,17 @@
+[
+  {
+    "sheet": 1,
+    "components": [
+      "CircularGauge",
+      "Initials",
+      "LoadBar",
+      "OasisBlob",
+      "SleepBars",
+      "Sparkline",
+      "StatTile",
+      "Tag",
+      "WeekCalendar",
+      "ZoneChip"
+    ]
+  }
+]
