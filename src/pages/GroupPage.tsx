@@ -4,11 +4,13 @@ import {
 } from 'lucide-react'
 
 import { Initials, SW, Tag } from '../ds'
+import type { ZoneKey } from '../ds'
 import type { Share } from '../logic/group'
-import { balance } from '../logic/group'
+import { balance, capacityOf } from '../logic/group'
 import { longDate } from '../logic/dates'
 import { useDispatch, useOasis } from '../state/store'
 import type { Member } from '../state/types'
+import CapacityChip from '../features/group/CapacityChip'
 import InviteSheet from '../features/group/InviteSheet'
 import WhatsAppMessageSheet from '../features/group/WhatsAppMessageSheet'
 
@@ -91,7 +93,12 @@ export default function GroupPage() {
 
           <div className="flex flex-col gap-4">
             {b.shares.map(s => (
-              <ShareRow key={s.member.id} share={s} onInvite={() => setInviting(s.member)} />
+              <ShareRow
+                key={s.member.id}
+                share={s}
+                capacity={capacityOf(project, s.member.id)}
+                onInvite={() => setInviting(s.member)}
+              />
             ))}
           </div>
 
@@ -106,7 +113,8 @@ export default function GroupPage() {
 
           <p className="t-micro flex items-start gap-2" style={{ color: 'var(--ink-muted)', lineHeight: 1.5 }}>
             <Shield size={14} strokeWidth={SW} className="shrink-0 mt-0.5" />
-            Teammates only see project tasks. Personal energy and sleep remain private.
+            Your teammates see the project split and whether you have room. They never
+            see your score.
           </p>
         </section>
 
@@ -217,8 +225,18 @@ export default function GroupPage() {
   )
 }
 
-/** One member's bar. The percentage and the label both state it — never colour alone. */
-function ShareRow({ share, onInvite }: { share: Share; onInvite: () => void }) {
+/**
+ * One member's bar. Two things are said about every person here and both come
+ * from the shared project: their share of the split, as a percentage, and their
+ * capacity, as a word. Nothing on this row is derived from anybody's energy
+ * score, sleep or check-in — which is what makes the promise under the list
+ * literally true rather than a claim.
+ */
+function ShareRow({ share, capacity, onInvite }: {
+  share: Share
+  capacity: ZoneKey
+  onInvite: () => void
+}) {
   const { member, weight, done, pct, over } = share
   const progress = weight > 0 ? Math.round((done / weight) * 100) : 0
 
@@ -230,8 +248,11 @@ function ShareRow({ share, onInvite }: { share: Share; onInvite: () => void }) {
           initials={member.status === 'you' ? undefined : member.name.slice(0, 2).toUpperCase()}
         />
 
-        <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-          <span className="t-label text-ink">{member.name}</span>
+        <div className="flex flex-col gap-1 flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="t-label text-ink">{member.name}</span>
+            <CapacityChip zone={capacity} />
+          </div>
           <span className="t-micro" style={{ color: 'var(--ink-muted)' }}>
             {STATUS_COPY[member.status]}
             {member.status !== 'none' && ` · ${weight} points · ${progress}% done`}

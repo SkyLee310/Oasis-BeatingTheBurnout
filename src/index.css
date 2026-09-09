@@ -537,3 +537,56 @@ button:focus-visible,
    src/features/shell/useAmbientTemp.ts, which re-resolves the mix each frame
    and works. The hook honours prefers-reduced-motion itself, so the colour
    still changes there; it just arrives in one step. */
+
+/* ═══ Modal ground ══════════════════════════════════════════════════════════
+   Every surface that *covers* the page rather than sitting in it shares one
+   ground. Fixed ink, not var(--ink): a scrim that inverts in dark mode stops
+   being a scrim. The colour lives here rather than inline in five components,
+   which is the only way it stays one colour. */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(20, 20, 15, 0.45);
+  backdrop-filter: blur(3px);
+}
+@media (min-width: 640px) { .scrim { padding: 24px; } }
+
+/* ═══ Row button ════════════════════════════════════════════════════════════
+   A whole list row that is one target — an incoming ask, a task, a project.
+   The card language at list scale: stroked surface, hard shadow on hover, and
+   it presses in rather than lighting up. Always a <button>, never a div with a
+   click handler: a row you can tap is a control and has to announce itself. */
+
+.row-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  text-align: left;
+  padding: 13px 15px;
+  background: var(--surface-2);
+  border: 2px solid var(--ink);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: transform 0.16s var(--ease), box-shadow 0.16s var(--ease),
+              background-color 0.16s var(--ease);
+}
+.row-btn:hover  { background: var(--surface); transform: translate(-1px, -1px); box-shadow: var(--shadow-hard-sm); }
+.row-btn:active { transform: translate(1px, 1px); box-shadow: none; }
+
+/* The unread mark. Ink, never a saturated hue — a waiting request is not a
+   health zone, and the count beside it says so in words either way. */
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  flex-shrink: 0;
+}

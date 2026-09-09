@@ -1,3 +1,4 @@
+import type { ZoneKey } from '../ds'
 import type { GroupProject, Member, ProjectTask } from '../state/types'
 
 // ─── Group fairness ───────────────────────────────────────────────────────────
@@ -70,6 +71,41 @@ export function balance(project: GroupProject): Balance {
   )
 
   return { shares, assigned, fair, unassigned, overloaded: heaviest }
+}
+
+// ─── Capacity, as a word ──────────────────────────────────────────────────────
+// The one rule that makes the privacy claim true rather than aspirational: a
+// teammate's capacity is derived from the *shared project object* and nothing
+// else. Not their energy score, not their sleep, not their check-in — none of
+// which anybody but them can see. Weight they hold, against an even split of
+// the whole project.
+//
+// The denominator is the project's total weight, unclaimed tasks included. That
+// is deliberate: an even share is a share of the work that exists, not of the
+// work people have already agreed to. It means somebody sitting next to three
+// unclaimed tasks still reads as having room to take one, which is exactly the
+// nudge the group needs.
+
+/** Carrying this much of an even share, or more, is at capacity. */
+const AT_CAPACITY_AT = 1.5
+/** Anything at or above an even share is loaded. */
+const LOADED_AT = 1
+
+/** The word a teammate sees. Never a number, in any surface, ever. */
+export const CAPACITY_LABEL: Record<ZoneKey, string> = {
+  green: 'Has room',
+  amber: 'Loaded',
+  red: 'At capacity',
+}
+
+export function capacityOf(project: GroupProject, memberId: string): ZoneKey {
+  const { members, tasks } = project
+  const total = weightOf(tasks)
+  const fair = members.length > 0 ? total / members.length : 0
+  if (fair <= 0) return 'green'
+
+  const share = weightOf(tasks.filter(t => t.assignee === memberId)) / fair
+  return share >= AT_CAPACITY_AT ? 'red' : share >= LOADED_AT ? 'amber' : 'green'
 }
 
 /** The lightest-loaded member who could take work — never the person already over. */
