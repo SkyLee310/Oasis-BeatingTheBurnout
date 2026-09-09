@@ -23,6 +23,7 @@ export const WEEK_START = '2026-09-07'
 export const TODAY = addDays(WEEK_START, 2)   // Wednesday 9 Sep 2026
 const FRIDAY = addDays(WEEK_START, 4)
 const SATURDAY = addDays(WEEK_START, 5)
+const SUNDAY = addDays(WEEK_START, 6)
 
 // ─── The week ─────────────────────────────────────────────────────────────────
 
@@ -131,6 +132,37 @@ const SHIFT_REQUEST: IncomingRequest = {
   status: 'pending',
 }
 
+/**
+ * The ask that actually causes the burnout in the problem statement: a teammate
+ * handing over a piece of the shared project. It names an unclaimed task from
+ * PROJECT by title, which is what lets accepting it move the Group split as
+ * well as the schedule — the whole point of measuring load and then spending it
+ * on the group assignment.
+ *
+ * Priced against the near-capacity week it lands in, this one negotiates rather
+ * than declines: four hours on a clear Sunday with nothing to collide with.
+ * Two seeded requests, one affordable and one not, so the inbox shows both
+ * verdicts without anyone having to paste a chat on camera.
+ */
+const TASK_REQUEST: IncomingRequest = {
+  id: 'req-report',
+  raw: [
+    'Aisyah: hey, are you able to take the report write-up?',
+    'Aisyah: I still have the slides to finish and I am not going to get to it',
+    'Aisyah: due Sunday, no rush before that',
+  ].join('\n'),
+  parsed: {
+    title: 'Report write-up',
+    asker: 'Aisyah',
+    kind: 'task',
+    hoursPerWeek: 4,
+    deadline: SUNDAY,
+    urgent: false,
+  },
+  receivedAt: TODAY,
+  status: 'pending',
+}
+
 // ─── Scenarios ────────────────────────────────────────────────────────────────
 
 function base(scenario: ScenarioKey): OasisState {
@@ -139,7 +171,7 @@ function base(scenario: ScenarioKey): OasisState {
     scenario,
     commitments: weekFromCalendar(),
     recovery: { ...RECOVERY, sleepHours: [...RECOVERY.sleepHours] },
-    requests: [SHIFT_REQUEST],
+    requests: [SHIFT_REQUEST, TASK_REQUEST],
     project: {
       ...PROJECT,
       members: PROJECT.members.map(m => ({ ...m })),
@@ -195,7 +227,7 @@ export function seedFor(scenario: ScenarioKey): OasisState {
             origin: 'chat', reason: 'Accepted from a chat on Wed 9 Sep.',
           },
         ],
-        requests: [{ ...SHIFT_REQUEST, status: 'accepted' }],
+        requests: [{ ...SHIFT_REQUEST, status: 'accepted' }, TASK_REQUEST],
         recovery: { ...s.recovery, sleepHours: [5.1, 5.8, 4.9, 4.2, 4.4, 3.9, 4.6], restingHr: 88 },
       }
 

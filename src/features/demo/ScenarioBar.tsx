@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Layers, RotateCcw, X } from 'lucide-react'
+import { Inbox, Layers, RotateCcw, X } from 'lucide-react'
 
 import { SW } from '../../ds'
 import { useDispatch, useEnergy, useOasis } from '../../state/store'
-import type { ScenarioKey } from '../../state/types'
+import type { IncomingRequest, OasisState, ScenarioKey } from '../../state/types'
 
 // ─── Demo switcher ────────────────────────────────────────────────────────────
 // Everything downstream of the store is derived, so restaging the whole app is
@@ -19,6 +19,36 @@ const SCENARIOS: { key: ScenarioKey; label: string; note: string }[] = [
   { key: 'nearCapacity', label: 'Near capacity', note: 'The week is filling' },
   { key: 'redZone', label: 'Red zone', note: 'Past what fits' },
 ]
+
+/**
+ * A request the demo can drop into whatever week is on screen. The engine has
+ * three verdicts and the seed only ever produces two of them — in a full week
+ * every ask is expensive, so `accept` is unreachable there by construction. This
+ * button is how the third one gets demonstrated: inject the same modest ask into
+ * All clear and Oasis says yes to it, on the same formula, on camera.
+ *
+ * The id is derived from the request count rather than generated, because the
+ * reducer is pure — the demo has to replay identically on the second take.
+ */
+function injectedRequest(s: OasisState): IncomingRequest {
+  return {
+    id: `demo-${s.requests.length}`,
+    raw: [
+      'Wei Jun: hey, could you take the demo video for the project?',
+      'Wei Jun: whenever suits you before the deadline',
+    ].join('\n'),
+    parsed: {
+      title: 'Demo video',
+      asker: 'Wei Jun',
+      kind: 'task',
+      hoursPerWeek: 3,
+      deadline: null,
+      urgent: false,
+    },
+    receivedAt: s.today,
+    status: 'pending',
+  }
+}
 
 /** ?demo=1 — read once, at mount, like every other mode switch in the app. */
 export function demoMode(): boolean {
@@ -103,6 +133,13 @@ export default function ScenarioBar({ startOpen = false }: { startOpen?: boolean
         ))}
         <button
           className="chip focus-ring"
+          onClick={() => dispatch({ type: 'addRequest', request: injectedRequest(state) })}
+          style={{ minHeight: 44 }}
+        >
+          <Inbox size={13} strokeWidth={SW} /> Send a request
+        </button>
+        <button
+          className="chip focus-ring"
           onClick={() => dispatch({ type: 'reset' })}
           style={{ minHeight: 44 }}
         >
@@ -111,8 +148,9 @@ export default function ScenarioBar({ startOpen = false }: { startOpen?: boolean
       </div>
 
       <span className="t-micro" style={{ color: 'var(--ink-2)', lineHeight: 1.5 }} aria-live="polite">
-        {SCENARIOS.find(s => s.key === state.scenario)?.note}. Every screen, the
-        widget included, restages from this one choice.
+        {SCENARIOS.find(s => s.key === state.scenario)?.note}. Every screen restages
+        from this one choice. Send a request to drop an ask into the inbox and watch
+        the same formula price it against this week.
       </span>
     </div>
   )

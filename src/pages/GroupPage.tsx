@@ -12,6 +12,7 @@ import { useDispatch, useOasis } from '../state/store'
 import type { Member } from '../state/types'
 import CapacityChip from '../features/group/CapacityChip'
 import InviteSheet from '../features/group/InviteSheet'
+import RequestInbox from '../features/requests/RequestInbox'
 import WhatsAppMessageSheet from '../features/group/WhatsAppMessageSheet'
 
 // ─── Group ────────────────────────────────────────────────────────────────────
@@ -77,6 +78,11 @@ export default function GroupPage() {
           </div>
         </div>
       )}
+
+      {/* ── What a teammate has asked you for ─────────────────────────────
+          On this page rather than only on Home, because the ask and the split
+          it would change are the same conversation. */}
+      <RequestInbox />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-6 items-start">
         {/* ── Who is carrying what ────────────────────────────────────────── */}

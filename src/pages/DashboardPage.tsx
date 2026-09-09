@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import {
-  AlertTriangle, Calendar, ChevronRight, Clock, Heart, HelpCircle,
-  MessageSquare, Moon, Shield, TrendingUp, Zap,
+  ChevronRight, Heart, HelpCircle, MessageSquare, Moon, Shield, Zap,
 } from 'lucide-react'
 
 import {
@@ -9,11 +8,11 @@ import {
   SleepBars, Sparkline, Tag, ZoneChip, ZONE_LABEL,
 } from '../ds'
 import { useEnergy, useOasis } from '../state/store'
-import { commitmentCost, projectEnergy, zoneFor } from '../logic/energy'
-import { dateOf, dayOf, longDate, shortDate } from '../logic/dates'
-import { lowerFirst } from '../logic/text'
+import { commitmentCost } from '../logic/energy'
+import { dateOf, dayOf, longDate } from '../logic/dates'
 import DailyCheck from '../features/checkin/DailyCheck'
 import DecisionSheet from '../features/decision/DecisionSheet'
+import RequestInbox from '../features/requests/RequestInbox'
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -26,10 +25,8 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
   onGoLoad: () => void; onGoRecovery: () => void; onGoBand: () => void
   onGoHow: () => void
 }) {
-  const [showCommit, setShowCommit] = useState(false)
-  // The other way in. Same sheet, different phase: with no request passed it
-  // opens at the intake, which is the only route to it — the rail below only
-  // exists when someone has already asked.
+  // The fallback way in, for an ask that arrived somewhere Oasis cannot see.
+  // The inbox above is the main route; this one takes a pasted chat.
   const [showIntake, setShowIntake] = useState(false)
   // Dismissing is local, not stored: skipping today should not skip tomorrow.
   const [checkHidden, setCheckHidden] = useState(false)
@@ -68,23 +65,6 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
       }
       return parseTime(a.time) - parseTime(b.time)
     })
-
-  // The open ask. Priced through projectEnergy so the figure quoted here is
-  // exactly the one the dashboard will show if it is accepted — one formula,
-  // nothing to drift.
-  const pending = state.requests.find(r => r.status === 'pending')
-  const pendingAfter = pending
-    ? projectEnergy(state, {
-        id: `candidate-${pending.id}`,
-        title: pending.parsed.title,
-        kind: 'commitment',
-        date: pending.parsed.deadline ?? state.today,
-        time: 'all day',
-        hours: pending.parsed.hoursPerWeek,
-        movable: false,
-        origin: 'chat',
-      })
-    : energy
 
   return (
     <div className="flex flex-col gap-8 sm:gap-10 max-w-[1140px] mx-auto pb-4">
@@ -145,6 +125,11 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
           </div>
         </div>
       </header>
+
+      {/* ── What is waiting on you ──────────────────────────────────────────
+          Immediately under the score, because the score is the thing these get
+          priced against. Nothing between them to read first. */}
+      <RequestInbox />
 
       {/* ── Consolidated live biometrics dashboard ─────────────────────────── */}
       <section className="flex flex-col gap-3">
@@ -213,8 +198,8 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
         </div>
       </section>
 
-      {/* ── Today's schedule + decision rail ────────────────────────────────── */}
-      <section className={`grid grid-cols-1 gap-6 lg:gap-8 ${pending ? 'lg:grid-cols-[1.6fr_1fr]' : ''}`}>
+      {/* ── Today's schedule ────────────────────────────────────────────────── */}
+      <section className="flex flex-col gap-6">
         <div className="card card-pop p-6 flex flex-col gap-4">
           <div className="flex items-baseline justify-between gap-3 rule-b pb-3">
             <div className="flex items-center gap-2.5">
@@ -274,63 +259,6 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
             Open full schedule <ChevronRight size={15} strokeWidth={SW} />
           </button>
         </div>
-
-        {pending && (
-          <aside className="tile tile-butter card-pop self-start" style={{ padding: 22, gap: 14 }}>
-            <div className="flex items-start gap-3">
-              <span
-                className="flex items-center justify-center shrink-0"
-                style={{
-                  width: 40, height: 40, borderRadius: 999,
-                  background: 'var(--surface)', border: '2px solid var(--ink)',
-                }}
-              >
-                <AlertTriangle size={19} strokeWidth={SW} style={{ color: 'var(--ink)' }} />
-              </span>
-              <div className="flex flex-col">
-                <span className="t-eyebrow" style={{ color: 'var(--ink)' }}>
-                  Asked by {pending.parsed.asker}
-                </span>
-                <span className="t-sub text-ink">{pending.parsed.title}</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              {[
-                {
-                  label: `${pending.parsed.hoursPerWeek} hrs / week workload`,
-                  icon: <Clock size={15} strokeWidth={SW} />,
-                },
-                {
-                  label: pending.parsed.deadline
-                    ? `Lands ${shortDate(pending.parsed.deadline)}`
-                    : 'No deadline given',
-                  icon: <Calendar size={15} strokeWidth={SW} />,
-                },
-                {
-                  label: `Would leave you ${ZONE_LABEL[zoneFor(pendingAfter)]}`,
-                  icon: <AlertTriangle size={15} strokeWidth={SW} />,
-                },
-              ].map(r => (
-                <div key={r.label} className="flex items-center gap-2.5 t-micro" style={{ color: 'var(--ink)' }}>
-                  <span className="flex">{r.icon}</span>
-                  <span>{r.label}</span>
-                </div>
-              ))}
-            </div>
-
-            <p className="t-micro" style={{ color: 'var(--ink-2)', lineHeight: 1.55 }}>
-              Accepting this takes your energy from {energy} down to {pendingAfter}, in a week
-              already carrying {lowerFirst(top.detail)}.
-            </p>
-
-            <button className="btn btn-primary focus-ring w-full" onClick={() => setShowCommit(true)}>
-              <TrendingUp size={16} strokeWidth={SW} /> Run impact check
-            </button>
-
-            {showCommit && <DecisionSheet req={pending} onClose={() => setShowCommit(false)} />}
-          </aside>
-        )}
       </section>
 
       {/* ── Share a chat ────────────────────────────────────────────────── */}
@@ -351,10 +279,11 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
             <MessageSquare size={20} strokeWidth={SW} />
           </span>
           <span className="flex flex-col gap-0.5 flex-1 min-w-0">
-            <span className="t-sub text-ink">Just been asked to do something?</span>
+            <span className="t-sub text-ink">Asked somewhere else?</span>
             <span className="t-micro" style={{ color: 'var(--ink-2)', lineHeight: 1.5 }}>
-              Share the chat here and Oasis prices it against your week before you
-              answer — then writes the reply for you.
+              Requests from people on Oasis land in the inbox above. For an ask that
+              came in by WhatsApp or in person, paste it here and it gets priced the
+              same way.
             </span>
           </span>
           <ChevronRight
