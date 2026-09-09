@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertTriangle, ArrowUpRight, Calendar, Check, CheckCircle } from 'lucide-react'
+import { AlertTriangle, ArrowUpRight, Calendar, Check, CheckCircle, HelpCircle } from 'lucide-react'
 
 import {
   KIND_STYLE, LoadBar, OasisBlob, SW, Tag, WeekCalendar,
@@ -26,7 +26,7 @@ const DEFER_DAYS = 2
 const taskZone = (cost: number): ZoneKey =>
   cost >= 20 ? 'red' : cost >= 10 ? 'amber' : 'green'
 
-export default function LoadPage() {
+export default function LoadPage({ onGoHow }: { onGoHow: () => void }) {
   const state = useOasis()
   const dispatch = useDispatch()
   const { energy, factors } = useEnergy()
@@ -170,6 +170,17 @@ export default function LoadPage() {
             </div>
             <p className="t-body max-w-[56ch]" style={{ color: 'var(--ink-2)' }}>{lead.detail}</p>
           </div>
+
+          {/* The same way out as the one under the dashboard gauge. A percentage
+              a student cannot interrogate is a percentage they will not act on. */}
+          <button
+            className="chip focus-ring self-start"
+            onClick={onGoHow}
+            style={{ minHeight: 44 }}
+            aria-label="How these load figures are worked out"
+          >
+            <HelpCircle size={14} strokeWidth={SW} /> How is this worked out?
+          </button>
 
           <div className="card card-pop p-6 flex flex-col gap-5">
             {categories.slice(1).map((c, i) => (

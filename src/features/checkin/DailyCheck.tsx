@@ -43,8 +43,26 @@ export default function DailyCheck({ onDismiss }: { onDismiss: () => void }) {
 
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<Partial<Record<'slept' | 'mood' | 'load', Score>>>({})
-  // Captured once, before anything is dispatched, so the "from → to" is real.
-  const [before] = useState(() => energyFor(state))
+  // Captured before anything is dispatched, so the "from → to" is real.
+  const [before, setBefore] = useState(() => energyFor(state))
+  // Set when this card is the one that wrote today's check-in. Without it the
+  // card would be testing state.checkIn on every render, and that test goes true
+  // the instant the third answer dispatches — taking the card off screen at the
+  // one moment it has something to say.
+  const [mine, setMine] = useState(false)
+
+  const answeredToday = state.checkIn?.date === state.today
+
+  // The seed can be swapped underneath this card: the demo switcher and Reset
+  // both hand back a state with checkIn: null. A finished card has to start over
+  // when that happens. Reconciled here rather than with a key on the caller, so
+  // the whole rule sits in one place — no check-in for today, ask the question.
+  if (mine && !answeredToday) {
+    setMine(false)
+    setStep(0)
+    setAnswers({})
+    setBefore(energyFor(state))
+  }
 
   const done = step >= QUESTIONS.length
   const q = QUESTIONS[Math.min(step, QUESTIONS.length - 1)]
@@ -65,8 +83,14 @@ export default function DailyCheck({ onDismiss }: { onDismiss: () => void }) {
       load: next.load ?? 2,
     }
     dispatch({ type: 'checkIn', checkIn })
+    setMine(true)
     setStep(step + 1)
   }
+
+  // Nothing to ask — today was answered before this card was on screen. The
+  // dashboard mounts it unconditionally so it survives its own dispatch;
+  // deciding there is no question today is this component's job, not its caller's.
+  if (answeredToday && !mine) return null
 
   if (done) {
     const after = energyFor(state)

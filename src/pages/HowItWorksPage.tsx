@@ -1,8 +1,57 @@
-import { ArrowLeft, EyeOff, Shield, Sigma } from 'lucide-react'
+import { ArrowLeft, EyeOff, Inbox, Shield, Sigma } from 'lucide-react'
 
 import { LoadBar, SW, Tag, ZONE_LABEL, ZoneChip } from '../ds'
+import { DECISION_PENALTIES, DECISION_THRESHOLDS, toneLabel } from '../logic/decision'
 import { ZONE_AMBER_AT, ZONE_GREEN_AT, energyFactors } from '../logic/energy'
 import { useEnergy, useOasis } from '../state/store'
+
+/**
+ * The four things that make the same hours land harder, in the order
+ * analyzeRequest() tests them. The wording is deliberately close to the
+ * sentences the verdict itself prints, so a student who read one recognises
+ * the other — and the point costs are read from the engine, never retyped.
+ */
+const PENALTIES: { cost: number; label: string; detail: string }[] = [
+  {
+    cost: DECISION_PENALTIES.collision,
+    label: 'It lands on a day that is already spoken for',
+    detail: 'Counted once per clash, and a deadline the day after counts too — you are working the night before either way.',
+  },
+  {
+    cost: DECISION_PENALTIES.urgency,
+    label: 'They want an answer immediately',
+    detail: 'An ask you cannot plan around costs more than the same ask with a week of warning.',
+  },
+  {
+    cost: DECISION_PENALTIES.sleepDebt,
+    label: 'You are under six hours of sleep a night',
+    detail: 'A week already short on sleep has nothing left to absorb an extra commitment with.',
+  },
+  {
+    cost: DECISION_PENALTIES.strain,
+    label: 'Your resting heart rate is well over your own baseline',
+    detail: 'Measured against your baseline, not a population average — the bar is you, last month.',
+  },
+]
+
+/** Below the first figure Oasis says no; below the second, "not like this". */
+const LADDER: { tone: 'decline' | 'negotiate' | 'accept'; range: string; meaning: string }[] = [
+  {
+    tone: 'decline',
+    range: `below ${DECISION_THRESHOLDS.decline}`,
+    meaning: 'Every version of yes costs more than the week can give back. Oasis writes the no; you send it.',
+  },
+  {
+    tone: 'negotiate',
+    range: `${DECISION_THRESHOLDS.decline} to ${DECISION_THRESHOLDS.negotiate - 1}`,
+    meaning: 'Half of it fits even though all of it does not, so the reply offers half rather than refusing.',
+  },
+  {
+    tone: 'accept',
+    range: `${DECISION_THRESHOLDS.negotiate} and above`,
+    meaning: 'There is room. Saying yes here costs something you can afford to spend.',
+  },
+]
 
 // ─── Where the numbers come from ──────────────────────────────────────────────
 // A wellness app that shows a score without showing its working is asking to be
@@ -97,6 +146,83 @@ export default function HowItWorksPage({ onBack }: { onBack: () => void }) {
         </div>
       </section>
 
+      {/* ── How an incoming request gets priced ───────────────────────────
+          The score above is only half the product. This is the other half:
+          what happens to it the moment somebody asks you for something. */}
+      <section className="card p-5 flex flex-col gap-5">
+        <div className="flex items-baseline justify-between gap-3 rule-b pb-3">
+          <span className="t-sub text-ink">
+            <Inbox size={17} strokeWidth={SW} className="inline mr-2" />
+            How a request gets priced
+          </span>
+        </div>
+
+        <p className="t-body max-w-[58ch]" style={{ color: 'var(--ink-2)' }}>
+          When somebody asks you for something, Oasis does not re-score your week
+          from scratch. It works out the energy you would have left if you said
+          yes, then takes points off for the things that make those same hours
+          land harder. What is left is the <strong style={{ color: 'var(--ink)' }}>margin</strong>.
+        </p>
+
+        <div className="flex flex-col rule-divide">
+          {PENALTIES.map(p => (
+            <div key={p.label} className="flex items-start gap-4 py-3">
+              <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                <span className="t-label text-ink">{p.label}</span>
+                <span className="t-micro" style={{ color: 'var(--ink-2)', lineHeight: 1.5 }}>
+                  {p.detail}
+                </span>
+              </div>
+              <span
+                className="t-stat shrink-0"
+                style={{ fontSize: 15, color: 'var(--ink)', whiteSpace: 'nowrap' }}
+              >
+                −{p.cost} pts
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div
+          className="flex flex-col gap-1 p-4"
+          style={{ background: 'var(--surface-2)', border: '2px solid var(--ink)', borderRadius: 'var(--r-md)' }}
+        >
+          <span className="t-label text-ink">
+            margin = your energy after saying yes − the penalties above
+          </span>
+          <span className="t-micro" style={{ color: 'var(--ink-2)', lineHeight: 1.5 }}>
+            Read against the margin rather than the raw score, so the same four
+            hours are judged more harshly on a day that already has something on
+            it than on a clear one.
+          </span>
+        </div>
+
+        {/* Neutral chips on purpose. A verdict is not a health zone, and in this
+            app a saturated colour means a health zone and nothing else — tinting
+            "Decline" red would quietly claim that declining is a bad state. */}
+        <div className="flex flex-col gap-3">
+          {LADDER.map(l => (
+            <div key={l.tone} className="flex items-start gap-3">
+              <span className="shrink-0" style={{ minWidth: 96 }}>
+                <Tag>{toneLabel(l.tone)}</Tag>
+              </span>
+              <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                <span className="t-label text-ink">Margin {l.range}</span>
+                <span className="t-micro" style={{ color: 'var(--ink-2)', lineHeight: 1.5 }}>
+                  {l.meaning}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <span className="t-micro" style={{ color: 'var(--ink-muted)', lineHeight: 1.5 }}>
+          There is no language model in this. It is the arithmetic on this page,
+          run once — which is why the same request always gets the same verdict,
+          and why every verdict can show you the lines it came from.
+        </span>
+      </section>
+
       {/* ── Measured vs estimated ─────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <section className="card p-5 flex flex-col gap-3">
@@ -105,8 +231,8 @@ export default function HowItWorksPage({ onBack }: { onBack: () => void }) {
             {[
               'Sleep hours and resting heart rate, from your band',
               'Classes, deadlines and shifts you or your timetable put in',
-              'Task weights on the group project',
-              'The minutes you told us your commute takes',
+              'Task weights on the group project, and who each one is assigned to',
+              'Every request you accepted or declined, and what you accepted it at',
             ].map(item => (
               <li key={item} className="t-micro flex items-start gap-2" style={{ color: 'var(--ink-2)', lineHeight: 1.5 }}>
                 <span style={{ color: 'var(--ink)' }}>·</span>{item}
@@ -119,18 +245,23 @@ export default function HowItWorksPage({ onBack }: { onBack: () => void }) {
           <span className="t-sub text-ink">Estimated</span>
           <ul className="flex flex-col gap-2">
             {[
-              'Hours of effort per commitment, until you correct them',
-              'How much a request will actually take, read from the chat',
-              'Which days you travel — inferred from where your classes are',
+              'Hours of effort per commitment, from the kind of thing it is',
+              'How much a request will actually take, read from the words in the chat',
+              'Your time on the road — which days you travel comes from where your classes are, and the trip length from a figure held in your profile',
             ].map(item => (
               <li key={item} className="t-micro flex items-start gap-2" style={{ color: 'var(--ink-2)', lineHeight: 1.5 }}>
                 <span style={{ color: 'var(--ink)' }}>·</span>{item}
               </li>
             ))}
           </ul>
+          {/* Said plainly rather than aspirationally. An estimate the prototype
+              cannot yet be corrected on is still an estimate, and this is the
+              one page in the app that cannot afford to overstate itself. */}
           <span className="t-micro" style={{ color: 'var(--ink-muted)', lineHeight: 1.5 }}>
-            Estimates are editable everywhere they appear. Oasis would rather be
-            corrected than believed.
+            Not all of these can be corrected yet. The chat you paste in is
+            editable, and any request can be accepted at half its hours instead
+            of all of them — but editing a stored estimate directly is on the
+            list, not in this build.
           </span>
         </section>
       </div>

@@ -335,6 +335,19 @@ export const DECISION_THRESHOLDS = {
   negotiate: NEGOTIATE_BELOW,
 }
 
+/**
+ * The penalties, for the same reason. How-it-works prints these four figures on
+ * screen; if they were retyped there instead of read from here, the page would
+ * go quietly wrong the first time one of them was tuned — and a page that
+ * explains the maths incorrectly is worse than no page at all.
+ */
+export const DECISION_PENALTIES = {
+  collision: COLLISION_COST,
+  urgency: URGENCY_COST,
+  sleepDebt: SLEEP_DEBT_COST,
+  strain: STRAIN_COST,
+}
+
 /** Split in two so the display face can set the second line in the accent. */
 const DECISION_HEADLINE: Record<Decision, [string, string]> = {
   decline: ['Say no', 'to this one.'],

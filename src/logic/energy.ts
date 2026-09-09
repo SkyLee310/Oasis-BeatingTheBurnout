@@ -1,6 +1,6 @@
 // ─── Energy ───────────────────────────────────────────────────────────────────
 // The single answer to "what is the number". Everything — the dashboard gauge,
-// the verdict card, the widget, the ambient colour temperature — comes through
+// the verdict card, the request inbox, the ambient colour temperature — comes through
 // here, so a chat declined on one screen moves every other screen at once.
 //
 // Deliberately a transparent weighted sum, not a model: every input is a number
@@ -55,8 +55,9 @@ const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n
 const clamp01 = (n: number) => clamp(n, 0, 1)
 
 // ─── Derived measures ─────────────────────────────────────────────────────────
-// Exported because the commute tab, the load categories and How-it-works all
-// need to show the raw figure next to the score it produced.
+// Exported because the load categories and How-it-works both need to show the
+// raw figure next to the score it produced. Commute keeps its 10 points in the
+// sum and lost its tab in the cut: measured, still counted, no longer a screen.
 
 /** Total estimated effort on the books this week. Rest blocks are 0h. */
 export const weekHours = (s: OasisState) =>

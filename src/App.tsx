@@ -218,7 +218,7 @@ function AppShell() {
     switch (page) {
       case 'dashboard': return <DashboardPage onGoLoad={() => setPage('load')} onGoRecovery={() => setPage('recovery')} onGoBand={() => setPage('band')} onGoHow={() => setPage('how')} />
       case 'band':      return <SmartBandPage onBack={() => setPage('dashboard')} />
-      case 'load':      return <LoadPage />
+      case 'load':      return <LoadPage onGoHow={() => setPage('how')} />
       case 'recovery':  return <RecoveryPage />
       case 'group':     return <GroupPage />
       case 'how':       return <HowItWorksPage onBack={() => setPage('dashboard')} />

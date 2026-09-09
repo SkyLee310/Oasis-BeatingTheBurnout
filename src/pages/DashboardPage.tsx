@@ -8,6 +8,7 @@ import {
   SleepBars, Sparkline, Tag, ZoneChip, ZONE_LABEL,
 } from '../ds'
 import { useEnergy, useOasis } from '../state/store'
+import type { ScenarioKey } from '../state/types'
 import { commitmentCost } from '../logic/energy'
 import { dateOf, dayOf, longDate } from '../logic/dates'
 import DailyCheck from '../features/checkin/DailyCheck'
@@ -29,7 +30,10 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
   // The inbox above is the main route; this one takes a pasted chat.
   const [showIntake, setShowIntake] = useState(false)
   // Dismissing is local, not stored: skipping today should not skip tomorrow.
-  const [checkHidden, setCheckHidden] = useState(false)
+  // Held as the scenario it was dismissed under rather than a bare flag, so the
+  // demo switcher restages the check along with every other screen: a card
+  // dismissed in one week should not stay gone in the next one.
+  const [checkHiddenFor, setCheckHiddenFor] = useState<ScenarioKey | null>(null)
 
   const state = useOasis()
   const { energy, zone, factors } = useEnergy()
@@ -70,8 +74,13 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
     <div className="flex flex-col gap-8 sm:gap-10 max-w-[1140px] mx-auto pb-4">
 
       {/* ── Daily check ─────────────────────────────────────────────────────── */}
-      {!checkHidden && state.checkIn?.date !== state.today && (
-        <DailyCheck onDismiss={() => setCheckHidden(true)} />
+      {/* Deliberately not gated on state.checkIn. The third answer writes it, so
+          testing it here unmounted the card at the exact moment it had something
+          to say, and the "your energy went from x to y" line never rendered.
+          DailyCheck decides for itself whether today still has a question in it,
+          and renders nothing when it does not. */}
+      {checkHiddenFor !== state.scenario && (
+        <DailyCheck onDismiss={() => setCheckHiddenFor(state.scenario)} />
       )}
 
       {/* ── Hero ────────────────────────────────────────────────────────────── */}
