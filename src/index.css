@@ -590,3 +590,25 @@ button:focus-visible,
   background: var(--ink);
   flex-shrink: 0;
 }
+
+/* ═══ Touch targets ═════════════════════════════════════════════════════════
+   A few controls are deliberately small: the close cross in a sheet header, a
+   chip that sits inline beside a name. Growing the pill itself to 44px would
+   push a header apart and turn an inline chip into a button, so the *target*
+   grows and the drawing does not — a centred, transparent pseudo-element takes
+   the tap on the control's behalf.
+
+   Use it only where the control is the one target in its neighbourhood. Two of
+   these within 10px of each other overlap, and an overlapping target is a worse
+   defect than a small one: it hands the tap to the wrong control. Replaced
+   elements (select, input) cannot carry ::after — give those a real min-height. */
+.hit-44 { position: relative; }
+.hit-44::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+  transform: translate(-50%, -50%);
+}

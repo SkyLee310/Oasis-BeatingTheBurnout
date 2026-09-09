@@ -158,7 +158,7 @@ export default function GroupPage() {
                     onClick={() => dispatch({ type: 'toggleTaskDone', taskId: t.id })}
                     aria-pressed={t.done}
                     aria-label={`Mark ${t.title} ${t.done ? 'not done' : 'done'}`}
-                    className="focus-ring shrink-0 flex items-center justify-center"
+                    className="focus-ring hit-44 shrink-0 flex items-center justify-center"
                     style={{
                       width: 24, height: 24, borderRadius: 'var(--r-sm)',
                       border: '2px solid var(--ink)',
@@ -201,7 +201,7 @@ export default function GroupPage() {
                       border: '2px solid var(--ink)',
                       borderRadius: 'var(--r-sm)',
                       padding: '6px 8px',
-                      minHeight: 34,
+                      minHeight: 44,
                     }}
                   >
                     <option value="">Nobody</option>
@@ -270,7 +270,7 @@ function ShareRow({ share, capacity, onInvite, onOpenRecord }: {
             <CapacityChip zone={capacity} />
             {member.status === 'you' && (
               <button
-                className="chip focus-ring"
+                className="chip focus-ring hit-44"
                 onClick={onOpenRecord}
                 aria-label="Open your track record"
                 style={{ minHeight: 30 }}
@@ -286,7 +286,7 @@ function ShareRow({ share, capacity, onInvite, onOpenRecord }: {
         </div>
 
         {member.status === 'none' ? (
-          <button className="chip focus-ring shrink-0" onClick={onInvite} style={{ minHeight: 34 }}>
+          <button className="chip focus-ring hit-44 shrink-0" onClick={onInvite} style={{ minHeight: 34 }}>
             <UserPlus size={13} strokeWidth={SW} /> Invite
           </button>
         ) : (

@@ -5,10 +5,11 @@ import { useEffect, useRef } from 'react'
 // opens, Escape closes it, and focus goes back to whatever opened it — otherwise
 // closing a panel drops you at the top of the document with no idea where you were.
 //
-// The trap is opt-in on purpose. Trapping focus inside an inline panel that the
-// rest of the page is still visible around is worse than not trapping it: a
-// keyboard user can see the content they are being kept out of. Only the mobile
-// voice sheet, which genuinely covers the screen behind a backdrop, passes trap.
+// The trap is opt-in on purpose, and the test is the scrim. Trapping focus
+// inside a panel the rest of the page is still visible around is worse than not
+// trapping it: a keyboard user can see the content they are being kept out of.
+// Every caller that covers the page behind a backdrop passes trap; the surfaces
+// that expand in place — RequestInbox, DayDetail — do not use this hook at all.
 
 const FOCUSABLE = [
   'a[href]', 'button:not([disabled])', 'input:not([disabled])',
@@ -55,10 +56,14 @@ export function useSheet<T extends HTMLElement>(
       const last = items[items.length - 1]
       const active = document.activeElement
 
+      // Both directions check containment, not just Shift. A phase change inside
+      // a sheet — answering a request, moving to the reply composer — unmounts
+      // the button that had focus and leaves it on <body>, and a forward Tab from
+      // there used to walk straight out of a modal that was still open.
       if (e.shiftKey && (active === first || !el.contains(active))) {
         e.preventDefault()
         last.focus()
-      } else if (!e.shiftKey && active === last) {
+      } else if (!e.shiftKey && (active === last || !el.contains(active))) {
         e.preventDefault()
         first.focus()
       }

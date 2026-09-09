@@ -145,7 +145,7 @@ export default function RecoveryPage() {
             <Sparkles size={19} strokeWidth={SW} />
             <span className="t-sub text-ink">Need to say no? Here&apos;s a script.</span>
           </div>
-          <button className="btn btn-secondary btn-sm focus-ring" onClick={() => setShowComm(p => !p)}>
+          <button className="btn btn-secondary btn-sm focus-ring hit-44" onClick={() => setShowComm(p => !p)}>
             {showComm ? 'Hide' : 'Show'}
           </button>
         </div>
@@ -158,7 +158,7 @@ export default function RecoveryPage() {
             <p className="t-body italic" style={{ color: 'var(--ink-2)' }}>
               &ldquo;{script}&rdquo;
             </p>
-            <button className="btn btn-accent btn-sm focus-ring self-start" onClick={copyTemplate}>
+            <button className="btn btn-accent btn-sm focus-ring hit-44 self-start" onClick={copyTemplate}>
               {copied
                 ? <><Check size={14} strokeWidth={SW} /> Copied</>
                 : <><Copy size={14} strokeWidth={SW} /> Copy to clipboard</>}

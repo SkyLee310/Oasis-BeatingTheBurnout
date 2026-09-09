@@ -67,7 +67,7 @@ export default function SmartBandPage({ onBack }: { onBack: () => void }) {
     <div className="flex flex-col gap-10 sm:gap-14 max-w-[1140px] mx-auto pb-4">
       {/* The band is not in the nav, so without this the only way out is to guess
           that Home is the way back. The other two off-nav pages both have one. */}
-      <button className="chip focus-ring self-start" onClick={onBack} style={{ minHeight: 34 }}>
+      <button className="chip focus-ring hit-44 self-start" onClick={onBack} style={{ minHeight: 34 }}>
         <ArrowLeft size={13} strokeWidth={SW} /> Back
       </button>
 

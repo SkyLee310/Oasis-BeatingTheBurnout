@@ -100,7 +100,13 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
               <span className="t-eyebrow" style={{ color: 'var(--ink-muted)' }}>CURRENT STATUS</span>
-              <div className="flex items-center gap-2">
+              {/* The one energy readout that speaks. Accepting a request from the
+                  decision sheet changes this number on a screen the student is not
+                  looking at, so the change has to announce itself. Only this line
+                  is live: the Energy index card below shows the same number, and a
+                  second live region would say it twice. The zone word rides along
+                  because the number alone does not tell you if it is bad news. */}
+              <div className="flex items-center gap-2" aria-live="polite">
                 <span className="t-title text-ink font-bold">Energy: {energy}/100</span>
                 <Tag tone={zone}>{ZONE_LABEL[zone]}</Tag>
               </div>
@@ -124,7 +130,7 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
               />
             </div>
             <button
-              className="chip focus-ring"
+              className="chip focus-ring hit-44"
               onClick={onGoHow}
               style={{ minHeight: 32 }}
               aria-label="How this energy score is worked out"
@@ -144,7 +150,7 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <h2 className="t-title text-ink">Live biometrics</h2>
-          <button className="chip focus-ring" onClick={onGoBand} style={{ minHeight: 34 }}>
+          <button className="chip focus-ring hit-44" onClick={onGoBand} style={{ minHeight: 34 }}>
             Synced 2m ago · Open band <ChevronRight size={13} strokeWidth={SW} />
           </button>
         </div>
@@ -272,9 +278,14 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
 
       {/* ── Share a chat ────────────────────────────────────────────────── */}
       <section className="flex flex-col gap-4">
+        {/* haspopup, not aria-expanded: this opens a modal over the page, and
+            saying "expanded" would promise a region that appears below the
+            button — which is exactly where a screen reader would then go
+            looking. The chevron points and stays pointing for the same reason;
+            a rotation is the drawn version of the same claim. */}
         <button
-          onClick={() => setShowIntake(v => !v)}
-          aria-expanded={showIntake}
+          onClick={() => setShowIntake(true)}
+          aria-haspopup="dialog"
           className="card focus-ring flex items-center gap-4 p-5 text-left w-full"
           style={{ cursor: 'pointer' }}
         >
@@ -295,13 +306,7 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
               same way.
             </span>
           </span>
-          <ChevronRight
-            size={18} strokeWidth={SW} className="shrink-0"
-            style={{
-              transform: showIntake ? 'rotate(90deg)' : 'none',
-              transition: 'transform 0.16s var(--ease)',
-            }}
-          />
+          <ChevronRight size={18} strokeWidth={SW} className="shrink-0" />
         </button>
 
         {showIntake && <DecisionSheet onClose={() => setShowIntake(false)} />}

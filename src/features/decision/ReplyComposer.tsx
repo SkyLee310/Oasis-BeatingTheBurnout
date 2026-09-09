@@ -58,7 +58,7 @@ export default function ReplyComposer({
             key={t}
             onClick={() => pickTone(t)}
             aria-pressed={tone === t}
-            className={`chip chip-lg focus-ring ${tone === t ? 'chip-selected' : ''}`}
+            className={`chip chip-lg focus-ring hit-44 ${tone === t ? 'chip-selected' : ''}`}
           >
             {toneLabel(t)}
             {t === v.decision && <span style={{ opacity: 0.6 }}> · suggested</span>}

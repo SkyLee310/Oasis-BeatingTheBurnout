@@ -96,7 +96,7 @@ function SideRail({ page, onPage }: { page: Page; onPage: (p: Page) => void }) {
         {/* Was a dead settings button. A control that does nothing is worse
             than no control at all when you reach it with a keyboard. */}
         <button
-          className="btn-icon focus-ring"
+          className="btn-icon focus-ring hit-44"
           aria-label="Where the numbers come from"
           aria-current={page === 'how' ? 'page' : undefined}
           onClick={() => onPage('how')}

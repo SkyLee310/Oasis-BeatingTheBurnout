@@ -43,7 +43,7 @@ export default function VoiceSheet({ onClose }: { onClose: () => void }) {
             </span>
             <span className="t-sub text-ink" id="voice-sheet-title">Oasis AI</span>
           </div>
-          <button className="btn-icon focus-ring" onClick={onClose} aria-label="Close Oasis AI">
+          <button className="btn-icon focus-ring hit-44" onClick={onClose} aria-label="Close Oasis AI">
             <X size={17} strokeWidth={SW} />
           </button>
         </div>

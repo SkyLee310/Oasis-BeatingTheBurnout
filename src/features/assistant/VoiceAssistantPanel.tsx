@@ -124,7 +124,7 @@ export default function VoiceAssistantPanel({ showHeader = true }: { showHeader?
               key={p}
               type="button"
               onClick={() => send(p)}
-              className="chip focus-ring shrink-0 text-xs py-1 px-2.5 cursor-pointer hover:bg-[var(--butter)]"
+              className="chip focus-ring hit-44 shrink-0 text-xs py-1 px-2.5 cursor-pointer hover:bg-[var(--butter)]"
               style={{ minHeight: 'unset', height: 'auto' }}
             >
               {p}
@@ -144,10 +144,13 @@ export default function VoiceAssistantPanel({ showHeader = true }: { showHeader?
               background: 'var(--surface-2)', color: 'var(--ink)',
               border: '2px solid var(--ink)', borderRadius: 'var(--r-pill)',
               padding: '10px 16px', outline: 'none', fontFamily: 'inherit',
+              // An input is a replaced element: .hit-44 cannot reach it with a
+              // pseudo-element, so this one carries the target height itself.
+              minHeight: 44,
             }}
           />
           <button
-            className="btn-icon focus-ring"
+            className="btn-icon focus-ring hit-44"
             onClick={() => send()}
             aria-label="Send message"
             style={{ background: 'var(--ink)', color: 'var(--on-ink)' }}
@@ -163,7 +166,7 @@ export default function VoiceAssistantPanel({ showHeader = true }: { showHeader?
           <button
             onClick={startVoice}
             aria-label={recording ? 'Stop voice input' : 'Start voice input'}
-            className="focus-ring relative flex items-center justify-center"
+            className="focus-ring hit-44 flex items-center justify-center"
             style={{
               width: 42, height: 42, borderRadius: 999,
               background: recording ? 'var(--bold-orange)' : 'var(--highlight)',

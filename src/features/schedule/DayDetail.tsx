@@ -13,7 +13,7 @@ export default function DayDetail({ day, onClose }: { day: CalDay; onClose: () =
           <span className="t-sub text-ink">{day.day}, {day.date} {day.month}</span>
           {day.isToday && <Tag tone="yellow">TODAY</Tag>}
         </div>
-        <button className="btn-icon focus-ring" onClick={onClose} aria-label="Close day detail">
+        <button className="btn-icon focus-ring hit-44" onClick={onClose} aria-label="Close day detail">
           <X size={16} strokeWidth={SW} />
         </button>
       </div>

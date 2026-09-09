@@ -97,14 +97,14 @@ export default function JoinLanding({ code, onEnter }: { code: string; onEnter: 
       {/* ── Have the app, or do not ───────────────────────────────────────── */}
       <div className="flex gap-2 flex-wrap" role="group" aria-label="Do you have Oasis?">
         <button
-          className={`chip chip-lg focus-ring ${installed ? 'chip-selected' : ''}`}
+          className={`chip chip-lg focus-ring hit-44 ${installed ? 'chip-selected' : ''}`}
           aria-pressed={installed}
           onClick={() => setInstalled(true)}
         >
           I have Oasis
         </button>
         <button
-          className={`chip chip-lg focus-ring ${!installed ? 'chip-selected' : ''}`}
+          className={`chip chip-lg focus-ring hit-44 ${!installed ? 'chip-selected' : ''}`}
           aria-pressed={!installed}
           onClick={() => setInstalled(false)}
         >

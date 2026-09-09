@@ -168,7 +168,7 @@ export default function DailyCheck({ onDismiss }: { onDismiss: () => void }) {
         </div>
       </div>
 
-      <button className="chip focus-ring self-start" onClick={onDismiss} style={{ minHeight: 34 }}>
+      <button className="chip focus-ring hit-44 self-start" onClick={onDismiss} style={{ minHeight: 34 }}>
         Not now <ChevronRight size={13} strokeWidth={SW} />
       </button>
     </section>

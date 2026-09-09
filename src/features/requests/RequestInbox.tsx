@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CalendarClock, Clock, Inbox } from 'lucide-react'
 
 import { Initials, SW } from '../../ds'
@@ -28,8 +28,30 @@ export default function RequestInbox() {
 
   const waiting = state.requests.filter(r => r.status === 'pending')
 
+  // Answering a request removes the row that opened the sheet, so useSheet
+  // restores focus to a node that has left the document and it lands on <body>
+  // instead — the exact drop that hook exists to prevent. Only the inbox knows
+  // where the row was, so only the inbox can catch it: when the sheet closes
+  // and nothing took focus, take it here. A screen reader then reads the
+  // heading and the new waiting count, which is the answer to "what happened".
+  const boxRef = useRef<HTMLElement>(null)
+  const wasOpen = useRef(false)
+  useEffect(() => {
+    if (open) { wasOpen.current = true; return }
+    if (!wasOpen.current) return
+    wasOpen.current = false
+    if (document.activeElement === document.body) {
+      boxRef.current?.focus({ preventScroll: true })
+    }
+  }, [open])
+
   return (
-    <section className="card p-5 flex flex-col gap-4" aria-labelledby="inbox-heading">
+    <section
+      ref={boxRef}
+      tabIndex={-1}
+      className="card p-5 flex flex-col gap-4"
+      aria-labelledby="inbox-heading"
+    >
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <span id="inbox-heading" className="t-sub text-ink">
           <Inbox size={17} strokeWidth={SW} className="inline mr-2" />

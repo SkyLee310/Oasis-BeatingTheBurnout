@@ -40,18 +40,14 @@ export default function WhatsAppMessageSheet({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-      style={{ background: 'rgba(20, 20, 15, 0.45)', backdropFilter: 'blur(3px)' }}
-      onClick={onClose}
-    >
+    <div className="scrim" onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
       <div
         ref={ref}
         role="dialog"
         aria-modal="true"
         aria-labelledby="whatsapp-sheet-title"
         tabIndex={-1}
-        onClick={e => e.stopPropagation()}
+        onMouseDown={e => e.stopPropagation()}
         className="card card-pop p-5 sm:p-6 flex flex-col gap-4 max-w-[540px] w-full max-h-[90vh] overflow-y-auto page-section-enter"
         style={{
           boxShadow: '0 20px 40px rgba(0, 0, 0, 0.35)',
@@ -64,7 +60,7 @@ export default function WhatsAppMessageSheet({
               WhatsApp group message
             </h3>
           </div>
-          <button className="btn-icon focus-ring" onClick={onClose} aria-label="Close message preview">
+          <button className="btn-icon focus-ring hit-44" onClick={onClose} aria-label="Close message preview">
             <X size={16} strokeWidth={SW} />
           </button>
         </div>

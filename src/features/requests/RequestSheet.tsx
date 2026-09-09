@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Check, X } from 'lucide-react'
 
 import { SW } from '../../ds'
 import { analyzeRequest } from '../../logic/decision'
+import { projectEnergy } from '../../logic/energy'
 import { useDispatch, useOasis } from '../../state/store'
 import type { IncomingRequest } from '../../state/types'
 import VerdictCard from '../decision/VerdictCard'
@@ -25,6 +26,13 @@ import type { ResolvedOutcome } from './Outcome'
 /** Which button carries the ink fill — the app's recommendation, stated once. */
 const RECOMMENDS_DECLINE = { decline: true, negotiate: false, accept: false }
 
+/** How the answer opens when it is spoken rather than seen. */
+const ANSWER_WORD: Record<ResolvedOutcome, string> = {
+  declined: 'Declined.',
+  negotiated: 'You took part of it.',
+  accepted: 'You picked it up.',
+}
+
 export default function RequestSheet({ req, onClose }: {
   req: IncomingRequest
   onClose: () => void
@@ -37,6 +45,18 @@ export default function RequestSheet({ req, onClose }: {
   // request leaves the pending list, and the sheet still has to finish showing
   // what happened before it closes.
   const [resolved, setResolved] = useState<ResolvedOutcome | null>(null)
+
+  // The same answer, written for a screen reader. Built at the moment of the tap
+  // rather than at render: by the time the answered view draws, the store already
+  // holds the accepted commitment, and projecting the landing energy off it a
+  // second time would count those hours twice.
+  const [said, setSaid] = useState('')
+
+  // Both buttons below unmount the instant an answer lands, which drops focus on
+  // <body> inside a dialog that is still open. Hand it to the one control the
+  // answered sheet has.
+  const doneRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => { if (resolved) doneRef.current?.focus() }, [resolved])
 
   const v = analyzeRequest(req, state)
   const titleId = `req-${req.id}-title`
@@ -53,10 +73,13 @@ export default function RequestSheet({ req, onClose }: {
       : `Accept (${landing.hours}h)`
 
   function accept() {
+    const outcome: ResolvedOutcome = negotiating ? 'negotiated' : 'accepted'
+    const landed = projectEnergy(state, landing)
+
     dispatch({
       type: 'resolveRequest',
       id: req.id,
-      outcome: negotiating ? 'negotiated' : 'accepted',
+      outcome,
       commitments: [landing],
       energySaved: 0,
     })
@@ -72,7 +95,10 @@ export default function RequestSheet({ req, onClose }: {
       dispatch({ type: 'assignTask', taskId: claimed.id, memberId: me.id })
     }
 
-    setResolved(negotiating ? 'negotiated' : 'accepted')
+    setResolved(outcome)
+    setSaid(
+      `${ANSWER_WORD[outcome]} Oasis wrote the reply. Your energy goes from ${v.before} to ${landed}.`,
+    )
   }
 
   function decline() {
@@ -83,6 +109,9 @@ export default function RequestSheet({ req, onClose }: {
       energySaved: v.before - v.after,
     })
     setResolved('declined')
+    setSaid(
+      `${ANSWER_WORD.declined} Oasis wrote the reply. Your energy stays at ${v.before}.`,
+    )
   }
 
   return (
@@ -92,10 +121,18 @@ export default function RequestSheet({ req, onClose }: {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        tabIndex={-1}
         className="card card-pop p-5 sm:p-6 flex flex-col gap-5 w-full"
         style={{ maxWidth: 560, maxHeight: '90vh', overflowY: 'auto' }}
         onMouseDown={e => e.stopPropagation()}
       >
+        {/* Mounted empty from the moment the sheet opens, because a live region
+            that arrives already full is not announced — it has to exist first and
+            change afterwards. Nothing outside can do this job either: aria-modal
+            hides the dashboard's energy line while the sheet is up, so the number
+            moving is only ever spoken from in here. */}
+        <span className="sr-only" role="status" aria-live="polite">{said}</span>
+
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1 min-w-0">
             <h2 id={titleId} className="t-sub text-ink">
@@ -108,7 +145,7 @@ export default function RequestSheet({ req, onClose }: {
             </span>
           </div>
           <button
-            className="chip focus-ring shrink-0"
+            className="chip focus-ring hit-44 shrink-0"
             onClick={onClose}
             aria-label="Close"
             style={{ minHeight: 34 }}
@@ -120,7 +157,7 @@ export default function RequestSheet({ req, onClose }: {
         {resolved ? (
           <>
             <Outcome req={req} outcome={resolved} />
-            <button className="btn btn-primary focus-ring" onClick={onClose}>
+            <button ref={doneRef} className="btn btn-primary focus-ring" onClick={onClose}>
               Done
             </button>
           </>

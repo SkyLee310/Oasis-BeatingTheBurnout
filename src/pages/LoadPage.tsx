@@ -107,7 +107,7 @@ export default function LoadPage({ onGoHow }: { onGoHow: () => void }) {
             role="tab"
             aria-selected={tab === t.id}
             onClick={() => setTab(t.id)}
-            className={`chip chip-lg focus-ring ${tab === t.id ? 'chip-selected' : ''}`}
+            className={`chip chip-lg focus-ring hit-44 ${tab === t.id ? 'chip-selected' : ''}`}
           >
             {t.label}
           </button>
@@ -253,7 +253,7 @@ export default function LoadPage({ onGoHow }: { onGoHow: () => void }) {
                 </span>
                 {t.movable && !t.moved && (
                   <button
-                    className="btn btn-accent btn-sm focus-ring"
+                    className="btn btn-accent btn-sm focus-ring hit-44"
                     onClick={() => dispatch({
                       type: 'deferCommitment', id: t.id, toDate: addDays(t.date, DEFER_DAYS),
                     })}
@@ -287,7 +287,7 @@ export default function LoadPage({ onGoHow }: { onGoHow: () => void }) {
                 <button
                   key={h}
                   onClick={() => setHrs(h)}
-                  className={`chip chip-lg focus-ring ${hrs === h ? 'chip-selected' : ''}`}
+                  className={`chip chip-lg focus-ring hit-44 ${hrs === h ? 'chip-selected' : ''}`}
                 >
                   {h} {h === 1 ? 'hr/day' : 'hrs/day'}
                 </button>

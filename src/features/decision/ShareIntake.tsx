@@ -113,9 +113,19 @@ export default function ShareIntake({ onSubmit }: { onSubmit: (raw: string) => v
             }}
           />
 
+          {/* These carry the 44px target in the drawing rather than in a .hit-44
+              pseudo-element, because the row wraps. At 375px it breaks onto two
+              lines 7px apart, and a centred 44px target over a 31px chip would
+              hang 6.5px into the row below — two overlapping targets, which hands
+              the tap to the wrong sample. A real height keeps the 7.5px gap. */}
           <div className="flex gap-2 flex-wrap">
             {SAMPLES.map(s => (
-              <button key={s.label} className="chip focus-ring" onClick={() => setText(s.raw)}>
+              <button
+                key={s.label}
+                className="chip focus-ring"
+                style={{ minHeight: 44 }}
+                onClick={() => setText(s.raw)}
+              >
                 {s.label}
               </button>
             ))}

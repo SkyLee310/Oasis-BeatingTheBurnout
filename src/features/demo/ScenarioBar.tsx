@@ -110,7 +110,7 @@ export default function ScenarioBar({ startOpen = false }: { startOpen?: boolean
         <div className="flex items-center gap-2">
           <span className="t-micro" style={{ color: 'var(--ink-muted)' }}>energy {energy}</span>
           <button
-            className="btn-icon focus-ring"
+            className="btn-icon focus-ring hit-44"
             onClick={() => setOpen(false)}
             aria-label="Hide the demo switcher"
           >

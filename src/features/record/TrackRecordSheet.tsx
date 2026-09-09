@@ -67,7 +67,7 @@ export default function TrackRecordSheet({ onClose }: { onClose: () => void }) {
             </span>
           </div>
           <button
-            className="chip focus-ring shrink-0"
+            className="chip focus-ring hit-44 shrink-0"
             onClick={onClose}
             aria-label="Close"
             style={{ minHeight: 34 }}

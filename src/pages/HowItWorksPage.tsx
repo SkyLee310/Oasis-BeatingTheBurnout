@@ -67,7 +67,7 @@ export default function HowItWorksPage({ onBack }: { onBack: () => void }) {
   return (
     <div className="flex flex-col gap-6 max-w-[860px]">
       <header className="flex flex-col gap-3">
-        <button className="chip focus-ring self-start" onClick={onBack} style={{ minHeight: 34 }}>
+        <button className="chip focus-ring hit-44 self-start" onClick={onBack} style={{ minHeight: 34 }}>
           <ArrowLeft size={13} strokeWidth={SW} /> Back
         </button>
         <Tag tone="yellow">HOW IT WORKS</Tag>
