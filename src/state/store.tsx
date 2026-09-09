@@ -21,8 +21,11 @@ import type {
 const STORAGE_KEY = 'oasis.v1'
 /** Bump when a change makes yesterday's stored state wrong rather than merely
  *  incomplete — hydrate() then discards it and reseeds. 2: the demo week moved
- *  onto real 2026 dates, so every stored `date` was off by a day. */
-const SCHEMA = 2
+ *  onto real 2026 dates, so every stored `date` was off by a day. 3: the track
+ *  record arrived, and a stored state from before it has no `record` at all —
+ *  spreading it over a fresh seed would keep the seeded history but silently
+ *  reset the share toggle, which is the one thing on it a user chose. */
+const SCHEMA = 3
 
 // ─── Actions ──────────────────────────────────────────────────────────────────
 
@@ -47,6 +50,7 @@ export type Action =
   | { type: 'assignTask'; taskId: string; memberId: string | null }
   | { type: 'toggleTaskDone'; taskId: string }
   | { type: 'toggleCommitmentDone'; id: string }
+  | { type: 'toggleRecordShare' }
 
 /** What each sleep answer means in hours. Rough on purpose — a student rating
  *  last night out of three is not reporting to two decimal places. */
@@ -151,6 +155,10 @@ export function reducer(s: OasisState, a: Action): OasisState {
         commitments: s.commitments.map(c =>
           c.id === a.id ? { ...c, done: !c.done } : c),
       }
+
+    // The only switch in the app that changes what another person can see.
+    case 'toggleRecordShare':
+      return { ...s, record: { ...s.record, shared: !s.record.shared } }
   }
 }
 

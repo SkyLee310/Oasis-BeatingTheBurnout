@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  AlertTriangle, Check, MessageCircle, Scale, Shield, UserPlus, Users,
+  AlertTriangle, Check, History, MessageCircle, Scale, Shield, UserPlus, Users,
 } from 'lucide-react'
 
 import { Initials, SW, Tag } from '../ds'
@@ -12,6 +12,7 @@ import { useDispatch, useOasis } from '../state/store'
 import type { Member } from '../state/types'
 import CapacityChip from '../features/group/CapacityChip'
 import InviteSheet from '../features/group/InviteSheet'
+import TrackRecordSheet from '../features/record/TrackRecordSheet'
 import RequestInbox from '../features/requests/RequestInbox'
 import WhatsAppMessageSheet from '../features/group/WhatsAppMessageSheet'
 
@@ -40,6 +41,7 @@ export default function GroupPage() {
 
   const [inviting, setInviting] = useState<Member | 'all' | null>(null)
   const [showWhatsApp, setShowWhatsApp] = useState(false)
+  const [showRecord, setShowRecord] = useState(false)
 
   const you = b.shares.find(s => s.member.status === 'you')
 
@@ -104,6 +106,7 @@ export default function GroupPage() {
                 share={s}
                 capacity={capacityOf(project, s.member.id)}
                 onInvite={() => setInviting(s.member)}
+                onOpenRecord={() => setShowRecord(true)}
               />
             ))}
           </div>
@@ -220,6 +223,8 @@ export default function GroupPage() {
         />
       )}
 
+      {showRecord && <TrackRecordSheet onClose={() => setShowRecord(false)} />}
+
       {inviting && (
         <InviteSheet
           project={project}
@@ -237,11 +242,16 @@ export default function GroupPage() {
  * capacity, as a word. Nothing on this row is derived from anybody's energy
  * score, sleep or check-in — which is what makes the promise under the list
  * literally true rather than a claim.
+ *
+ * One row has something the others do not: yours opens your track record. There
+ * is no equivalent control on a teammate's row, and that absence is the feature
+ * — a history you can open about somebody else is a rating system.
  */
-function ShareRow({ share, capacity, onInvite }: {
+function ShareRow({ share, capacity, onInvite, onOpenRecord }: {
   share: Share
   capacity: ZoneKey
   onInvite: () => void
+  onOpenRecord: () => void
 }) {
   const { member, weight, done, pct, over } = share
   const progress = weight > 0 ? Math.round((done / weight) * 100) : 0
@@ -258,6 +268,16 @@ function ShareRow({ share, capacity, onInvite }: {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="t-label text-ink">{member.name}</span>
             <CapacityChip zone={capacity} />
+            {member.status === 'you' && (
+              <button
+                className="chip focus-ring"
+                onClick={onOpenRecord}
+                aria-label="Open your track record"
+                style={{ minHeight: 30 }}
+              >
+                <History size={12} strokeWidth={SW} /> Track record
+              </button>
+            )}
           </div>
           <span className="t-micro" style={{ color: 'var(--ink-muted)' }}>
             {STATUS_COPY[member.status]}

@@ -136,6 +136,39 @@ export interface DecisionLogEntry {
   at: string
 }
 
+// ─── Track record ─────────────────────────────────────────────────────────────
+// A student's own history across finished projects — the thing they would lose
+// by leaving, and the only part of Oasis that accumulates.
+//
+// Read the Steam comparison correctly: Steam shows you your own hours and your
+// own achievements. It does not show you what other players thought of you.
+// So there is no peer rating here, no leaderboard and no rank. Nothing on this
+// type can be filled in by somebody else.
+
+export interface PastProject {
+  id: string
+  course: string
+  title: string
+  /** Which semester it belongs to, e.g. 'Sem 2, 2025/26'. */
+  term: string
+  /** Share of the team's total task weight this student carried, 0-100. */
+  weightShare: number
+  /** Tasks this student closed. */
+  tasksDone: number
+  /** Handed in on or before the deadline. */
+  onTime: boolean
+  /** Tasks in the project altogether, across every member. */
+  total: number
+}
+
+export interface RecordState {
+  /** Off until the student turns it on. Private is the default, not a setting
+   *  they have to find — nobody is opted in to being looked at. */
+  shared: boolean
+  /** Finished projects, newest term first. */
+  past: PastProject[]
+}
+
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export interface OasisState {
@@ -148,6 +181,7 @@ export interface OasisState {
   commute: CommuteState
   checkIn: DailyCheckIn | null
   decisions: DecisionLogEntry[]
+  record: RecordState
 }
 
 /** A single weighted input to the energy score, ready to render on the

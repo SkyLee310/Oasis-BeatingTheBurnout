@@ -15,7 +15,7 @@ import { CALENDAR_WEEK } from '../ds'
 import { addDays } from '../logic/dates'
 import type {
   Commitment, CommuteState, GroupProject, IncomingRequest,
-  OasisState, Recovery, ScenarioKey,
+  OasisState, PastProject, Recovery, ScenarioKey,
 } from './types'
 
 /** Monday of the demo week — which is also the CodeNection prototype week. */
@@ -112,6 +112,49 @@ const PROJECT: GroupProject = {
   ],
 }
 
+// ─── What she has already finished ────────────────────────────────────────────
+// Two terms of group projects, because a track record that starts empty is not
+// a track record. The numbers are chosen to be unflattering in one place on
+// purpose: Statistics went in late. A history that is all wins reads as a demo,
+// and the on-time figure means nothing if it can only ever be 100%.
+//
+// These three produce the summary line in the sheet exactly: twelve tasks
+// closed, eleven of them in projects handed in on time (92%), and an average
+// of 34% of each team's weight carried.
+
+const PAST_PROJECTS: PastProject[] = [
+  {
+    id: 'pp-web',
+    course: 'Web Systems',
+    title: 'Campus events site',
+    term: 'Sem 2, 2025/26',
+    weightShare: 44,
+    tasksDone: 6,
+    onTime: true,
+    total: 14,
+  },
+  {
+    id: 'pp-se',
+    course: 'Software Engineering',
+    title: 'Requirements and prototype',
+    term: 'Sem 2, 2025/26',
+    weightShare: 31,
+    tasksDone: 5,
+    onTime: true,
+    total: 16,
+  },
+  {
+    id: 'pp-stats',
+    course: 'Statistics',
+    title: 'Survey analysis report',
+    term: 'Sem 1, 2025/26',
+    weightShare: 27,
+    tasksDone: 1,
+    onTime: false,
+    total: 4,
+  },
+]
+
 /** The Friday alert on the calendar, as it actually arrived: in a chat. */
 const SHIFT_REQUEST: IncomingRequest = {
   id: 'req-shift',
@@ -180,6 +223,7 @@ function base(scenario: ScenarioKey): OasisState {
     commute: { ...COMMUTE, skippedDays: [] },
     checkIn: null,
     decisions: [],
+    record: { shared: false, past: PAST_PROJECTS.map(p => ({ ...p })) },
   }
 }
 
@@ -198,6 +242,7 @@ export function seedFor(scenario: ScenarioKey): OasisState {
         commitments: [],
         requests: [],
         project: { ...s.project, tasks: [], members: s.project.members.slice(0, 1) },
+        record: { shared: false, past: [] },
         recovery: { ...s.recovery, sleepHours: [7.2, 7.5, 7.1, 7.4, 7.6, 8.0, 7.8], restingHr: 72 },
       }
 
