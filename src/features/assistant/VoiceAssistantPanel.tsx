@@ -11,6 +11,9 @@ import { analyzeRequest, decisionHeadline, parseChat } from '../../logic/decisio
 import { energyFor } from '../../logic/energy'
 import { shortDate } from '../../logic/dates'
 
+import CrisisSupportCard from './CrisisSupportCard'
+import { detectCrisisIntent, getCrisisResponseText } from '../../logic/safetyIntervention'
+
 // ─── Oasis AI ─────────────────────────────────────────────────────────────────
 // One surface, three jobs, in the order a stressed student needs them:
 //
@@ -18,6 +21,7 @@ import { shortDate } from '../../logic/dates'
 //      real week — the flow that used to sit in its own card on Home.
 //   2. Answer a question.  "Can I accept 4h?" runs the same projection.
 //   3. Change the week.  "Add 3h report on Friday", "drop the Ethics reading."
+//   4. Crisis safety. Intercept self-harm/suicide ideation with emergency lifelines.
 //
 // The third is the one that needed care. An agent that edits your schedule the
 // moment you ask is the opposite of this app's argument, so it does not: it
@@ -29,6 +33,7 @@ import { shortDate } from '../../logic/dates'
 type Pending =
   | { kind: 'add' | 'remove'; commitment: Commitment; settled: 'open' | 'applied' | 'dismissed' }
   | { kind: 'decision'; req: IncomingRequest }
+  | { kind: 'crisis' }
 
 interface ChatMsg { role: 'user' | 'ai'; text: string; action?: Pending }
 
@@ -78,6 +83,7 @@ export default function VoiceAssistantPanel({
   const [input, setInput] = useState('')
   const [recording, setRecording] = useState(false)
   const [promptIdx, setPromptIdx] = useState(0)
+  const [hasCrisisTriggered, setHasCrisisTriggered] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
 
@@ -97,6 +103,13 @@ export default function VoiceAssistantPanel({
     setMessages(prev => [...prev, { role: 'user', text: userMsg }])
 
     setTimeout(() => {
+      // 0. PRIORITY 0 SAFETY: Detect self-harm, suicidal ideation or acute crisis
+      if (detectCrisisIntent(userMsg)) {
+        setHasCrisisTriggered(true)
+        reply(getCrisisResponseText(userMsg), { kind: 'crisis' })
+        return
+      }
+
       // Order is the routing. An imperative is anchored at the start of the
       // message, so a pasted "Farah: can you add the slides?" never trips it —
       // the speaker name is in the way, which is exactly what we want.
@@ -195,6 +208,38 @@ export default function VoiceAssistantPanel({
         </div>
       )}
 
+      {hasCrisisTriggered && (
+        <aside
+          aria-label="24/7 Crisis helpline quick access"
+          className="flex items-center justify-between px-4 py-2 text-xs shrink-0"
+          style={{
+            background: 'linear-gradient(90deg, #fee2e2 0%, #fef2f2 100%)',
+            borderBottom: '2px solid #f87171',
+            color: '#991b1b',
+          }}
+        >
+          <span className="flex items-center gap-1.5 font-bold">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            24/7 Crisis Support
+          </span>
+          <div className="flex items-center gap-2">
+            <a
+              href="tel:0376272929"
+              className="font-bold underline text-red-800 hover:text-red-950"
+            >
+              Befrienders 03-7627 2929
+            </a>
+            <span className="text-red-300">|</span>
+            <a
+              href="tel:+60123456789"
+              className="font-bold underline text-red-800 hover:text-red-950"
+            >
+              Call Mom
+            </a>
+          </div>
+        </aside>
+      )}
+
       {/* role=log rather than a bare div: replies arrive on their own after a
           pause, and without this a screen-reader user has no way to know the
           answer landed short of hunting for it. polite, so it waits its turn. */}
@@ -235,7 +280,7 @@ export default function VoiceAssistantPanel({
                 action={m.action}
                 onSettle={apply => {
                   const a = m.action
-                  if (a && a.kind !== 'decision') {
+                  if (a && a.kind !== 'decision' && a.kind !== 'crisis') {
                     settle(i, { kind: a.kind, commitment: a.commitment } as AgentAction, apply)
                   }
                 }}
@@ -333,6 +378,14 @@ function ActionCard({ action, onSettle, onOpenDecision }: {
   onSettle: (apply: boolean) => void
   onOpenDecision?: (req: IncomingRequest) => void
 }) {
+  if (action.kind === 'crisis') {
+    return (
+      <div className="w-full" style={{ paddingLeft: 42 }}>
+        <CrisisSupportCard />
+      </div>
+    )
+  }
+
   if (action.kind === 'decision') {
     return (
       <div className="flex" style={{ paddingLeft: 42 }}>
