@@ -60,9 +60,9 @@ export default function InviteSheet({
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
             <Tag tone="yellow">INVITE</Tag>
-            <h3 className="t-title text-ink" id="invite-sheet-title">
+            <h2 className="t-title text-ink" id="invite-sheet-title">
               {member ? `Add ${member.name} to the project` : 'Add your teammates'}
-            </h3>
+            </h2>
           </div>
           <button className="btn-icon focus-ring hit-44" onClick={onClose} aria-label="Close invite">
             <X size={16} strokeWidth={SW} />

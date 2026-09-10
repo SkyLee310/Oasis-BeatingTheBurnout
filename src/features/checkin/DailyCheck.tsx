@@ -117,7 +117,7 @@ export default function DailyCheck({ onDismiss }: { onDismiss: () => void }) {
                 : `Your energy went from ${before} to ${after}. Short sleep costs more than it feels like.`}
           </span>
         </div>
-        <button className="btn-icon focus-ring shrink-0" onClick={onDismiss} aria-label="Close check-in">
+        <button className="btn-icon focus-ring hit-44 shrink-0" onClick={onDismiss} aria-label="Close check-in">
           <X size={16} strokeWidth={SW} />
         </button>
       </section>
@@ -128,21 +128,34 @@ export default function DailyCheck({ onDismiss }: { onDismiss: () => void }) {
     <section className="card card-pop p-5 flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1.5">
-          <Tag tone="yellow">DAILY CHECK · 10 SECONDS</Tag>
+          {/* Butter rather than the full highlight: this pill opens the card you
+              see most often, and at full strength it out-shouted the question. */}
+          <Tag tone="yellow" bg="var(--butter)">DAILY CHECK · 10 SECONDS</Tag>
           <h2 className="t-title text-ink">{q.question}</h2>
         </div>
-        <button className="btn-icon focus-ring shrink-0" onClick={onDismiss} aria-label="Skip the check-in">
+        <button className="btn-icon focus-ring hit-44 shrink-0" onClick={onDismiss} aria-label="Skip the check-in">
           <X size={16} strokeWidth={SW} />
         </button>
       </div>
 
+      {/* Three identical grey chips gave no clue which end of the scale was
+          which. The pastel run does — and because every chip still carries its
+          own word ("Barely", "Patchy", "Properly"), the colour is a second
+          channel rather than the only one. minHeight is real, not .hit-44:
+          this row wraps, and an overflowing pseudo-element would overlap the
+          chip on the line below. */}
       <div className="flex gap-2 flex-wrap" role="group" aria-label={q.question}>
         {([1, 2, 3] as Score[]).map(score => (
           <button
             key={score}
             className="chip chip-lg focus-ring"
             onClick={() => answer(score)}
-            style={{ minHeight: 44 }}
+            style={{
+              minHeight: 44,
+              background:
+                score === 1 ? 'var(--blush)' :
+                score === 2 ? 'var(--butter)' : 'var(--mint)',
+            }}
           >
             {q.options[score]}
           </button>

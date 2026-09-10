@@ -75,7 +75,9 @@ export default function GroupPage() {
                 : `${b.overloaded.member.name} is carrying ${b.overloaded.pct}% of this project`}
             </span>
             <span className="t-micro" style={{ color: 'var(--ink)', lineHeight: 1.5 }}>
-              Fair share is {Math.round(100 / project.members.length)}% per member based on task effort.
+              An even split across {project.members.length} people is{' '}
+              {Math.round(100 / project.members.length)}% each. Weight counts effort,
+              not task count — a five-point build is not one slide deck.
             </span>
           </div>
         </div>
@@ -122,8 +124,9 @@ export default function GroupPage() {
 
           <p className="t-micro flex items-start gap-2" style={{ color: 'var(--ink-muted)', lineHeight: 1.5 }}>
             <Shield size={14} strokeWidth={SW} className="shrink-0 mt-0.5" />
-            Your teammates see the project split and whether you have room. They never
-            see your score.
+            Everyone here sees the project split and whether you have room. Nobody sees
+            anyone&apos;s energy score, sleep, or what they turned down — that stays on
+            your phone.
           </p>
         </section>
 

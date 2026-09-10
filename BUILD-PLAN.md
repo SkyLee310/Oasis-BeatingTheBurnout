@@ -61,7 +61,7 @@ touches them.
 
 ### State — [src/state/types.ts](src/state/types.ts)
 
-`OasisState` is `{ today, scenario, commitments, recovery, requests, project, commute, checkIn, decisions }`.
+`OasisState` is `{ today, scenario, commitments, recovery, requests, project, commute, checkIn, decisions, record }`.
 Dates are ISO `YYYY-MM-DD` throughout so they sort and compare as strings.
 
 **The types for steps 4, 6 and 7 already exist** — `GroupProject`, `Member`,
@@ -83,7 +83,7 @@ Actions, all already implemented in the reducer:
 
 ```
 reset · setScenario · addCommitments · removeCommitment · deferCommitment
-addRequest · resolveRequest · setCommute · toggleTrip · checkIn
+addRequest · resolveRequest · checkIn · toggleRecordShare
 setMemberStatus · assignTask · toggleTaskDone
 ```
 
@@ -105,9 +105,10 @@ Energy is `100 − stress`, a transparent five-factor weighted sum:
 `{ academic: 30, sleep: 25, density: 20, physiological: 15, commute: 10 }`.
 Zones: green ≥ 60, amber ≥ 30, red below.
 
-**Note for step 6:** `tripDays()` and `commuteHours()` already exist and commute
-is **already charged** to the energy budget. `src/logic/commute.ts` only needs the
-timetable parser and the merge suggestions.
+**Note, after the step 6 cut:** `tripDays()` and `commuteHours()` still exist in
+`energy.ts` and commute is **still charged** its 10 points. What went was the UI
+— `src/logic/commute.ts`, `src/features/commute/*`, the fifth `LoadTab`. Do not
+remove the term from `WEIGHTS` to "finish" the cut: the measurement is the point.
 
 ### Design system — `src/ds/index.ts` (import from `'../ds'`)
 
@@ -187,7 +188,14 @@ project → it appears on the Group page. Fairness bar reflects `assignTask` and
 
 ---
 
-## 4. Step 5 — Widget + installable PWA
+## 4. Step 5 — Widget + installable PWA — **CUT**
+
+> **Cut on 10 Sep 2026** by the REPLAN restructure. `src/features/widget/*` and the
+> `?view=widget` branch in `src/App.tsx` are deleted; nothing below was kept. The
+> section stays because the reasoning is worth reading before anyone proposes it
+> again: a home-screen mock is a camera-facing asset, and the prototype has four
+> days left to spend on the thing that actually breaks a student. Everything from
+> here to the end of this section is history, not a task list.
 
 **The "would students keep it on their phone" answer.**
 
@@ -213,7 +221,18 @@ number as Home after a decision changes it.
 
 ---
 
-## 5. Step 6 — Commute
+## 5. Step 6 — Commute — **CUT, except the charge**
+
+> **Cut on 10 Sep 2026** by the REPLAN restructure. `src/logic/commute.ts`, all of
+> `src/features/commute/*` and the fifth `LoadTab` are deleted, and no `setCommute`
+> or `toggleTrip` action was ever added.
+>
+> **What survives, deliberately:** `commuteHours()` and `tripDays()` still run in
+> `energy.ts` and commute still carries its **10 points** in `WEIGHTS`, and
+> `state.commute` is still seeded and still read. Commute is measured and still
+> counted — it just has no screen. Do not remove the term to "finish" the cut.
+>
+> Everything from here to the end of this section is history, not a task list.
 
 **The third specialism.** A fifth tab on the Schedule page.
 
@@ -248,7 +267,7 @@ Three small features; one step because none is big enough to be its own.
 
 | File | Status | What it does |
 |---|---|---|
-| `src/features/checkin/DailyCheck.tsx` | new | Three 3-option questions (slept / mood / load), ~10 seconds, at the top of Home and as the widget's tap target. Writes via `checkIn` and **visibly moves the number**. Shows once per day (`checkIn.date`); skip always available. |
+| `src/features/checkin/DailyCheck.tsx` | new | Three 3-option questions (slept / mood / load), ~10 seconds, at the top of Home. Writes via `checkIn` and **visibly moves the number**. Shows once per day (`checkIn.date`); skip always available. |
 | `src/pages/HowItWorksPage.tsx` | new | The `'how'` page. Plain-language walkthrough of the formula **with the user's current values plugged in** — render `energyFactors(state)`, quote `DECISION_THRESHOLDS`, and state what Oasis never does (it does not read your chats in the background; you choose what to share). Reachable from any energy number via a small "How?" affordance. |
 | `src/features/demo/ScenarioBar.tsx` | new | Hidden behind `?demo=1` or `Shift+D`. Flips `state.scenario` between **Week 1 (empty) / All clear / Near capacity / Red zone** via `setScenario`. Everything downstream is derived, so one click restages the whole app. **Hidden by default so judges never see scaffolding.** |
 
@@ -265,11 +284,13 @@ included; the temperature sweeps smoothly both ways.
 
 - **Sheets:** focus trap, `Esc` closes, focus returns to the trigger,
   `role="dialog"` + `aria-modal` + `aria-labelledby` on the heading.
-  **`DecisionSheet` currently renders as an inline panel with `Esc`-to-close but
-  no focus trap and no dialog role — promoting it is part of this step.**
+  ~~**`DecisionSheet` currently renders as an inline panel with `Esc`-to-close but
+  no focus trap and no dialog role — promoting it is part of this step.**~~
+  **Done** — every sheet now goes through `useSheet({ trap: true })` and carries
+  `role="dialog"` + `aria-modal` + a labelled `h2`.
 - Verdict results and energy changes announced with `aria-live="polite"`.
 - ≥44×44px touch targets on every new mobile control.
-- Widget preview and demo switcher fully keyboard reachable; `.focus-ring`
+- Demo switcher fully keyboard reachable; `.focus-ring`
   (`3px solid var(--ink)`) on every new interactive element.
 - Bypass link on via `site.json`.
 - New pastel-on-pastel combinations reach **≥4.5:1** — and re-check the existing
@@ -285,33 +306,33 @@ included; the temperature sweeps smoothly both ways.
   component mounted **without** `data-ambient` renders identically to today — the
   check that `src/index.css` stayed additive.
 - Browser pane at **375×812 mobile** and desktop:
-  - Paste a chat → verdict → decline → the energy number changes on Home, on the
-    schedule, and in `?view=widget`, **and the canvas visibly warms**.
+  - Paste a chat → verdict → decline → the energy number changes on Home and on
+    the schedule, **and the canvas visibly warms**.
   - `Shift+D` Red zone ⇄ All clear, light and dark, and with reduced motion
     forced on it snaps instantly.
   - Invite → copy → `?join=<code>` in a second tab → add → appears on Group.
   - Import timetable → merge a trip → week and total reflow.
 - Keyboard-only pass on each sheet: tab in, `Esc` out, focus returns.
-- `lighthouse_audit` for PWA installability, plus an accessibility score on Home
-  and Group.
+- `lighthouse_audit` accessibility score on Home and Group. (Installability is
+  moot — step 5 is cut.)
 - Dark mode holds on every new surface (`.dark` on `<html>`).
 
 ---
 
 ## 8. Working in parallel
 
-Steps 4–7 touch mostly disjoint files. The contention points:
+Steps 4–7 touch mostly disjoint files. **Steps 5 and 6 are cut**, so what remains
+to parallelise is 4, 7 and 8. The contention points:
 
 | File | Wanted by | How to avoid conflicts |
 |---|---|---|
-| `src/App.tsx` | 4 (nav + `?join=`), 5 (`?view=widget`), 7 (`?demo=1`) | **Step 4 lands the URL-mode switch first**, as one `useState` reading `window.location.search` once. Steps 5 and 7 then add a branch each. Do not have two agents restructure the shell. |
-| `src/pages/DashboardPage.tsx` | 4 (band card), 5 (widget entry), 7 (daily check) | Each adds one section. Land them in step order, rebase between. |
+| `src/App.tsx` | 4 (nav + `?join=`), 7 (`?demo=1`) | **Step 4 lands the URL-mode switch first**, as one `useState` reading `window.location.search` once. Step 7 then adds a branch. Do not have two agents restructure the shell. |
+| `src/pages/DashboardPage.tsx` | 4 (band card), 7 (daily check) | Each adds one section. Land them in step order, rebase between. |
 | `src/index.css` | any step needing a token | Append only. Never edit the `:root` or `.dark` literals — the ambient scale depends on them staying exactly as they are. |
 | `src/state/types.ts` | any step extending a shape | The shapes for 4, 6 and 7 already exist. If you must change one, bump `SCHEMA` in `store.tsx` and say so loudly. |
 
-Suggested split: **one agent takes 4 + 8's Group items**, another takes **5 + 6**,
-step 7 last by whoever is free. Step 4 must land its `App.tsx` change before the
-others start on theirs.
+Suggested split: **one agent takes 4 + 8's Group items**, step 7 next by whoever
+is free. Step 4 must land its `App.tsx` change before the others start on theirs.
 
 ## 9. Definition of done, every step
 

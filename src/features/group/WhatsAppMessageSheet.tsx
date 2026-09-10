@@ -56,9 +56,9 @@ export default function WhatsAppMessageSheet({
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
             <Tag tone="green">WHATSAPP DRAFT</Tag>
-            <h3 className="t-title text-ink" id="whatsapp-sheet-title">
+            <h2 className="t-title text-ink" id="whatsapp-sheet-title">
               WhatsApp group message
-            </h3>
+            </h2>
           </div>
           <button className="btn-icon focus-ring hit-44" onClick={onClose} aria-label="Close message preview">
             <X size={16} strokeWidth={SW} />

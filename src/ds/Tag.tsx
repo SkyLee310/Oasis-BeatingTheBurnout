@@ -4,15 +4,19 @@ export interface TagProps {
   children: ReactNode
   /** Fill colour. `neutral` is the plain surface pill. */
   tone?: 'neutral' | 'yellow' | 'green' | 'amber' | 'red'
+  /** Softer fill than the tone's default, for a pill that should sit back
+   *  rather than shout. Text colour still follows `tone`, so the pair stays
+   *  legible — pass a token, never a literal. */
+  bg?: string
 }
 
 /** A small stroked pill for metadata — dates, counts, short labels. */
-export function Tag({ children, tone = 'neutral' }: TagProps) {
-  const bg =
-    tone === 'yellow' ? 'var(--highlight)' :
+export function Tag({ children, tone = 'neutral', bg: bgOverride }: TagProps) {
+  const bg = bgOverride ??
+    (tone === 'yellow' ? 'var(--highlight)' :
     tone === 'green' ? 'var(--zone-green-bg)' :
     tone === 'amber' ? 'var(--zone-amber-bg)' :
-    tone === 'red' ? 'var(--zone-red-bg)' : 'var(--surface)'
+    tone === 'red' ? 'var(--zone-red-bg)' : 'var(--surface)')
   const fg =
     tone === 'green' ? 'var(--zone-green-text)' :
     tone === 'amber' ? 'var(--zone-amber-text)' :

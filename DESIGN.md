@@ -212,6 +212,20 @@ chat are hand-built so nothing renders in the kit's own idiom.
 Both `.chip` and `.zone-chip` carry `width: fit-content` so a column-flex parent
 cannot stretch them into a full-width bar. Keep that if you clone them.
 
+### Colour overrides on primitives
+
+Three primitives take an explicit fill so a screen can soften a pill without
+inventing a second component: `Tag bg`, `Initials bg`, and `OasisBlob`'s
+`fillColor` / `strokeColor` / `mouthFill` / `mouthStroke` / `eyeHighlightFill`.
+Two rules govern all of them.
+
+- **Pass a token, never a literal.** These sit under text, and a hex that looks
+  right in light mode goes unreadable the moment `.dark` swaps the ground.
+- **Do not override `OasisBlob`'s fill on a readout.** The zone owns that colour
+  and reporting the zone is the mascot's whole job; an override is for the places
+  it is a logo mark. `Tag bg` is the softer case — `DailyCheck` passes `--butter`
+  because the pill at full `--highlight` out-shouted the question under it.
+
 ### `OasisBlob`
 
 Inline SVG mascot, `viewBox="0 0 200 200"`, `strokeWidth="4"`. Expression is bound
@@ -253,6 +267,62 @@ idle animation for small instances.
   a verdict, a recomputed score, a parse readout — sit in an `aria-live="polite"`
   region.
 
+### Reaching a small control: `.hit-44`
+
+Some controls have to stay small to read correctly — a 22px tick inside a card
+that is itself a button would become the card's control if drawn at full size.
+`.hit-44` buys the reach without changing what is drawn: `position: relative`
+plus a centred transparent `::after` at `max(100%, 44px)` square. The drawn box
+keeps its size; the tappable one grows around it.
+
+It does not work everywhere, and the two exceptions are not stylistic:
+
+- **Replaced elements** — `<select>`, `<input>` — have no `::after`. Give those a
+  real `minHeight: 44`.
+- **A row that wraps.** The claimed ring overflows the element, so on a wrapped
+  line it lands on top of the chip below and swallows its taps. `DailyCheck`'s
+  mood chips use a real `minHeight: 44` for exactly this reason.
+
+Before reaching for it, check the ring it claims still fits inside its parent's
+padding. An 11px ring inside a `p-3` card does; inside a `p-1` one it does not.
+
+### Headings
+
+- **One `h1` per screen, first in the DOM.** Where the design opens on a readout
+  rather than a title, the `h1` is `sr-only` — the dashboard's is. Do not promote
+  a heading that sits below other content to fix this: reordering the DOM to put
+  it first splits focus order from visual order, which is the worse trade.
+- **A sheet's title is an `h2`**, and carries the `id` that the dialog's
+  `aria-labelledby` points at. Content headings inside the sheet go `h3` down.
+- Section headings on a page are `h2`. Never skip a level to get a size — the
+  `t-*` classes set size and weight outright, so any heading tag renders at any
+  size with no visual cost.
+
+### Accessible names
+
+- **The accessible name leads with the words on the control.** A name that only
+  paraphrases the visible text leaves a speech-input user saying what they can
+  see and hitting nothing (WCAG 2.5.3). `aria-label="How is this worked out? The
+  energy score, explained"` on a button reading *How is this worked out?* — the
+  visible string first, the disambiguation after.
+- **The exception is a composite row**, where the visible content is a block
+  rather than a label: `RequestInbox`'s rows carry
+  `aria-label="Open request from {asker}: {title}"` rather than the concatenated
+  name, sleeve, hours and date that a screen reader would otherwise read out.
+  Full containment is not achievable there, and the summary is the better name.
+
+### Focus, when the thing you clicked disappears
+
+`useSheet()` restores focus to its opener on unmount. That contract breaks when
+answering removes the opener from the DOM — a request row that leaves the inbox
+once it is answered has nothing to hand focus back to, and focus falls to
+`<body>`. **The list owns the restore in that case**, not the sheet: move focus
+to the next row, or to the heading above an emptied list.
+
+A live region has to be **mounted and empty before it has anything to say**. A
+region that appears at the same moment as its text is a new node, not a changed
+one, and screen readers announce nothing.
+
 ---
 
 ## Adding a screen — checklist
@@ -269,3 +339,8 @@ idle animation for small instances.
    scale moves them, and anything hardcoded will drift off the page around it.
 10. Anything dismissable goes through `useSheet()`; anything that changes a
     number without a page change announces it with `aria-live="polite"`.
+11. One `h1`, first in the DOM — `sr-only` if the design has no title. Section
+    headings `h2`, sheet titles `h2`, nothing skipped.
+12. Any `aria-label` on a control with visible text starts with that text.
+13. Under 44px and it has to stay that way? `.hit-44` — unless the element is
+    replaced or its row wraps, and then a real `minHeight`.

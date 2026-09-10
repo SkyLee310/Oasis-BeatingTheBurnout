@@ -162,7 +162,7 @@ export default function LoadPage({ onGoHow }: { onGoHow: () => void }) {
           <div className={`tile ${zoneTile(lead.zone)} card-pop`} style={{ padding: 24, gap: 12 }}>
             <span className="t-eyebrow" style={{ color: 'var(--ink)' }}>Highest load right now</span>
             <div className="flex items-end justify-between gap-4 flex-wrap">
-              <h3 className="t-display text-ink">{lead.label}</h3>
+              <h2 className="t-display text-ink">{lead.label}</h2>
               <span className="t-stat text-ink" style={{ fontSize: 52 }}>{lead.pct}%</span>
             </div>
             <div className="track" style={{ height: 18 }}>
@@ -177,7 +177,7 @@ export default function LoadPage({ onGoHow }: { onGoHow: () => void }) {
             className="chip focus-ring self-start"
             onClick={onGoHow}
             style={{ minHeight: 44 }}
-            aria-label="How these load figures are worked out"
+            aria-label="How is this worked out? The load figures, explained"
           >
             <HelpCircle size={14} strokeWidth={SW} /> How is this worked out?
           </button>

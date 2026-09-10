@@ -150,6 +150,11 @@ export default function AcademicDDLRadar({
                 </span>
               </div>
 
+              {/* The box stays 22px on purpose: it sits inside a card that is
+                  itself a button, and a full-size square would read as the
+                  card's control rather than a tick. .hit-44 buys the reach
+                  without changing what is drawn — the ring it claims is 11px
+                  wide, and the card's p-3 keeps that ring inside the card. */}
               <div className="flex items-center gap-2.5 my-2">
                 <button
                   type="button"
@@ -159,7 +164,7 @@ export default function AcademicDDLRadar({
                   }}
                   aria-pressed={c.done}
                   aria-label={`Mark ${c.title} ${c.done ? 'pending' : 'completed'}`}
-                  className="focus-ring shrink-0 flex items-center justify-center cursor-pointer transition-transform active:scale-95"
+                  className="focus-ring hit-44 shrink-0 flex items-center justify-center cursor-pointer transition-transform active:scale-95"
                   style={{
                     width: 22,
                     height: 22,

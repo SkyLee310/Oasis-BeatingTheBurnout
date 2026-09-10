@@ -73,6 +73,16 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
   return (
     <div className="flex flex-col gap-8 sm:gap-10 max-w-[1140px] mx-auto pb-4">
 
+      {/* Home had no h1 at all: the design opens on a gauge, not a title, so a
+          screen-reader user landed in a run of h2s with nothing naming the page.
+          It is sr-only and first in the DOM because the two visible candidates
+          both fail — the check-in question is conditional and outranks nothing,
+          and the greeting sits inside the header, below the check-in card. Giving
+          the greeting the h1 would have put the page title second in reading
+          order; reordering the DOM to fix that would have split focus order from
+          visual order, which is the worse trade. */}
+      <h1 className="sr-only">Today on Oasis</h1>
+
       {/* ── Daily check ─────────────────────────────────────────────────────── */}
       {/* Deliberately not gated on state.checkIn. The third answer writes it, so
           testing it here unmounted the card at the exact moment it had something
@@ -96,7 +106,7 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
           <Tag tone={zone}><Zap size={13} strokeWidth={SW} /> TODAY&apos;S READING</Tag>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 p-6 card card-pop" style={{ background: 'var(--surface)' }}>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 p-4 sm:p-6 card card-pop" style={{ background: 'var(--surface)' }}>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
               <span className="t-eyebrow" style={{ color: 'var(--ink-muted)' }}>CURRENT STATUS</span>
@@ -122,18 +132,25 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
           </div>
 
           <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center justify-center gap-4 sm:gap-6">
-              <OasisBlob zone={zone} size={96} />
+            {/* The readout pair, at the size the design asks for. The gap tightens
+                on mobile because 124 + 168 plus a roomy gutter is wider than a
+                375px phone, and this row must never be the thing that scrolls. */}
+            <div className="flex items-center justify-center gap-2 sm:gap-6">
+              <OasisBlob zone={zone} size={124} shadow />
               <CircularGauge
                 value={energy} zone={zone}
-                label={String(energy)} sublabel="/ 100 ENERGY" size={144}
+                label={String(energy)} sublabel="/ 100 ENERGY" size={168}
               />
             </div>
+            {/* The accessible name leads with the words on the button, then adds
+                what it is about. A name that only paraphrases the visible text
+                leaves a speech-input user saying what they can see and hitting
+                nothing (WCAG 2.5.3). The Schedule button is labelled the same way. */}
             <button
               className="chip focus-ring hit-44"
               onClick={onGoHow}
               style={{ minHeight: 32 }}
-              aria-label="How this energy score is worked out"
+              aria-label="How is this worked out? The energy score, explained"
             >
               <HelpCircle size={13} strokeWidth={SW} /> How is this worked out?
             </button>
@@ -230,7 +247,7 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
 
           {todayTasks.length === 0 ? (
             <p className="t-body py-4" style={{ color: 'var(--ink-2)' }}>
-              Nothing scheduled for today. Great time to rest and recharge!
+              Nothing scheduled for today. This is the day to get ahead — or to rest.
             </p>
           ) : (
             <div className="flex flex-col rule-divide">

@@ -115,11 +115,11 @@ export default function DecisionSheet({
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Sparkles size={18} strokeWidth={SW} />
-            <span className="t-sub text-ink" id={titleId}>
+            <h2 className="t-sub text-ink" id={titleId}>
               {phase === 'intake' ? 'Share a chat'
                 : phase === 'done' ? 'Logged'
                 : 'Should you take this on?'}
-            </span>
+            </h2>
           </div>
           <div className="flex items-center gap-3">
             {phase === 'reply' && (

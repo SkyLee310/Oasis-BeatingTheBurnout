@@ -9,13 +9,16 @@ export interface InitialsProps {
   src?: string | null
   /** Alt text for image */
   alt?: string
+  /** Disc colour behind the initials, and the backdrop while a photo loads.
+   *  A token, never a literal — this sits under text at small sizes. */
+  bg?: string
 }
 
 /**
  * Avatar component: renders the user's avatar image by default,
  * or a colored disc with initials when specific initials are provided.
  */
-export function Initials({ size = 40, initials, src, alt }: InitialsProps) {
+export function Initials({ size = 40, initials, src, alt, bg = 'var(--highlight)' }: InitialsProps) {
   // If specific image src is passed, or if initials is not specified / is the default 'MC' user:
   const isDefaultUser = !initials || initials === 'MC'
   const imageSrc = src !== undefined ? src : (isDefaultUser ? defaultAvatar : null)
@@ -31,7 +34,7 @@ export function Initials({ size = 40, initials, src, alt }: InitialsProps) {
           height: size,
           borderRadius: '50%',
           border: '2px solid var(--ink)',
-          background: 'var(--highlight)',
+          background: bg,
         }}
       />
     )
@@ -44,7 +47,7 @@ export function Initials({ size = 40, initials, src, alt }: InitialsProps) {
         width: size,
         height: size,
         borderRadius: '50%',
-        background: 'var(--highlight)',
+        background: bg,
         border: '2px solid var(--ink)',
         color: 'var(--ink)',
         fontFamily: 'Archivo, sans-serif',
