@@ -307,7 +307,7 @@ export default function EmotionBlob({
       {...(hideFromScreenReaders
         ? { 'aria-hidden': true as const }
         : { role: 'img', 'aria-label': `Mascot looking ${face.label.toLowerCase()}` })}
-      style={{ overflow: 'visible', flexShrink: 0 }}
+      style={{ overflow: 'visible', flexShrink: 0, display: 'inline-block', willChange: 'transform' }}
     >
       {showProp && <PropShape kind={face.prop} />}
       <path d={BODY} fill={face.fill} stroke={INK} strokeWidth="4" strokeLinejoin="round" />

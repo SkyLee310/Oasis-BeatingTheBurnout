@@ -273,7 +273,7 @@ export default function LoadPage({ onGoHow }: { onGoHow: () => void }) {
         <div className="flex flex-col gap-4 page-section-enter">
           <div className="card card-pop p-6 flex flex-col gap-5">
             <div className="flex items-center gap-3">
-              <OasisBlob zone={zoneFor(showAfter ? projected : energy)} size={64} float={false} />
+              <OasisBlob zone={zoneFor(showAfter ? projected : energy)} size={64} />
               <div className="flex flex-col">
                 <span className="t-sub text-ink">Simulate new commitment</span>
                 <span className="t-micro" style={{ color: 'var(--ink-muted)' }}>
