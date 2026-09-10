@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import defaultAvatar from '../assets/avatar.png'
 
 export interface InitialsProps {
@@ -19,15 +20,17 @@ export interface InitialsProps {
  * or a colored disc with initials when specific initials are provided.
  */
 export function Initials({ size = 40, initials, src, alt, bg = 'var(--highlight)' }: InitialsProps) {
+  const [hasError, setHasError] = useState(false)
   // If specific image src is passed, or if initials is not specified / is the default 'MC' user:
   const isDefaultUser = !initials || initials === 'MC'
   const imageSrc = src !== undefined ? src : (isDefaultUser ? defaultAvatar : null)
 
-  if (imageSrc) {
+  if (imageSrc && !hasError) {
     return (
       <img
         src={imageSrc}
         alt={alt || (initials ? `Avatar for ${initials}` : 'User avatar')}
+        onError={() => setHasError(true)}
         className="inline-block shrink-0 object-cover"
         style={{
           width: size,
@@ -56,7 +59,7 @@ export function Initials({ size = 40, initials, src, alt, bg = 'var(--highlight)
         letterSpacing: '-0.02em',
       }}
     >
-      {initials}
+      {initials || 'MC'}
     </span>
   )
 }
