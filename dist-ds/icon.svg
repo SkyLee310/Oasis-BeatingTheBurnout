@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Oasis">
+  <!-- Maskable: everything meaningful sits inside the centre 80% safe zone, so
+       Android's circle/squircle crop never clips the mascot. Hex is literal here
+       because a standalone asset cannot read the app's CSS tokens. -->
+  <rect width="512" height="512" fill="#f6f2e8"/>
+  <g transform="translate(106 106) scale(1.5)">
+    <path d="M 100 14 C 143 12 174 44 179 86 C 185 130 156 174 111 183 C 66 192 25 163 17 120 C 9 76 41 22 100 14 Z"
+          fill="#b6de8e" stroke="#14140f" stroke-width="9" stroke-linejoin="round"/>
+    <ellipse cx="60" cy="118" rx="11" ry="7" fill="#fbd5dc" stroke="#14140f" stroke-width="5"/>
+    <ellipse cx="140" cy="118" rx="11" ry="7" fill="#fbd5dc" stroke="#14140f" stroke-width="5"/>
+    <ellipse cx="74" cy="88" rx="9" ry="12" fill="#14140f"/>
+    <ellipse cx="126" cy="88" rx="9" ry="12" fill="#14140f"/>
+    <circle cx="77" cy="83" r="3.2" fill="#ffffff"/>
+    <circle cx="129" cy="83" r="3.2" fill="#ffffff"/>
+    <path d="M 76 116 Q 100 140 124 116" fill="none" stroke="#14140f" stroke-width="10" stroke-linecap="round"/>
+  </g>
+</svg>
