@@ -11,6 +11,7 @@ import {
 import { Initials, OasisBlob, SW } from './ds'
 
 import { OasisProvider, useEnergy } from './state/store'
+import type { IncomingRequest } from './state/types'
 
 import DashboardPage from './pages/DashboardPage'
 import SmartBandPage from './pages/BandPage'
@@ -24,6 +25,7 @@ import ScenarioBar, { demoMode } from './features/demo/ScenarioBar'
 import { useAmbientTemp } from './features/shell/useAmbientTemp'
 import VoiceAssistantPanel from './features/assistant/VoiceAssistantPanel'
 import VoiceSheet from './features/assistant/VoiceSheet'
+import DecisionSheet from './features/decision/DecisionSheet'
 
 // ─── App-only types ───────────────────────────────────────────────────────────
 type Page = 'dashboard' | 'band' | 'load' | 'recovery' | 'group' | 'how'
@@ -204,6 +206,11 @@ export default function App() {
 function AppShell() {
   const [page, setPage] = useState<Page>('dashboard')
   const [showVoice, setShowVoice] = useState(false)
+  // The Decision Check is opened from inside Oasis AI, so it is owned here
+  // rather than by the assistant: on mobile the assistant is itself a
+  // full-screen sheet, and a modal nested inside a modal has two focus
+  // traps fighting over the same Escape key.
+  const [decisionReq, setDecisionReq] = useState<IncomingRequest | null>(null)
   const [join, setJoin] = useState<string | null>(joinCode)
   const [avatars] = useState(avatarsMode)
   const [demo] = useState(demoMode)
@@ -276,11 +283,16 @@ function AppShell() {
             className="hide-mobile flex-col shrink-0"
             style={{ width: 360, minWidth: 320, maxWidth: 400, borderLeft: '2px solid var(--ink)' }}
           >
-            <VoiceAssistantPanel />
+            <VoiceAssistantPanel onOpenDecision={setDecisionReq} />
           </div>
 
           {/* Voice panel — mobile sheet */}
-          {showVoice && <VoiceSheet onClose={() => setShowVoice(false)} />}
+          {showVoice && (
+            <VoiceSheet
+              onClose={() => setShowVoice(false)}
+              onOpenDecision={req => { setShowVoice(false); setDecisionReq(req) }}
+            />
+          )}
         </div>
       </div>
 
@@ -290,6 +302,12 @@ function AppShell() {
         onOpenVoice={() => setShowVoice(prev => !prev)}
         isVoiceOpen={showVoice}
       />
+
+      {/* The Decision Check, raised by Oasis AI when a pasted chat turns out
+          to be somebody asking you for work. */}
+      {decisionReq && (
+        <DecisionSheet req={decisionReq} onClose={() => setDecisionReq(null)} />
+      )}
 
       {/* Scaffolding, deliberately last and deliberately hidden. */}
       <ScenarioBar startOpen={demo} />

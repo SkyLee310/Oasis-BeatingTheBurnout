@@ -236,6 +236,26 @@ Sizes in use: 124 (dashboard hero), 118 (recovery hero), 104 (band hero), 64
 (simulator), 40 (side rail logo), 34 (chat avatar). `float={false}` disables the
 idle animation for small instances.
 
+### Oasis AI
+
+One assistant, three routes, all of them spending the same energy model:
+
+- **Consultant** — `logic/assistantDecision.ts` answers questions about the week
+  ("can I accept 4h?", "what are my deadlines?").
+- **Agent** — `logic/assistantAgent.ts` reads an add-or-remove instruction and
+  returns a *proposal*. It never dispatches.
+- **Shared chat** — a pasted thread is priced in the transcript, then hands off
+  to the Decision Check.
+
+A proposal renders as a card under the reply, carrying the task, the date, the
+hours and the projected score. Nothing reaches the store until **Confirm**. An
+app whose argument is "see what this costs before you say yes" cannot be the
+thing that quietly adds four hours to your Thursday, so the confirm step is
+where the cost gets shown — which makes the confirm step the product.
+
+`App.tsx` owns `DecisionSheet`, not the panel: on mobile the assistant is itself
+a full-screen sheet, and two nested focus traps would fight over one Escape key.
+
 ### Navigation
 
 - **Desktop `SideRail`** — 78px, 2px ink right border. Active item = yellow +

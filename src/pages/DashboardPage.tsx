@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  ChevronRight, Heart, HelpCircle, MessageSquare, Moon, Shield, Zap,
+  ChevronRight, Heart, HelpCircle, Moon, Shield, Zap,
 } from 'lucide-react'
 
 import {
@@ -12,7 +12,6 @@ import type { ScenarioKey } from '../state/types'
 import { commitmentCost } from '../logic/energy'
 import { dateOf, dayOf, longDate } from '../logic/dates'
 import DailyCheck from '../features/checkin/DailyCheck'
-import DecisionSheet from '../features/decision/DecisionSheet'
 import RequestInbox from '../features/requests/RequestInbox'
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -28,7 +27,6 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
 }) {
   // The fallback way in, for an ask that arrived somewhere Oasis cannot see.
   // The inbox above is the main route; this one takes a pasted chat.
-  const [showIntake, setShowIntake] = useState(false)
   // Dismissing is local, not stored: skipping today should not skip tomorrow.
   // Held as the scenario it was dismissed under rather than a bare flag, so the
   // demo switcher restages the check along with every other screen: a card
@@ -291,42 +289,6 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
             Open full schedule <ChevronRight size={15} strokeWidth={SW} />
           </button>
         </div>
-      </section>
-
-      {/* ── Share a chat ────────────────────────────────────────────────── */}
-      <section className="flex flex-col gap-4">
-        {/* haspopup, not aria-expanded: this opens a modal over the page, and
-            saying "expanded" would promise a region that appears below the
-            button — which is exactly where a screen reader would then go
-            looking. The chevron points and stays pointing for the same reason;
-            a rotation is the drawn version of the same claim. */}
-        <button
-          onClick={() => setShowIntake(true)}
-          aria-haspopup="dialog"
-          className="card focus-ring flex items-center gap-4 p-5 text-left w-full"
-          style={{ cursor: 'pointer' }}
-        >
-          <span
-            className="flex items-center justify-center shrink-0"
-            style={{
-              width: 44, height: 44, borderRadius: 'var(--r-md)',
-              background: 'var(--butter)', border: '2px solid var(--ink)',
-            }}
-          >
-            <MessageSquare size={20} strokeWidth={SW} />
-          </span>
-          <span className="flex flex-col gap-0.5 flex-1 min-w-0">
-            <span className="t-sub text-ink">Asked somewhere else?</span>
-            <span className="t-micro" style={{ color: 'var(--ink-2)', lineHeight: 1.5 }}>
-              Requests from people on Oasis land in the inbox above. For an ask that
-              came in by WhatsApp or in person, paste it here and it gets priced the
-              same way.
-            </span>
-          </span>
-          <ChevronRight size={18} strokeWidth={SW} className="shrink-0" />
-        </button>
-
-        {showIntake && <DecisionSheet onClose={() => setShowIntake(false)} />}
       </section>
     </div>
   )

@@ -1,6 +1,7 @@
 import { Brain, X } from 'lucide-react'
 
 import { SW } from '../../ds'
+import type { IncomingRequest } from '../../state/types'
 import { useSheet } from '../shell/useSheet'
 import VoiceAssistantPanel from './VoiceAssistantPanel'
 
@@ -9,7 +10,10 @@ import VoiceAssistantPanel from './VoiceAssistantPanel'
 // that genuinely traps focus. Lifted out of App.tsx because the trap lives in a
 // hook, and a hook cannot be called from inside a conditional branch of a render.
 
-export default function VoiceSheet({ onClose }: { onClose: () => void }) {
+export default function VoiceSheet({ onClose, onOpenDecision }: {
+  onClose: () => void
+  onOpenDecision?: (req: IncomingRequest) => void
+}) {
   const ref = useSheet<HTMLDivElement>(onClose, { trap: true })
 
   return (
@@ -48,7 +52,7 @@ export default function VoiceSheet({ onClose }: { onClose: () => void }) {
           </button>
         </div>
         <div style={{ height: 'calc(82vh - 67px)' }}>
-          <VoiceAssistantPanel showHeader={false} />
+          <VoiceAssistantPanel showHeader={false} onOpenDecision={onOpenDecision} />
         </div>
       </div>
     </div>
