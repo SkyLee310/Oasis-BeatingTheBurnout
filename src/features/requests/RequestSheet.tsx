@@ -87,12 +87,19 @@ export default function RequestSheet({ req, onClose }: {
     // If the ask names a task nobody has claimed, taking it on here is the same
     // act as claiming it on the Group page. Doing both from one tap is what
     // makes the split move when a request is answered.
-    const claimed = state.project.tasks.find(t =>
-      t.assignee === null &&
-      t.title.toLowerCase() === req.parsed.title.toLowerCase())
-    const me = state.project.members.find(m => m.status === 'you')
-    if (claimed && me) {
-      dispatch({ type: 'assignTask', taskId: claimed.id, memberId: me.id })
+    //
+    // The search runs across every project. A request lands in the inbox with no
+    // idea which project page was last open, so matching only that one would
+    // quietly drop the claim whenever the ask belonged to a different course.
+    for (const project of state.projects) {
+      const claimed = project.tasks.find(t =>
+        t.assignee === null &&
+        t.title.toLowerCase() === req.parsed.title.toLowerCase())
+      const me = project.members.find(m => m.status === 'you')
+      if (claimed && me) {
+        dispatch({ type: 'assignTask', projectId: project.id, taskId: claimed.id, memberId: me.id })
+        break
+      }
     }
 
     setResolved(outcome)

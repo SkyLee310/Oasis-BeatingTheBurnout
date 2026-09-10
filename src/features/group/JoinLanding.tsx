@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ArrowRight, Check, Download, Share, Shield, Users } from 'lucide-react'
 
 import { Initials, OasisBlob, SW, Tag } from '../../ds'
-import { balance } from '../../logic/group'
+import { balance, projectByCode } from '../../logic/group'
 import { longDate } from '../../logic/dates'
 import { useDispatch, useOasis } from '../../state/store'
 
@@ -17,22 +17,27 @@ export default function JoinLanding({ code, onEnter }: { code: string; onEnter: 
   const state = useOasis()
   const dispatch = useDispatch()
 
-  const project = state.project
-  const b = balance(project)
-  const valid = code.toUpperCase() === project.code.toUpperCase()
+  // The code is the project's identity to anyone outside the app, so the link
+  // resolves against every project the student holds rather than whichever one
+  // the Group page happens to have open. Unresolvable reads as expired.
+  const project = projectByCode(state, code)
 
   // The invitee we are standing in for: the first person still waiting on the link.
-  const invitee = project.members.find(m => m.status === 'invited' || m.status === 'none')
+  const invitee = project?.members.find(m => m.status === 'invited' || m.status === 'none')
 
   const [installed, setInstalled] = useState(true)
   const [joined, setJoined] = useState(invitee?.status === 'joined')
 
   const join = () => {
-    if (invitee) dispatch({ type: 'setMemberStatus', memberId: invitee.id, status: 'joined' })
+    if (project && invitee) {
+      dispatch({
+        type: 'setMemberStatus', projectId: project.id, memberId: invitee.id, status: 'joined',
+      })
+    }
     setJoined(true)
   }
 
-  if (!valid) {
+  if (!project) {
     return (
       <Frame>
         <h1 className="t-title text-ink">That link has expired</h1>
@@ -45,6 +50,8 @@ export default function JoinLanding({ code, onEnter }: { code: string; onEnter: 
       </Frame>
     )
   }
+
+  const b = balance(project)
 
   if (joined) {
     return (

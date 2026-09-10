@@ -9,10 +9,12 @@ export interface CircularGaugeProps {
     /** The big number in the middle. */
     label: string;
     /** The small caption under it. */
-    sublabel: string;
+    sublabel?: string;
     /** Outer diameter in px. Inner disc and type scale with it. */
     size?: number;
+    /** Whether to render the ZoneChip beneath the gauge. Defaults to true. */
+    showChip?: boolean;
 }
 /** The hero ring gauge: a conic sweep, an ink-stroked disc, and a zone chip. */
-export declare function CircularGauge({ value, max, zone, label, sublabel, size, }: CircularGaugeProps): import("react").JSX.Element;
+export declare function CircularGauge({ value, max, zone, label, sublabel, size, showChip, }: CircularGaugeProps): import("react").JSX.Element;
 //# sourceMappingURL=CircularGauge.d.ts.map

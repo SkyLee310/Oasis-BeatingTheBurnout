@@ -177,7 +177,13 @@ export interface OasisState {
   commitments: Commitment[]
   recovery: Recovery
   requests: IncomingRequest[]
-  project: GroupProject
+  /** Every group assignment the student is in. A term is never one project, and
+   *  the number worth knowing — how much of yourself you have promised across
+   *  all of them at once — cannot be stated until they sit in one place. */
+  projects: GroupProject[]
+  /** Which project the Group page is showing. Resolved through activeProject(),
+   *  which falls back to the first project, so a stale id cannot blank a page. */
+  activeProjectId: string
   commute: CommuteState
   checkIn: DailyCheckIn | null
   decisions: DecisionLogEntry[]

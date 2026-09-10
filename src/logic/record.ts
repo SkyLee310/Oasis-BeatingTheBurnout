@@ -105,13 +105,17 @@ export function achievementsFor(history: PastProject[]): Achievement[] {
  * the first place.
  */
 function rescuedFor(state: OasisState): Achievement[] {
-  const me = state.project.members.find(m => m.status === 'you')
-  if (!me) return []
-
   const taken = state.decisions.filter(d => d.outcome !== 'declined')
-  const mine = state.project.tasks.filter(t =>
-    t.assignee === me.id &&
-    taken.some(d => d.title.toLowerCase() === t.title.toLowerCase()))
+
+  // Every project, not the open one. A request is answered from the inbox,
+  // which has no idea which project page the student last had in front of them.
+  const mine = state.projects.flatMap(project => {
+    const me = project.members.find(m => m.status === 'you')
+    if (!me) return []
+    return project.tasks.filter(t =>
+      t.assignee === me.id &&
+      taken.some(d => d.title.toLowerCase() === t.title.toLowerCase()))
+  })
 
   if (mine.length === 0) return []
 

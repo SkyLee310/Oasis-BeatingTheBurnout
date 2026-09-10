@@ -86,11 +86,18 @@ const COMMUTE: CommuteState = {
   skippedDays: [],
 }
 
-// ─── The group assignment ─────────────────────────────────────────────────────
-// Deliberately lopsided: Maya holds two of the three heaviest tasks, which is
-// what the fairness engine is there to surface.
+// ─── The group assignments ────────────────────────────────────────────────────
+// Three at once, because that is what a semester actually looks like, and
+// because one project can never produce the sentence this app exists to say:
+// not "you are carrying this group", but "you are carrying two of three groups
+// in the same fortnight".
+//
+// The shares come out at 69% / 62% / 20% on purpose. Two over and one light
+// reads as a real term; three over reads as a demo, and nobody believes a demo.
+// Ethics is the one where somebody else is doing the work, and it is what makes
+// the other two mean anything.
 
-const PROJECT: GroupProject = {
+const DS_PROJECT: GroupProject = {
   id: 'p-ds-a2',
   name: 'DS Assignment 2 — group report',
   course: 'Data Structures',
@@ -111,6 +118,56 @@ const PROJECT: GroupProject = {
     { id: 't6', title: 'Demo video', weight: 3, assignee: null, done: false },
   ],
 }
+
+/** Due a week after the DS report, which is the point: the second one is not a
+ *  relief, it is the reason the first one has no slack. */
+const WEB_PROJECT: GroupProject = {
+  id: 'p-web-term',
+  name: 'Web Systems — term project',
+  course: 'Web Systems',
+  due: addDays(WEEK_START, 11),
+  code: 'WB7K',
+  members: [
+    { id: 'you', name: 'Maya', status: 'you' },
+    { id: 'm5', name: 'Priya', status: 'joined' },
+    { id: 'm6', name: 'Hafiz', status: 'joined' },
+  ],
+  tasks: [
+    { id: 'w1', title: 'Frontend build', weight: 5, assignee: 'you', done: false },
+    { id: 'w2', title: 'API integration', weight: 3, assignee: 'you', done: true },
+    { id: 'w3', title: 'Database schema', weight: 3, assignee: 'm5', done: true },
+    { id: 'w4', title: 'User testing', weight: 2, assignee: 'm6', done: false },
+    { id: 'w5', title: 'Final report', weight: 3, assignee: null, done: false },
+  ],
+}
+
+/** The counter-example. Maya holds one small thing here and Nurul is carrying
+ *  it — proof the split reads what is there rather than always accusing the
+ *  group, which is the only reason to believe it on the other two. */
+const ETHICS_PROJECT: GroupProject = {
+  id: 'p-ethics-case',
+  name: 'Ethics case study',
+  course: 'Computing Ethics',
+  due: addDays(WEEK_START, 18),
+  code: 'ETH5',
+  members: [
+    { id: 'you', name: 'Maya', status: 'you' },
+    { id: 'm7', name: 'Nurul', status: 'joined' },
+    { id: 'm8', name: 'Kai', status: 'invited' },
+    { id: 'm9', name: 'Farah', status: 'joined' },
+  ],
+  tasks: [
+    { id: 'e1', title: 'Case research', weight: 3, assignee: 'm7', done: true },
+    { id: 'e2', title: 'Interview write-up', weight: 3, assignee: 'm9', done: false },
+    { id: 'e3', title: 'Slides', weight: 2, assignee: 'you', done: false },
+    { id: 'e4', title: 'Presentation script', weight: 2, assignee: 'm7', done: false },
+    { id: 'e5', title: 'Peer review sheet', weight: 2, assignee: null, done: false },
+  ],
+}
+
+/** Soonest deadline first. The Group page renders them in this order and the
+ *  first is what opens, so the order is a product decision, not a detail. */
+const PROJECTS: GroupProject[] = [DS_PROJECT, WEB_PROJECT, ETHICS_PROJECT]
 
 // ─── What she has already finished ────────────────────────────────────────────
 // Two terms of group projects, because a track record that starts empty is not
@@ -215,11 +272,12 @@ function base(scenario: ScenarioKey): OasisState {
     commitments: weekFromCalendar(),
     recovery: { ...RECOVERY, sleepHours: [...RECOVERY.sleepHours] },
     requests: [SHIFT_REQUEST, TASK_REQUEST],
-    project: {
-      ...PROJECT,
-      members: PROJECT.members.map(m => ({ ...m })),
-      tasks: PROJECT.tasks.map(t => ({ ...t })),
-    },
+    projects: PROJECTS.map(p => ({
+      ...p,
+      members: p.members.map(m => ({ ...m })),
+      tasks: p.tasks.map(t => ({ ...t })),
+    })),
+    activeProjectId: PROJECTS[0].id,
     commute: { ...COMMUTE, skippedDays: [] },
     checkIn: null,
     decisions: [],
@@ -241,7 +299,11 @@ export function seedFor(scenario: ScenarioKey): OasisState {
         ...s,
         commitments: [],
         requests: [],
-        project: { ...s.project, tasks: [], members: s.project.members.slice(0, 1) },
+        // One project, empty. A first-time student has joined a group but has
+        // not typed anything into it yet — three seeded assignments would be
+        // somebody else's account, not a new one.
+        projects: [{ ...s.projects[0], tasks: [], members: s.projects[0].members.slice(0, 1) }],
+        activeProjectId: s.projects[0].id,
         record: { shared: false, past: [] },
         recovery: { ...s.recovery, sleepHours: [7.2, 7.5, 7.1, 7.4, 7.6, 8.0, 7.8], restingHr: 72 },
       }

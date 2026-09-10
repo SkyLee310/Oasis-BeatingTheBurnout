@@ -19,3 +19,12 @@ logs/
 /.plugins/
 /.opencode-skills/
 .worktrees/
+
+# Standalone clickable prototype for PM review — self-deployed separately,
+# never tracked here.
+/prototype/
+
+# Design system sync tooling & transient artifacts
+/.ds-sync/
+ds-bundle/_ds_needs_recompile
+ds-bundle/.ds-bundle

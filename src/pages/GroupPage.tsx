@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import {
-  AlertTriangle, Check, History, MessageCircle, Scale, Shield, UserPlus, Users,
+  AlertTriangle, Check, History, Layers, MessageCircle, Scale, Shield, UserPlus, Users,
 } from 'lucide-react'
 
 import { Initials, SW, Tag } from '../ds'
 import type { ZoneKey } from '../ds'
-import type { Share } from '../logic/group'
-import { balance, capacityOf } from '../logic/group'
+import type { ProjectShare, Share } from '../logic/group'
+import { activeProject, balance, capacityOf, sharesAcrossProjects } from '../logic/group'
 import { longDate } from '../logic/dates'
 import { useDispatch, useOasis } from '../state/store'
 import type { Member } from '../state/types'
@@ -22,6 +22,12 @@ import WhatsAppMessageSheet from '../features/group/WhatsAppMessageSheet'
 // numbers, then hands over a message that raises it for you — the same move as
 // the Decision Check, applied to a team instead of a request.
 //
+// A third way, which no single project can ever see: three assignments each
+// hand out a perfectly even share, and a fair share of three projects is more
+// than one person has. Every group is looking only at its own sheet, so nobody
+// is behaving unreasonably and the student is still underwater. That is what
+// the top card is for.
+//
 // Deliberate boundary: everything here is about the *project*. No teammate's
 // personal energy score appears anywhere, and the page says so out loud.
 
@@ -36,13 +42,26 @@ export default function GroupPage() {
   const state = useOasis()
   const dispatch = useDispatch()
 
-  const project = state.project
-  const b = balance(project)
+  const project = activeProject(state)
+  const across = sharesAcrossProjects(state)
 
   const [inviting, setInviting] = useState<Member | 'all' | null>(null)
   const [showWhatsApp, setShowWhatsApp] = useState(false)
   const [showRecord, setShowRecord] = useState(false)
 
+  // Hooks first, then the guard. Only reachable with no projects at all —
+  // activeProject falls back to the first, so a stale id cannot land here.
+  if (!project) {
+    return (
+      <div className="card p-5 max-w-[560px]">
+        <p className="t-body" style={{ color: 'var(--ink-2)' }}>
+          No group projects yet. Open an invite link and the split appears here.
+        </p>
+      </div>
+    )
+  }
+
+  const b = balance(project)
   const you = b.shares.find(s => s.member.status === 'you')
 
   return (
@@ -60,6 +79,15 @@ export default function GroupPage() {
           {you && <span className="chip chip-selected">You hold {you.pct}%</span>}
         </div>
       </header>
+
+      {/* ── Every project at once ─────────────────────────────────────────── */}
+      {across.length > 1 && (
+        <AcrossProjects
+          shares={across}
+          activeId={project.id}
+          onSelect={id => dispatch({ type: 'selectProject', projectId: id })}
+        />
+      )}
 
       {/* ── The imbalance, named ──────────────────────────────────────────── */}
       {b.overloaded && (
@@ -158,7 +186,9 @@ export default function GroupPage() {
                   }}
                 >
                   <button
-                    onClick={() => dispatch({ type: 'toggleTaskDone', taskId: t.id })}
+                    onClick={() =>
+                      dispatch({ type: 'toggleTaskDone', projectId: project.id, taskId: t.id })
+                    }
                     aria-pressed={t.done}
                     aria-label={`Mark ${t.title} ${t.done ? 'not done' : 'done'}`}
                     className="focus-ring hit-44 shrink-0 flex items-center justify-center"
@@ -193,6 +223,7 @@ export default function GroupPage() {
                     onChange={e =>
                       dispatch({
                         type: 'assignTask',
+                        projectId: project.id,
                         taskId: t.id,
                         memberId: e.target.value === '' ? null : e.target.value,
                       })
@@ -312,5 +343,90 @@ function ShareRow({ share, capacity, onInvite, onOpenRecord }: {
         <span className="t-micro" style={{ color: 'var(--ink-2)' }}>Over an even share</span>
       )}
     </div>
+  )
+}
+
+/**
+ * The sentence a single project cannot say. Each group only sees its own sheet,
+ * so three of them can each hand out an even share and still leave one person
+ * carrying more than a person has. Until these sat in one place nothing in the
+ * app could tell — the page would show 69%, call it a conversation with three
+ * people, and the student would still be drowning for a reason no screen had a
+ * word for.
+ *
+ * It is also the switcher. A list of your projects and a way to open one are
+ * the same list; a separate row of tabs above it would only say it twice.
+ */
+function AcrossProjects({ shares, activeId, onSelect }: {
+  shares: ProjectShare[]
+  activeId: string
+  onSelect: (id: string) => void
+}) {
+  const over = shares.filter(s => s.over)
+
+  const line = over.length === 0
+    ? `Your share is at or under an even split on all ${shares.length}.`
+    : over.length === 1
+      ? `You are over an even split on ${over[0].project.course}. The others are holding.`
+      : `You are over an even split on ${over.length} of them — ${over.map(s => s.project.course).join(' and ')}. Each of those groups only sees its own sheet.`
+
+  return (
+    <section className="card p-5 flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-3">
+        <span className="t-sub text-ink">
+          <Layers size={17} strokeWidth={SW} className="inline mr-2" />
+          Across every project
+        </span>
+        <span className="t-micro" style={{ color: 'var(--ink-muted)' }}>
+          {shares.length} running
+        </span>
+      </div>
+
+      <p className="t-body" style={{ color: 'var(--ink-2)', lineHeight: 1.5 }}>{line}</p>
+
+      <div className="flex flex-col gap-2" role="group" aria-label="Switch project">
+        {shares.map(({ project, pct, over: isOver }) => {
+          const open = project.id === activeId
+          return (
+            <button
+              key={project.id}
+              onClick={() => onSelect(project.id)}
+              aria-pressed={open}
+              className="focus-ring flex flex-col gap-2 p-3 text-left"
+              style={{
+                background: open ? 'var(--surface-2)' : 'var(--surface)',
+                border: '2px solid var(--ink)',
+                borderRadius: 'var(--r-sm)',
+                boxShadow: open ? '3px 3px 0 var(--ink)' : 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <div className="flex items-center gap-2 w-full">
+                <span className="t-label text-ink flex-1 min-w-0 truncate">{project.course}</span>
+                {isOver && <AlertTriangle size={13} strokeWidth={SW} className="shrink-0" />}
+                <span className="t-stat shrink-0" style={{ fontSize: 15, color: 'var(--ink)' }}>
+                  {pct}%
+                </span>
+              </div>
+
+              <div className="track" style={{ height: 10 }}>
+                <div
+                  className="bar-fill"
+                  style={{
+                    height: '100%',
+                    width: `${pct}%`,
+                    background: isOver ? 'var(--blush-deep)' : 'var(--sky-deep)',
+                  }}
+                />
+              </div>
+
+              <span className="t-micro" style={{ color: 'var(--ink-muted)' }}>
+                Due {longDate(project.due)}{open ? ' · open' : ''}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </section>
   )
 }

@@ -1,7 +1,7 @@
 import { Eye } from 'lucide-react'
 
 import { Initials, SW, Tag } from '../../ds'
-import { capacityOf } from '../../logic/group'
+import { activeProject, capacityOf } from '../../logic/group'
 import { useOasis } from '../../state/store'
 import type { IncomingRequest } from '../../state/types'
 import CapacityChip from '../group/CapacityChip'
@@ -37,13 +37,19 @@ export default function Outcome({ req, outcome }: {
   req: IncomingRequest
   outcome: ResolvedOutcome
 }) {
-  const { project } = useOasis()
+  const state = useOasis()
 
-  const me = project.members.find(m => m.status === 'you')
+  // One project, deliberately — never a roll-up across all of them. A teammate
+  // on the ethics case learning that you are buried in a data-science build is
+  // exactly the leak the Group page promises does not happen. Capacity is a
+  // fact about the work you share with this person, and it stays that way.
+  const project = activeProject(state)
+
+  const me = project?.members.find(m => m.status === 'you')
   const name = me?.name ?? 'You'
-  const capacity = me ? capacityOf(project, me.id) : 'green'
+  const capacity = project && me ? capacityOf(project, me.id) : 'green'
 
-  const open = me
+  const open = project && me
     ? project.tasks.filter(t => t.assignee === me.id && !t.done).length
     : 0
 

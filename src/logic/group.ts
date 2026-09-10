@@ -1,5 +1,5 @@
 import type { ZoneKey } from '../ds'
-import type { GroupProject, Member, ProjectTask } from '../state/types'
+import type { GroupProject, Member, OasisState, ProjectTask } from '../state/types'
 
 // ─── Group fairness ───────────────────────────────────────────────────────────
 // The complaint about university group work is never "we have no task list" —
@@ -11,6 +11,26 @@ import type { GroupProject, Member, ProjectTask } from '../state/types'
 //
 // Everything here is pure and derived from the project, so the Group page, the
 // invite sheet and the join landing all read the same numbers.
+
+// ─── Which project ────────────────────────────────────────────────────────────
+// A student is in several group assignments at once, which is the whole reason
+// the term feels the way it does. Every function below takes a GroupProject
+// rather than reading state, so none of them had to change when one project
+// became a list — these two resolvers are the only place that knows.
+
+/** The project the Group page is showing. Falls back to the first rather than
+ *  returning null on a stale id, so switching scenarios cannot blank the page. */
+export function activeProject(s: OasisState): GroupProject | null {
+  if (s.projects.length === 0) return null
+  return s.projects.find(p => p.id === s.activeProjectId) ?? s.projects[0]
+}
+
+/** Resolve an invite link. The code is the project's identity to anyone outside
+ *  the app, so ?join=<code> has to search all of them, not just the open one. */
+export function projectByCode(s: OasisState, code: string): GroupProject | null {
+  const wanted = code.trim().toUpperCase()
+  return s.projects.find(p => p.code.toUpperCase() === wanted) ?? null
+}
 
 /** One member's slice of the project, in weight and in percent. */
 export interface Share {
@@ -71,6 +91,37 @@ export function balance(project: GroupProject): Balance {
   )
 
   return { shares, assigned, fair, unassigned, overloaded: heaviest }
+}
+
+// ─── The same person, across every project ────────────────────────────────────
+// The sentence a single project can never say. Carrying 48% of one assignment is
+// a conversation with three people; carrying 48%, 52% and 40% of three at once
+// is the thing that actually ends a term, and until now nothing in the app could
+// see it, because nothing held more than one project at a time.
+
+export interface ProjectShare {
+  project: GroupProject
+  /** Your share of that project's assigned weight, 0–100. */
+  pct: number
+  /** Over 1.5× an even split of it. */
+  over: boolean
+}
+
+/**
+ * Your slice of each project, in state order. Projects you are not a member of
+ * are skipped rather than reported as 0% — a project you are not in is not a
+ * project you are doing well at.
+ */
+export function sharesAcrossProjects(s: OasisState): ProjectShare[] {
+  const out: ProjectShare[] = []
+
+  for (const project of s.projects) {
+    const mine = balance(project).shares.find(sh => sh.member.status === 'you')
+    if (!mine) continue
+    out.push({ project, pct: mine.pct, over: mine.over })
+  }
+
+  return out
 }
 
 // ─── Capacity, as a word ──────────────────────────────────────────────────────

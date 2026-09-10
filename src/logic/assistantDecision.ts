@@ -1,5 +1,6 @@
 import { addDays, shortDate } from './dates'
 import { projectEnergy, zoneFor, avgSleep } from './energy'
+import { sharesAcrossProjects } from './group'
 import type { Commitment, OasisState } from '../state/types'
 
 // ─── Oasis AI Assistant Decision Engine ───────────────────────────────────────
@@ -75,9 +76,10 @@ export function evaluateAITaskQuery(
     const sleep = avgSleep(state)
     const isSleepLow = sleep < 6.0
 
-    // Group imbalance check
-    const youShare = state.project.members.find(m => m.status === 'you')
-    const hasHeavyGroup = youShare ? true : false
+    // Group imbalance check, across every project — three groups can each hand
+    // out a perfectly even share and still leave one person underwater, and no
+    // single project sheet can see it.
+    const hasHeavyGroup = sharesAcrossProjects(state).some(p => p.over)
 
     // Decision Logic
     let decision: 'DECLINE' | 'NEGOTIATE' | 'ACCEPT'

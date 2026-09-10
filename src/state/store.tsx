@@ -14,7 +14,7 @@ import {
 import { energyFactors, energyFor, tempFor, zoneFor } from '../logic/energy'
 import { DEFAULT_SCENARIO, seedFor } from './seed'
 import type {
-  Commitment, DailyCheckIn, IncomingRequest,
+  Commitment, DailyCheckIn, GroupProject, IncomingRequest,
   MemberStatus, OasisState, ScenarioKey,
 } from './types'
 
@@ -24,8 +24,10 @@ const STORAGE_KEY = 'oasis.v1'
  *  onto real 2026 dates, so every stored `date` was off by a day. 3: the track
  *  record arrived, and a stored state from before it has no `record` at all —
  *  spreading it over a fresh seed would keep the seeded history but silently
- *  reset the share toggle, which is the one thing on it a user chose. */
-const SCHEMA = 3
+ *  reset the share toggle, which is the one thing on it a user chose. 4: one
+ *  group project became a list of them, so a stored state carries a `project`
+ *  key the app no longer reads and lacks the `projects` it now needs. */
+const SCHEMA = 4
 
 // ─── Actions ──────────────────────────────────────────────────────────────────
 
@@ -46,15 +48,32 @@ export type Action =
       energySaved: number
     }
   | { type: 'checkIn'; checkIn: DailyCheckIn }
-  | { type: 'setMemberStatus'; memberId: string; status: MemberStatus }
-  | { type: 'assignTask'; taskId: string; memberId: string | null }
-  | { type: 'toggleTaskDone'; taskId: string }
+  | { type: 'selectProject'; projectId: string }
+  // Every project action names its project. It would be shorter to let the
+  // reducer assume the open one, but a request answered from the inbox can
+  // claim a task in a project the student is not looking at — and a reducer
+  // that reads activeProjectId is a reducer whose result depends on which
+  // screen was on top, which is exactly what the pure-replay demo cannot have.
+  | { type: 'setMemberStatus'; projectId: string; memberId: string; status: MemberStatus }
+  | { type: 'assignTask'; projectId: string; taskId: string; memberId: string | null }
+  | { type: 'toggleTaskDone'; projectId: string; taskId: string }
   | { type: 'toggleCommitmentDone'; id: string }
   | { type: 'toggleRecordShare' }
 
 /** What each sleep answer means in hours. Rough on purpose — a student rating
  *  last night out of three is not reporting to two decimal places. */
 const REPORTED_SLEEP: Record<1 | 2 | 3, number> = { 1: 4.5, 2: 6, 3: 7.5 }
+
+/** Change one project, leave the rest alone. Every project action goes through
+ *  here so the list-of-projects shape stays an implementation detail of the
+ *  store rather than something three reducer cases each re-derive. */
+function inProject(
+  s: OasisState,
+  projectId: string,
+  change: (p: GroupProject) => GroupProject,
+): OasisState {
+  return { ...s, projects: s.projects.map(p => (p.id === projectId ? change(p) : p)) }
+}
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
 // Pure: no Date.now(), no crypto.randomUUID(). Ids and timestamps are derived
@@ -119,35 +138,29 @@ export function reducer(s: OasisState, a: Action): OasisState {
       return { ...s, checkIn: a.checkIn, recovery: { ...s.recovery, sleepHours } }
     }
 
+    case 'selectProject':
+      return { ...s, activeProjectId: a.projectId }
+
     case 'setMemberStatus':
-      return {
-        ...s,
-        project: {
-          ...s.project,
-          members: s.project.members.map(m =>
-            m.id === a.memberId ? { ...m, status: a.status } : m),
-        },
-      }
+      return inProject(s, a.projectId, p => ({
+        ...p,
+        members: p.members.map(m =>
+          m.id === a.memberId ? { ...m, status: a.status } : m),
+      }))
 
     case 'assignTask':
-      return {
-        ...s,
-        project: {
-          ...s.project,
-          tasks: s.project.tasks.map(t =>
-            t.id === a.taskId ? { ...t, assignee: a.memberId } : t),
-        },
-      }
+      return inProject(s, a.projectId, p => ({
+        ...p,
+        tasks: p.tasks.map(t =>
+          t.id === a.taskId ? { ...t, assignee: a.memberId } : t),
+      }))
 
     case 'toggleTaskDone':
-      return {
-        ...s,
-        project: {
-          ...s.project,
-          tasks: s.project.tasks.map(t =>
-            t.id === a.taskId ? { ...t, done: !t.done } : t),
-        },
-      }
+      return inProject(s, a.projectId, p => ({
+        ...p,
+        tasks: p.tasks.map(t =>
+          t.id === a.taskId ? { ...t, done: !t.done } : t),
+      }))
 
     case 'toggleCommitmentDone':
       return {

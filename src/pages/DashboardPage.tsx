@@ -170,9 +170,9 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
           </button>
         </div>
 
-        <div className="card card-pop p-6 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[var(--border)] gap-6" style={{ background: 'var(--surface)' }}>
+        <div className="card card-pop p-6 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[var(--border)]" style={{ background: 'var(--surface)' }}>
           {/* Energy index */}
-          <div className="flex flex-col justify-between gap-3 md:pr-4">
+          <div className="flex flex-col justify-between gap-3 pb-6 md:pb-0 md:pr-6">
             <div className="flex items-center justify-between gap-2">
               <span className="inline-flex items-center gap-2 t-eyebrow" style={{ color: 'var(--ink)' }}>
                 <Zap size={14} strokeWidth={SW} /> Energy index
@@ -180,12 +180,12 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
               <ZoneChip zone={zone} />
             </div>
             <div className="flex items-center justify-between gap-3 my-auto">
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 min-w-0">
                 <div className="flex items-baseline gap-1.5">
                   <span className="t-stat text-ink" style={{ fontSize: 44 }}>{energy}</span>
                   <span className="t-label" style={{ color: 'var(--ink-2)' }}>/ 100</span>
                 </div>
-                <span className="t-micro" style={{ color: 'var(--ink-2)' }}>
+                <span className="t-micro truncate" style={{ color: 'var(--ink-2)' }}>
                   Top drain: <strong style={{ fontWeight: 700, color: 'var(--ink)' }}>{top.label}</strong>
                 </span>
               </div>
@@ -195,7 +195,7 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
                   zone={zone}
                   label={String(energy)}
                   sublabel="/ 100"
-                  size={68}
+                  size={64}
                   showChip={false}
                 />
               </div>
@@ -203,7 +203,7 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
           </div>
 
           {/* Heart rate */}
-          <div className="flex flex-col justify-between gap-3 pt-4 md:pt-0 md:px-4">
+          <div className="flex flex-col justify-between gap-3 py-6 md:py-0 md:px-6">
             <div className="flex items-center justify-between gap-2">
               <span className="inline-flex items-center gap-2 t-eyebrow" style={{ color: 'var(--ink)' }}>
                 <Heart size={14} strokeWidth={SW} /> Heart rate
@@ -223,7 +223,7 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
           </div>
 
           {/* Sleep */}
-          <div className="flex flex-col justify-between gap-3 pt-4 md:pt-0 md:pl-4">
+          <div className="flex flex-col justify-between gap-3 pt-6 md:pt-0 md:pl-6">
             <div className="flex items-center justify-between gap-2">
               <span className="inline-flex items-center gap-2 t-eyebrow" style={{ color: 'var(--ink)' }}>
                 <Moon size={14} strokeWidth={SW} /> Sleep · 7-day
