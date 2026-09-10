@@ -429,10 +429,19 @@ button:focus-visible,
 .rule-t { border-top: 2px solid var(--ink); }
 
 /* ═══ Mascot ════════════════════════════════════════════════════════════════ */
-.blob-float { animation: blobFloat 5s ease-in-out infinite; transform-origin: 50% 100%; }
+.blob-float {
+  display: inline-block;
+  animation: blobFloat 2.8s ease-in-out infinite;
+  transform-origin: 50% 85%;
+  will-change: transform;
+}
 @keyframes blobFloat {
-  0%, 100% { transform: translateY(0) rotate(-1deg); }
-  50%      { transform: translateY(-6px) rotate(1deg); }
+  0%, 100% {
+    transform: translateY(0px) rotate(-1.5deg) scale(1, 1);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1.5deg) scale(1.025, 0.985);
+  }
 }
 
 /* ═══ Screen-size helpers ═══════════════════════════════════════════════════ */

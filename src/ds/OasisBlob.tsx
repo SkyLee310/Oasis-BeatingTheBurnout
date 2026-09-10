@@ -60,6 +60,8 @@ export function OasisBlob({
       role="img" aria-label={label}
       style={{
         overflow: 'visible', flexShrink: 0,
+        display: 'inline-block',
+        willChange: 'transform',
         // The house offset shadow, not a soft blur: the mascot lifts off the
         // surface the same way every card does.
         ...(shadow ? { filter: 'drop-shadow(var(--shadow-hard))' } : {}),

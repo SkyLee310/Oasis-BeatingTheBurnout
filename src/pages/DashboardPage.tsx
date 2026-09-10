@@ -179,13 +179,27 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
               </span>
               <ZoneChip zone={zone} />
             </div>
-            <div className="flex items-baseline gap-1.5 my-auto">
-              <span className="t-stat text-ink" style={{ fontSize: 44 }}>{energy}</span>
-              <span className="t-label" style={{ color: 'var(--ink-2)' }}>/ 100</span>
+            <div className="flex items-center justify-between gap-3 my-auto">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="t-stat text-ink" style={{ fontSize: 44 }}>{energy}</span>
+                  <span className="t-label" style={{ color: 'var(--ink-2)' }}>/ 100</span>
+                </div>
+                <span className="t-micro" style={{ color: 'var(--ink-2)' }}>
+                  Top drain: <strong style={{ fontWeight: 700, color: 'var(--ink)' }}>{top.label}</strong>
+                </span>
+              </div>
+              <div className="shrink-0">
+                <CircularGauge
+                  value={energy}
+                  zone={zone}
+                  label={String(energy)}
+                  sublabel="/ 100"
+                  size={68}
+                  showChip={false}
+                />
+              </div>
             </div>
-            <span className="t-micro" style={{ color: 'var(--ink-2)' }}>
-              Top drain: <strong style={{ fontWeight: 700, color: 'var(--ink)' }}>{top.label}</strong>
-            </span>
           </div>
 
           {/* Heart rate */}
