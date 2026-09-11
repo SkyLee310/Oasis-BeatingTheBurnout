@@ -15,7 +15,7 @@ import { CALENDAR_WEEK } from '../ds'
 import { addDays } from '../logic/dates'
 import type {
   Commitment, CommuteState, GroupProject, IncomingRequest,
-  OasisState, PastProject, Recovery, ScenarioKey,
+  OasisState, PastProject, Profile, Recovery, ScenarioKey,
 } from './types'
 
 /** Monday of the demo week — which is also the CodeNection prototype week. */
@@ -263,12 +263,29 @@ const TASK_REQUEST: IncomingRequest = {
   status: 'pending',
 }
 
+// --- Who this is ------------------------------------------------------------
+// Maya is the name on the three projects below, so she is the name here: the
+// 'you' member and the profile have to agree from the first render, and
+// store.tsx is what keeps them agreeing afterwards.
+//
+// The bio starts empty and no pattern is picked. Both are deliberate -- the Me
+// page is full of figures on first open because it computes all four patterns
+// whether or not any is selected, and the empty ones are the invitation.
+
+const PROFILE: Profile = {
+  name: 'Maya',
+  bio: '',
+  avatar: null,
+  patterns: [],
+}
+
 // ─── Scenarios ────────────────────────────────────────────────────────────────
 
 function base(scenario: ScenarioKey): OasisState {
   return {
     today: TODAY,
     scenario,
+    profile: { ...PROFILE, patterns: [...PROFILE.patterns] },
     commitments: weekFromCalendar(),
     recovery: { ...RECOVERY, sleepHours: [...RECOVERY.sleepHours] },
     requests: [SHIFT_REQUEST, TASK_REQUEST],
