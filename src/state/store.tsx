@@ -49,6 +49,10 @@ export type Action =
     }
   | { type: 'checkIn'; checkIn: DailyCheckIn }
   | { type: 'selectProject'; projectId: string }
+  // A project you just made is a project you want to be looking at, so this one
+  // action moves the selection too. Every *other* project action names its
+  // project for the reason in the comment below.
+  | { type: 'addProject'; project: GroupProject }
   // Every project action names its project. It would be shorter to let the
   // reducer assume the open one, but a request answered from the inbox can
   // claim a task in a project the student is not looking at — and a reducer
@@ -141,6 +145,13 @@ export function reducer(s: OasisState, a: Action): OasisState {
 
     case 'selectProject':
       return { ...s, activeProjectId: a.projectId }
+
+    case 'addProject':
+      return {
+        ...s,
+        projects: [...s.projects, a.project],
+        activeProjectId: a.project.id,
+      }
 
     case 'setMemberStatus':
       return inProject(s, a.projectId, p => ({
