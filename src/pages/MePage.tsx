@@ -5,6 +5,7 @@ import { useDispatch, useOasis } from '../state/store'
 import { BIO_MAX } from '../state/types'
 import MeAvatar from '../features/me/MeAvatar'
 import AvatarPicker from '../features/me/AvatarPicker'
+import PatternCards from '../features/me/PatternCards'
 
 // --- Me ---------------------------------------------------------------------
 // A private mirror, not a profile card. There is no version of this screen
@@ -87,6 +88,8 @@ export default function MePage({ onBack }: { onBack: () => void }) {
 
         <AvatarPicker />
       </section>
+
+      <PatternCards />
     </div>
   )
 }
