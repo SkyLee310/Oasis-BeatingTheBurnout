@@ -1,5 +1,8 @@
-import { activeProject } from '../logic/group'
-import { useOasis } from '../state/store'
+import { useState } from 'react'
+
+import { activeProject, sharesAcrossProjects } from '../logic/group'
+import { useDispatch, useOasis } from '../state/store'
+import ProjectList from '../features/group/ProjectList'
 import ProjectDetail from '../features/group/ProjectDetail'
 
 // --- Group ------------------------------------------------------------------
@@ -16,17 +19,28 @@ import ProjectDetail from '../features/group/ProjectDetail'
 
 export default function GroupPage() {
   const state = useOasis()
+  const dispatch = useDispatch()
+  const [view, setView] = useState<'list' | 'detail'>('list')
+
   const project = activeProject(state)
 
-  if (!project) {
+  // The list is the landing view, so an empty state belongs to it rather than
+  // to this router -- ProjectList says what to do about having no assignments.
+  if (view === 'list' || !project) {
     return (
-      <div className="card p-5 max-w-[560px]">
-        <p className="t-body" style={{ color: 'var(--ink-2)' }}>
-          No group projects yet. Open an invite link and the split appears here.
-        </p>
-      </div>
+      <ProjectList
+        shares={sharesAcrossProjects(state)}
+        onOpen={id => {
+          dispatch({ type: 'selectProject', projectId: id })
+          setView('detail')
+        }}
+      />
     )
   }
 
-  return <ProjectDetail project={project} />
+  return (
+    <div key={project.id} className="page-section-enter">
+      <ProjectDetail project={project} onBack={() => setView('list')} />
+    </div>
+  )
 }

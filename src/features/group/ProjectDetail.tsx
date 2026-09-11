@@ -15,7 +15,6 @@ import InviteSheet from './InviteSheet'
 import WhatsAppMessageSheet from './WhatsAppMessageSheet'
 import AddTaskRow from './AddTaskRow'
 import TrackRecordSheet from '../record/TrackRecordSheet'
-import RequestInbox from '../requests/RequestInbox'
 
 // --- One assignment ---------------------------------------------------------
 // Everything about a single project: who is carrying what, what is unclaimed,
@@ -49,6 +48,12 @@ export default function ProjectDetail({ project, onBack }: {
 
   return (
     <div className="flex flex-col gap-6 max-w-[1100px]">
+      {onBack && (
+        <button className="chip focus-ring hit-44 self-start" onClick={onBack}>
+          <ArrowLeft size={14} strokeWidth={SW} /> All assignments
+        </button>
+      )}
+
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <header className="flex flex-col gap-3">
         <Tag tone="yellow">GROUP PROJECT</Tag>
@@ -84,11 +89,6 @@ export default function ProjectDetail({ project, onBack }: {
           </div>
         </div>
       )}
-
-      {/* ── What a teammate has asked you for ─────────────────────────────
-          On this page rather than only on Home, because the ask and the split
-          it would change are the same conversation. */}
-      <RequestInbox />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-6 items-start">
         {/* ── Who is carrying what ────────────────────────────────────────── */}
