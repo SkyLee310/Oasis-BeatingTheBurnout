@@ -13,6 +13,7 @@ import { addDays, dateOf, shortDate } from '../logic/dates'
 import { weekDays, weekLabel } from '../logic/week'
 import DayDetail from '../features/schedule/DayDetail'
 import AcademicDDLRadar from '../features/schedule/AcademicDDLRadar'
+import AddCommitmentForm from '../features/schedule/AddCommitmentForm'
 
 // ─── Schedule & load ──────────────────────────────────────────────────────────
 type LoadTab = 'schedule' | 'categories' | 'tasks' | 'commitment'
@@ -142,6 +143,8 @@ export default function LoadPage({ onGoHow }: { onGoHow: () => void }) {
               ))}
             </div>
           </div>
+
+          <AddCommitmentForm onAdded={isoDay => setSelectedDate(dateOf(isoDay))} />
 
           <WeekCalendar
             days={days}
