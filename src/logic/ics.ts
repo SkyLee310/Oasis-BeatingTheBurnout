@@ -216,3 +216,94 @@ function buildEvent(props: Prop[]): IcsEvent | null {
     exdates,
   }
 }
+
+// ─── Recurrence, bounded by the week ──────────────────────────────────────────
+// A general RRULE engine is a genuinely large piece of software. This is not one
+// and does not need to be: Oasis plans seven days, so the only question ever put
+// to a rule is "which of these seven dates do you land on".
+//
+// WEEKLY and DAILY are handled properly, because between them they are what a
+// class timetable is made of. MONTHLY and YEARLY contribute their first
+// occurrence if it falls in the window and nothing further — a monthly seminar
+// is not what makes a term heavy, and pretending to expand one would mean
+// writing the engine this deliberately is not.
+
+const DOW_CODE = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA']
+
+/** 0 = Sunday, matching Date#getDay. Midday-pinned, clear of DST. */
+const dowOf = (isoDate: string) => new Date(`${isoDate}T12:00:00`).getDay()
+
+function ruleParts(rrule: string): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const part of rrule.split(';')) {
+    const eq = part.indexOf('=')
+    if (eq > 0) out[part.slice(0, eq).toUpperCase()] = part.slice(eq + 1)
+  }
+  return out
+}
+
+/** UNTIL is a date or date-time; only the date half bounds a day-grained series. */
+const untilDate = (v: string | undefined) =>
+  v && v.length >= 8 ? `${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}` : null
+
+/** Local-date arithmetic, midday-pinned. Same rule as logic/dates.ts addDays,
+ *  duplicated so this module keeps importing nothing. */
+function addLocalDays(isoDate: string, days: number): string {
+  const d = new Date(`${isoDate}T12:00:00`)
+  d.setDate(d.getDate() + days)
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+export function expandInto(ev: IcsEvent, fromIso: string, toIso: string): string[] {
+  const skip = new Set(ev.exdates)
+  const inWindow = (d: string) => d >= fromIso && d <= toIso && !skip.has(d)
+
+  if (!ev.rrule) return inWindow(ev.startDate) ? [ev.startDate] : []
+
+  const r = ruleParts(ev.rrule)
+  const freq = (r.FREQ ?? '').toUpperCase()
+  const interval = Math.max(1, Number(r.INTERVAL ?? 1) || 1)
+  const until = untilDate(r.UNTIL)
+  const count = r.COUNT ? Number(r.COUNT) : null
+
+  if (freq !== 'WEEKLY' && freq !== 'DAILY') {
+    return inWindow(ev.startDate) ? [ev.startDate] : []
+  }
+
+  // No BYDAY means "the weekday the series started on" — what every timetable
+  // export without one means.
+  const byDay = freq === 'WEEKLY'
+    ? new Set((r.BYDAY ?? DOW_CODE[dowOf(ev.startDate)]).split(',').map(d => d.trim().toUpperCase()))
+    : null
+
+  // COUNT limits the whole series, not the window, so occurrences before the
+  // window still consume it — walk from the start to know how many have gone by.
+  // Capped so a daily rule with COUNT=9999 cannot spin.
+  const MAX_WALK = 4000
+  const out: string[] = []
+  let seen = 0
+
+  const startOfWeek = (d: string) => addLocalDays(d, -((dowOf(d) + 6) % 7))
+  const seriesWeek = startOfWeek(ev.startDate)
+
+  const total = daysBetween(ev.startDate, toIso)
+  if (total < 0) return []
+
+  for (let i = 0; i <= Math.min(total, MAX_WALK); i++) {
+    const day = addLocalDays(ev.startDate, i)
+    if (until && day > until) break
+    if (count !== null && seen >= count) break
+
+    const fires = freq === 'DAILY'
+      ? i % interval === 0
+      : Math.floor(daysBetween(seriesWeek, startOfWeek(day)) / 7) % interval === 0
+        && byDay!.has(DOW_CODE[dowOf(day)])
+
+    if (!fires) continue
+    seen++
+    if (inWindow(day)) out.push(day)
+  }
+
+  return out
+}
+
