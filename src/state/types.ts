@@ -172,11 +172,48 @@ export interface RecordState {
   past: PastProject[]
 }
 
+// --- Profile ----------------------------------------------------------------
+// The only part of state the student writes about themselves rather than about
+// their week. It is private: nothing here is shareable, and the one switch in
+// the app that changes what a teammate sees is record.shared, not this.
+//
+// Both keys below are declared here rather than imported from the art and the
+// logic that use them, because this file is the layer underneath both. The Me
+// page renders <EmotionBlob emotion={avatar} />, and that line is where the
+// compiler checks that AvatarKey still names eight real faces.
+
+/** One of the eight faces in src/features/avatars/EmotionBlob.tsx, or null for
+ *  the default photo. */
+export type AvatarKey =
+  | 'calm' | 'proud' | 'confident' | 'anxious'
+  | 'overwhelmed' | 'drained' | 'guilty' | 'frustrated'
+
+/** A habit a student recognises in themselves. Self-declared -- Oasis measures
+ *  it, and never assigns it. See src/logic/pattern.ts. */
+export type PatternKey = 'cant-say-no' | 'last-minute' | 'carries-team' | 'sleep-debt'
+
+export interface Profile {
+  /** Also written onto the 'you' member of every project, because that is the
+   *  name teammates read on the shared sheet. store.tsx keeps the two in step. */
+  name: string
+  /** In their own words. Capped at BIO_MAX characters at the input. */
+  bio: string
+  avatar: AvatarKey | null
+  /** At most MAX_PATTERNS, in the order they were picked. */
+  patterns: PatternKey[]
+}
+
+/** Long enough for two real sentences, short enough that it stays a self-
+ *  description rather than becoming a journal the app would have to hold. */
+export const BIO_MAX = 140
+
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export interface OasisState {
   today: string
   scenario: ScenarioKey
+  /** Who this is. Private, and the only part of state they wrote themselves. */
+  profile: Profile
   commitments: Commitment[]
   recovery: Recovery
   requests: IncomingRequest[]

@@ -4,8 +4,8 @@ import {
 } from 'lucide-react'
 
 import {
-  CircularGauge, Initials, KIND_STYLE, OasisBlob, SW,
-  SleepBars, Sparkline, Tag, ZoneChip, ZONE_LABEL,
+  CircularGauge, KIND_STYLE, OasisBlob, SW,
+  SleepBars, Sparkline, Tag, ZoneChip, ZONE_LABEL, type ZoneKey,
 } from '../ds'
 import { useEnergy, useOasis } from '../state/store'
 import type { ScenarioKey } from '../state/types'
@@ -13,6 +13,7 @@ import { commitmentCost } from '../logic/energy'
 import { dateOf, dayOf, longDate } from '../logic/dates'
 import DailyCheck from '../features/checkin/DailyCheck'
 import RequestInbox from '../features/requests/RequestInbox'
+import MeAvatar from '../features/me/MeAvatar'
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -21,9 +22,9 @@ const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const HR_TRACE = [-4, -2, 1, 4, 0, 2, -1, 0, 3, 0, -2, 1]
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
-export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHow }: {
+export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHow, onGoMe }: {
   onGoLoad: () => void; onGoRecovery: () => void; onGoBand: () => void
-  onGoHow: () => void
+  onGoHow: () => void; onGoMe: () => void
 }) {
   // The fallback way in, for an ask that arrived somewhere Oasis cannot see.
   // The inbox above is the main route; this one takes a pasted chat.
@@ -41,6 +42,8 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
   const overBaseline = restingHr - hrBaseline
 
   const todayName = dayOf(state.today)
+  const [selectedSleepDay, setSelectedSleepDay] = useState<string | null>(todayName)
+
   const sleepData = sleepHours.map((hours, i) => ({
     day: WEEKDAYS[i], hours, isToday: WEEKDAYS[i] === todayName,
   }))
@@ -48,8 +51,13 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
     ? sleepHours.reduce((a, b) => a + b, 0) / sleepHours.length
     : 0
 
+  const selectedSleepDatum = selectedSleepDay ? sleepData.find(d => d.day === selectedSleepDay) : null
+  const dashboardSleepHours = selectedSleepDatum ? selectedSleepDatum.hours : avgNight
   const top = [...factors].sort((a, b) => b.cost - a.cost)[0]
   const sleepZone = factors.find(f => f.key === 'sleep')?.zone ?? 'green'
+  const dashboardSleepZone: ZoneKey = selectedSleepDatum
+    ? (selectedSleepDatum.hours >= 7 ? 'green' : selectedSleepDatum.hours >= 6 ? 'amber' : 'red')
+    : sleepZone
   const hrZone = factors.find(f => f.key === 'physiological')?.zone ?? 'green'
 
   // Only what today should do (chronological schedule & tasks for today)
@@ -95,10 +103,20 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
       <header className="flex flex-col gap-6">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3">
-            <Initials size={44} />
+            <button
+              className="focus-ring press"
+              aria-label="You"
+              onClick={onGoMe}
+              style={{
+                background: 'none', border: 'none', padding: 0,
+                cursor: 'pointer', borderRadius: '50%',
+              }}
+            >
+              <MeAvatar size={44} />
+            </button>
             <div className="flex flex-col">
               <span className="t-eyebrow">{longDate(state.today)}</span>
-              <span className="t-label text-ink">Good morning, Maya</span>
+              <span className="t-label text-ink">Good morning, {state.profile.name}</span>
             </div>
           </div>
           <Tag tone={zone}><Zap size={13} strokeWidth={SW} /> TODAY&apos;S READING</Tag>
@@ -226,17 +244,33 @@ export default function DashboardPage({ onGoLoad, onGoRecovery, onGoBand, onGoHo
           <div className="flex flex-col justify-between gap-3 pt-6 md:pt-0 md:pl-6">
             <div className="flex items-center justify-between gap-2">
               <span className="inline-flex items-center gap-2 t-eyebrow" style={{ color: 'var(--ink)' }}>
-                <Moon size={14} strokeWidth={SW} /> Sleep · 7-day
+                <Moon size={14} strokeWidth={SW} /> Sleep · {selectedSleepDatum ? selectedSleepDatum.day : '7-day'}
               </span>
               <span className="t-micro" style={{ color: 'var(--ink-2)' }}>Goal 7.5h</span>
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="t-stat text-ink" style={{ fontSize: 44 }}>{avgNight.toFixed(1)}</span>
-              <span className="t-label" style={{ color: 'var(--ink-2)' }}>hrs avg</span>
+              <span className="t-stat text-ink" style={{ fontSize: 44 }}>{dashboardSleepHours.toFixed(1)}</span>
+              <span className="t-label" style={{ color: 'var(--ink-2)' }}>{selectedSleepDatum ? 'hrs' : 'hrs avg'}</span>
             </div>
-            <SleepBars data={sleepData} height={48} />
-            <div className="mt-auto pt-1">
-              <ZoneChip zone={sleepZone} />
+            <SleepBars
+              data={sleepData}
+              height={48}
+              selectedDay={selectedSleepDay}
+              onSelectDay={(day) => setSelectedSleepDay(d => d === day ? null : day)}
+            />
+            <div className="mt-auto pt-1 flex items-center justify-between">
+              <ZoneChip zone={dashboardSleepZone} />
+              {selectedSleepDatum && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedSleepDay(null)}
+                  className="chip focus-ring hit-44"
+                  style={{ minHeight: 22, padding: '1px 7px', fontSize: 11 }}
+                  title="Switch to 7-day average"
+                >
+                  Avg
+                </button>
+              )}
             </div>
           </div>
         </div>

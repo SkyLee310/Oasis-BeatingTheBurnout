@@ -12,10 +12,11 @@ import {
 } from 'react'
 
 import { energyFactors, energyFor, tempFor, zoneFor } from '../logic/energy'
+import { MAX_PATTERNS } from '../logic/pattern'
 import { DEFAULT_SCENARIO, seedFor } from './seed'
 import type {
   Commitment, DailyCheckIn, GroupProject, IncomingRequest,
-  MemberStatus, OasisState, ProjectTask, ScenarioKey,
+  MemberStatus, OasisState, PatternKey, Profile, ProjectTask, ScenarioKey,
 } from './types'
 
 const STORAGE_KEY = 'oasis.v1'
@@ -26,7 +27,10 @@ const STORAGE_KEY = 'oasis.v1'
  *  spreading it over a fresh seed would keep the seeded history but silently
  *  reset the share toggle, which is the one thing on it a user chose. 4: one
  *  group project became a list of them, so a stored state carries a `project`
- *  key the app no longer reads and lacks the `projects` it now needs. */
+ *  key the app no longer reads and lacks the `projects` it now needs.
+ *  A profile did *not* need a fifth: a stored state without one is merely
+ *  incomplete, and hydrate() spreads it over a fresh seed, so the seeded
+ *  profile survives and nothing reads a missing field. */
 const SCHEMA = 4
 
 // ─── Actions ──────────────────────────────────────────────────────────────────
@@ -49,6 +53,10 @@ export type Action =
     }
   | { type: 'checkIn'; checkIn: DailyCheckIn }
   | { type: 'selectProject'; projectId: string }
+  // A project you just made is a project you want to be looking at, so this one
+  // action moves the selection too. Every *other* project action names its
+  // project for the reason in the comment below.
+  | { type: 'addProject'; project: GroupProject }
   // Every project action names its project. It would be shorter to let the
   // reducer assume the open one, but a request answered from the inbox can
   // claim a task in a project the student is not looking at — and a reducer
@@ -60,6 +68,8 @@ export type Action =
   | { type: 'addTask'; projectId: string; task: ProjectTask }
   | { type: 'toggleCommitmentDone'; id: string }
   | { type: 'toggleRecordShare' }
+  | { type: 'setProfile'; patch: Partial<Profile> }
+  | { type: 'togglePattern'; pattern: PatternKey }
 
 /** What each sleep answer means in hours. Rough on purpose — a student rating
  *  last night out of three is not reporting to two decimal places. */
@@ -76,6 +86,23 @@ function inProject(
   return { ...s, projects: s.projects.map(p => (p.id === projectId ? change(p) : p)) }
 }
 
+/**
+ * Your name lives in two places on purpose. profile.name is yours; the 'you'
+ * member is what every teammate reads on the shared sheet. This keeps them in
+ * step, so renaming yourself -- or restaging the demo week -- can never leave
+ * the split addressing somebody else.
+ */
+function withProfile(s: OasisState, profile: Profile): OasisState {
+  return {
+    ...s,
+    profile,
+    projects: s.projects.map(p => ({
+      ...p,
+      members: p.members.map(m => (m.status === 'you' ? { ...m, name: profile.name } : m)),
+    })),
+  }
+}
+
 // ─── Reducer ──────────────────────────────────────────────────────────────────
 // Pure: no Date.now(), no crypto.randomUUID(). Ids and timestamps are derived
 // from what is already in the action or in state, so the same actions always
@@ -87,7 +114,9 @@ export function reducer(s: OasisState, a: Action): OasisState {
       return seedFor(s.scenario)
 
     case 'setScenario':
-      return seedFor(a.scenario)
+      // The scenario restages the week, not the person. A demo switch that
+      // renamed the student would be a bug with a very plausible cause.
+      return withProfile(seedFor(a.scenario), s.profile)
 
     case 'addCommitments':
       return { ...s, commitments: [...s.commitments, ...a.commitments] }
@@ -142,6 +171,13 @@ export function reducer(s: OasisState, a: Action): OasisState {
     case 'selectProject':
       return { ...s, activeProjectId: a.projectId }
 
+    case 'addProject':
+      return {
+        ...s,
+        projects: [...s.projects, a.project],
+        activeProjectId: a.project.id,
+      }
+
     case 'setMemberStatus':
       return inProject(s, a.projectId, p => ({
         ...p,
@@ -176,6 +212,21 @@ export function reducer(s: OasisState, a: Action): OasisState {
     // The only switch in the app that changes what another person can see.
     case 'toggleRecordShare':
       return { ...s, record: { ...s.record, shared: !s.record.shared } }
+
+    case 'setProfile':
+      return withProfile(s, { ...s.profile, ...a.patch })
+
+    case 'togglePattern': {
+      const has = s.profile.patterns.includes(a.pattern)
+      const patterns = has
+        ? s.profile.patterns.filter(p => p !== a.pattern)
+        // Silently ignored at the cap rather than dropping the oldest: a card
+        // that quietly unpicks another is a card that lied when you tapped it.
+        : s.profile.patterns.length >= MAX_PATTERNS
+          ? s.profile.patterns
+          : [...s.profile.patterns, a.pattern]
+      return { ...s, profile: { ...s.profile, patterns } }
+    }
   }
 }
 

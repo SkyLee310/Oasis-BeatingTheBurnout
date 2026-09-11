@@ -1,5 +1,5 @@
 import type { EventKind } from '../ds'
-import type { Commitment, OasisState } from '../state/types'
+import type { Commitment, GroupProject, OasisState } from '../state/types'
 
 // ─── Composing a commitment ───────────────────────────────────────────────────
 // The reducer is pure — no Date.now(), no crypto.randomUUID() — so the same
@@ -53,5 +53,53 @@ export function newCommitment(s: OasisState, draft: CommitmentDraft, offset = 0)
     // what you chose to put in your week can be moved back out of it.
     movable: draft.kind === 'commitment' || draft.kind === 'rest',
     origin: draft.origin,
+  }
+}
+
+// --- Projects ----------------------------------------------------------------
+// A new assignment, minted the same way a commitment is: here, not in the
+// reducer. The invite code is the part that cannot be casual -- it is the
+// project's identity to anybody outside the app (?join=<code>), and
+// Math.random() is banned three lines into store.tsx. So it is derived from the
+// course, which is also the thing a student would guess it from.
+
+export interface ProjectDraft {
+  name: string
+  course: string
+  /** ISO 'YYYY-MM-DD'. */
+  due: string
+}
+
+/** 'Database Systems' -> 'DS', 'Ethics' -> 'ETH'. Word initials where there are
+ *  words, the first three letters where there is only one. */
+function courseCode(course: string): string {
+  const words = course.toUpperCase().match(/[A-Z0-9]+/g) ?? []
+  const initials = words.map(w => w[0]).join('')
+  const base = initials.length >= 2 ? initials : (words[0] ?? 'PRJ')
+  return base.slice(0, 3)
+}
+
+export function newProject(s: OasisState, draft: ProjectDraft): GroupProject {
+  const n = s.projects.length
+
+  // Derived, then bumped until it is free. Deterministic either way, so the
+  // same sequence of adds always produces the same codes on a replay.
+  const taken = new Set(s.projects.map(p => p.code.toUpperCase()))
+  let code = `${courseCode(draft.course)}${n}`
+  for (let bump = n + 1; taken.has(code); bump++) code = `${courseCode(draft.course)}${bump}`
+
+  // You are the only member of an assignment you just created; everyone else
+  // arrives through the invite link. Carry your identity off an existing
+  // project so the split addresses you by the name teammates already see.
+  const you = s.projects[0]?.members.find(m => m.status === 'you')
+
+  return {
+    id: `p-${slug(draft.course)}-${n}`,
+    name: draft.name,
+    course: draft.course,
+    due: draft.due,
+    code,
+    members: [{ id: you?.id ?? 'you', name: you?.name ?? 'You', status: 'you' }],
+    tasks: [],
   }
 }
