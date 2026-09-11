@@ -12,6 +12,7 @@ import {
 } from 'react'
 
 import { energyFactors, energyFor, tempFor, zoneFor } from '../logic/energy'
+import { MAX_PATTERNS } from '../logic/pattern'
 import { DEFAULT_SCENARIO, seedFor } from './seed'
 import type {
   Commitment, DailyCheckIn, GroupProject, IncomingRequest,
@@ -84,11 +85,6 @@ function inProject(
 ): OasisState {
   return { ...s, projects: s.projects.map(p => (p.id === projectId ? change(p) : p)) }
 }
-
-/** At most three. Four cards and a cap of three means one is always unpicked,
- *  which is the point: a page that lets you agree with everything has not asked
- *  you anything. Moves to src/logic/pattern.ts in the next task. */
-const MAX_PATTERNS = 3
 
 /**
  * Your name lives in two places on purpose. profile.name is yours; the 'you'
