@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertTriangle, ArrowUpRight, Calendar, Check, CheckCircle, HelpCircle } from 'lucide-react'
+import { AlertTriangle, ArrowUpRight, Calendar, CalendarPlus, Check, CheckCircle, HelpCircle } from 'lucide-react'
 
 import {
   KIND_STYLE, LoadBar, OasisBlob, SW, Tag, WeekCalendar,
@@ -14,6 +14,7 @@ import { weekDays, weekLabel } from '../logic/week'
 import DayDetail from '../features/schedule/DayDetail'
 import AcademicDDLRadar from '../features/schedule/AcademicDDLRadar'
 import AddCommitmentForm from '../features/schedule/AddCommitmentForm'
+import ImportCalendarSheet from '../features/schedule/ImportCalendarSheet'
 
 // ─── Schedule & load ──────────────────────────────────────────────────────────
 type LoadTab = 'schedule' | 'categories' | 'tasks' | 'commitment'
@@ -41,6 +42,7 @@ export default function LoadPage({ onGoHow }: { onGoHow: () => void }) {
     () => dateOf(state.today),
   )
   const [commitPhase, setCommitPhase] = useState<'idle' | 'result'>('idle')
+  const [importing, setImporting] = useState(false)
   const [hrs, setHrs] = useState(2)
   const [showAfter, setShowAfter] = useState(false)
 
@@ -144,7 +146,14 @@ export default function LoadPage({ onGoHow }: { onGoHow: () => void }) {
             </div>
           </div>
 
-          <AddCommitmentForm onAdded={isoDay => setSelectedDate(dateOf(isoDay))} />
+            <div className="flex gap-2 flex-wrap items-start">
+              <AddCommitmentForm onAdded={isoDay => setSelectedDate(dateOf(isoDay))} />
+              <button onClick={() => setImporting(true)}
+                className="btn btn-secondary focus-ring hit-44 flex items-center gap-2">
+                <CalendarPlus size={15} strokeWidth={SW} />
+                Import calendar
+              </button>
+            </div>
 
           <WeekCalendar
             days={days}
@@ -321,6 +330,8 @@ export default function LoadPage({ onGoHow }: { onGoHow: () => void }) {
           )}
         </div>
       )}
+
+      {importing && <ImportCalendarSheet onClose={() => setImporting(false)} />}
     </div>
   )
 }
