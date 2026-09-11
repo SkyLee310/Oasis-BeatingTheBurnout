@@ -15,6 +15,7 @@ import InviteSheet from '../features/group/InviteSheet'
 import TrackRecordSheet from '../features/record/TrackRecordSheet'
 import RequestInbox from '../features/requests/RequestInbox'
 import WhatsAppMessageSheet from '../features/group/WhatsAppMessageSheet'
+import AddTaskRow from '../features/group/AddTaskRow'
 
 // ─── Group ────────────────────────────────────────────────────────────────────
 // Group assignments go wrong in two specific ways: the split is lopsided and
@@ -247,6 +248,7 @@ export default function GroupPage() {
               ))}
             </div>
           )}
+          <AddTaskRow project={project} />
         </section>
       </div>
 
