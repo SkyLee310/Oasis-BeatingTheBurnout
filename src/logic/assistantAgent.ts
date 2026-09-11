@@ -1,6 +1,7 @@
 import type { EventKind } from '../ds'
 import { addDays, nextDow, shortDate } from './dates'
 import { projectEnergy, zoneFor } from './energy'
+import { DEFAULT_HOURS, MAX_HOURS, newCommitment } from './compose'
 import type { Commitment, OasisState } from '../state/types'
 
 // ─── Oasis AI, the agent half ─────────────────────────────────────────────────
@@ -45,12 +46,6 @@ function kindOf(text: string): EventKind {
   return 'commitment'
 }
 
-/** Per-kind fallback when the student names no figure. Rest blocks cost 0. */
-const DEFAULT_HOURS: Record<EventKind, number> = {
-  deadline: 3, class: 2, commitment: 2, rest: 0, alert: 1,
-}
-
-const MAX_HOURS = 12
 
 function dateFrom(text: string, today: string): string {
   const hay = text.toLowerCase()
@@ -130,20 +125,14 @@ export function parseAgentIntent(raw: string, s: OasisState): AgentAction | null
 
   return {
     kind: 'add',
-    commitment: {
-      // Derived, never random: the reducer stays pure and replaying the demo
-      // gives back the same week. Same rule the shared-chat flow follows.
-      id: `ai-${s.commitments.length}`,
+    commitment: newCommitment(s, {
       title,
       kind,
       date: dateFrom(rest, s.today),
       time: timeFrom(rest),
-      hours: Math.round(hours * 10) / 10,
-      // Anything the assistant puts in can be moved back out by the deferral
-      // pass. A block you asked for is not a fixed point in your week.
-      movable: kind !== 'deadline',
+      hours,
       origin: 'chat',
-    },
+    }),
   }
 }
 
