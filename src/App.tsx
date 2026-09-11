@@ -244,7 +244,7 @@ function AppShell() {
       case 'band':      return <SmartBandPage onBack={() => setPage('dashboard')} />
       case 'load':      return <LoadPage onGoHow={() => setPage('how')} />
       case 'recovery':  return <RecoveryPage />
-      case 'group':     return <GroupPage />
+      case 'group':     return <GroupPage onGoMe={() => setPage('me')} />
       case 'how':       return <HowItWorksPage onBack={() => setPage('dashboard')} />
       case 'me':        return <MePage onBack={() => setPage('dashboard')} />
     }

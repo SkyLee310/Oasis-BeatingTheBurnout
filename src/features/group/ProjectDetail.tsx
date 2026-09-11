@@ -15,7 +15,6 @@ import CapacityChip from './CapacityChip'
 import InviteSheet from './InviteSheet'
 import WhatsAppMessageSheet from './WhatsAppMessageSheet'
 import AddTaskRow from './AddTaskRow'
-import TrackRecordSheet from '../record/TrackRecordSheet'
 
 // --- One assignment ---------------------------------------------------------
 // Everything about a single project: who is carrying what, what is unclaimed,
@@ -34,15 +33,15 @@ const STATUS_COPY: Record<Member['status'], string> = {
   none: 'Not invited',
 }
 
-export default function ProjectDetail({ project, onBack }: {
+export default function ProjectDetail({ project, onBack, onGoMe }: {
   project: GroupProject
   onBack?: () => void
+  onGoMe: () => void
 }) {
   const dispatch = useDispatch()
 
   const [inviting, setInviting] = useState<Member | 'all' | null>(null)
   const [showWhatsApp, setShowWhatsApp] = useState(false)
-  const [showRecord, setShowRecord] = useState(false)
 
   const b = balance(project)
   const you = b.shares.find(s => s.member.status === 'you')
@@ -111,7 +110,7 @@ export default function ProjectDetail({ project, onBack }: {
                 share={s}
                 capacity={capacityOf(project, s.member.id)}
                 onInvite={() => setInviting(s.member)}
-                onOpenRecord={() => setShowRecord(true)}
+                onOpenRecord={onGoMe}
               />
             ))}
           </div>
@@ -233,8 +232,6 @@ export default function ProjectDetail({ project, onBack }: {
         />
       )}
 
-      {showRecord && <TrackRecordSheet onClose={() => setShowRecord(false)} />}
-
       {inviting && (
         <InviteSheet
           project={project}
@@ -281,10 +278,10 @@ function ShareRow({ share, capacity, onInvite, onOpenRecord }: {
               <button
                 className="chip focus-ring hit-44"
                 onClick={onOpenRecord}
-                aria-label="Open your track record"
+                aria-label="Open your own page"
                 style={{ minHeight: 30 }}
               >
-                <History size={12} strokeWidth={SW} /> Track record
+                <History size={12} strokeWidth={SW} /> Your record
               </button>
             )}
           </div>

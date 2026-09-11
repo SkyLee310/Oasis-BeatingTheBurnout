@@ -17,7 +17,7 @@ import ProjectDetail from '../features/group/ProjectDetail'
 // selection held in local state would leave the app telling a teammate about a
 // project the student is not looking at.
 
-export default function GroupPage() {
+export default function GroupPage({ onGoMe }: { onGoMe: () => void }) {
   const state = useOasis()
   const dispatch = useDispatch()
   const [view, setView] = useState<'list' | 'detail'>('list')
@@ -40,7 +40,7 @@ export default function GroupPage() {
 
   return (
     <div key={project.id} className="page-section-enter">
-      <ProjectDetail project={project} onBack={() => setView('list')} />
+      <ProjectDetail project={project} onBack={() => setView('list')} onGoMe={onGoMe} />
     </div>
   )
 }
