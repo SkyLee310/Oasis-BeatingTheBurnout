@@ -8,7 +8,7 @@ import {
 // Every primitive below is published from src/ds/index.ts. Screens live in
 // src/pages and feature UI in src/features; this file is the shell and the
 // navigation that switches between them.
-import { Initials, OasisBlob, SW } from './ds'
+import { OasisBlob, SW } from './ds'
 
 import { OasisProvider, useEnergy } from './state/store'
 import type { IncomingRequest } from './state/types'
@@ -21,14 +21,16 @@ import GroupPage from './pages/GroupPage'
 import JoinLanding from './features/group/JoinLanding'
 import AvatarGallery from './features/avatars/AvatarGallery'
 import HowItWorksPage from './pages/HowItWorksPage'
+import MePage from './pages/MePage'
 import ScenarioBar, { demoMode } from './features/demo/ScenarioBar'
 import { useAmbientTemp } from './features/shell/useAmbientTemp'
 import VoiceAssistantPanel from './features/assistant/VoiceAssistantPanel'
 import VoiceSheet from './features/assistant/VoiceSheet'
 import DecisionSheet from './features/decision/DecisionSheet'
+import MeAvatar from './features/me/MeAvatar'
 
 // ─── App-only types ───────────────────────────────────────────────────────────
-type Page = 'dashboard' | 'band' | 'load' | 'recovery' | 'group' | 'how'
+type Page = 'dashboard' | 'band' | 'load' | 'recovery' | 'group' | 'how' | 'me'
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 const NAV_ITEMS: { id: Page; icon: React.ReactNode; label: string; short: string }[] = [
@@ -106,7 +108,22 @@ function SideRail({ page, onPage }: { page: Page; onPage: (p: Page) => void }) {
         >
           <HelpCircle size={18} strokeWidth={SW} />
         </button>
-        <Initials size={40} />
+        <button
+          className="focus-ring press"
+          aria-label="You"
+          aria-current={page === 'me' ? 'page' : undefined}
+          onClick={() => onPage('me')}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
+            borderRadius: '50%',
+            boxShadow: page === 'me' ? 'var(--shadow-hard-sm)' : 'none',
+          }}
+        >
+          <MeAvatar size={40} />
+        </button>
       </div>
     </aside>
   )
@@ -223,12 +240,13 @@ function AppShell() {
 
   const renderPage = () => {
     switch (page) {
-      case 'dashboard': return <DashboardPage onGoLoad={() => setPage('load')} onGoRecovery={() => setPage('recovery')} onGoBand={() => setPage('band')} onGoHow={() => setPage('how')} />
+      case 'dashboard': return <DashboardPage onGoLoad={() => setPage('load')} onGoRecovery={() => setPage('recovery')} onGoBand={() => setPage('band')} onGoHow={() => setPage('how')} onGoMe={() => setPage('me')} />
       case 'band':      return <SmartBandPage onBack={() => setPage('dashboard')} />
       case 'load':      return <LoadPage onGoHow={() => setPage('how')} />
       case 'recovery':  return <RecoveryPage />
       case 'group':     return <GroupPage />
       case 'how':       return <HowItWorksPage onBack={() => setPage('dashboard')} />
+      case 'me':        return <MePage onBack={() => setPage('dashboard')} />
     }
   }
 

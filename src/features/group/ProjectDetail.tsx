@@ -4,6 +4,7 @@ import {
 } from 'lucide-react'
 
 import { Initials, SW, Tag } from '../../ds'
+import MeAvatar from '../me/MeAvatar'
 import type { ZoneKey } from '../../ds'
 import type { Share } from '../../logic/group'
 import { balance, capacityOf } from '../../logic/group'
@@ -268,10 +269,9 @@ function ShareRow({ share, capacity, onInvite, onOpenRecord }: {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-3">
-        <Initials
-          size={32}
-          initials={member.status === 'you' ? undefined : member.name.slice(0, 2).toUpperCase()}
-        />
+        {member.status === 'you'
+          ? <MeAvatar size={32} />
+          : <Initials size={32} initials={member.name.slice(0, 2).toUpperCase()} />}
 
         <div className="flex flex-col gap-1 flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
