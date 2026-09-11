@@ -6,6 +6,8 @@ import type { Verdict } from '../../logic/decision'
 import { DECISION_THRESHOLDS, decisionHeadline, decisionLead } from '../../logic/decision'
 import type { IncomingRequest } from '../../state/types'
 import { shortDate } from '../../logic/dates'
+import { patternPrefix } from '../../logic/pattern'
+import { useOasis } from '../../state/store'
 
 // ─── Verdict ──────────────────────────────────────────────────────────────────
 // The answer, and — one tap away — every number that produced it. The reasons
@@ -14,6 +16,7 @@ import { shortDate } from '../../logic/dates'
 // out of step with the score.
 
 export default function VerdictCard({ req, v }: { req: IncomingRequest; v: Verdict }) {
+  const state = useOasis()
   const [showWhy, setShowWhy] = useState(false)
   const [head, tail] = decisionHeadline(v.decision)
   const { parsed } = req
@@ -56,8 +59,12 @@ export default function VerdictCard({ req, v }: { req: IncomingRequest; v: Verdi
           <h2 className="t-hero text-ink" style={{ fontSize: 'clamp(28px, 6vw, 40px)' }}>
             {head}<br />{tail}
           </h2>
+          {/* The pattern the student named, in front of the verdict and nowhere
+              else. decision.ts does not know this module exists, so the answer,
+              its thresholds and its arithmetic are untouched -- this changes how
+              the verdict is introduced, never what it is. */}
           <p className="t-body max-w-[42ch]" style={{ color: 'var(--ink-2)' }}>
-            {decisionLead(v.decision)}
+            {patternPrefix(state)}{decisionLead(v.decision)}
           </p>
           <div className="flex items-center gap-2 flex-wrap">
             <ZoneChip zone={v.zone} />
