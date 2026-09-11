@@ -15,7 +15,7 @@ import { energyFactors, energyFor, tempFor, zoneFor } from '../logic/energy'
 import { DEFAULT_SCENARIO, seedFor } from './seed'
 import type {
   Commitment, DailyCheckIn, GroupProject, IncomingRequest,
-  MemberStatus, OasisState, ScenarioKey,
+  MemberStatus, OasisState, ProjectTask, ScenarioKey,
 } from './types'
 
 const STORAGE_KEY = 'oasis.v1'
@@ -57,6 +57,7 @@ export type Action =
   | { type: 'setMemberStatus'; projectId: string; memberId: string; status: MemberStatus }
   | { type: 'assignTask'; projectId: string; taskId: string; memberId: string | null }
   | { type: 'toggleTaskDone'; projectId: string; taskId: string }
+  | { type: 'addTask'; projectId: string; task: ProjectTask }
   | { type: 'toggleCommitmentDone'; id: string }
   | { type: 'toggleRecordShare' }
 
@@ -161,6 +162,9 @@ export function reducer(s: OasisState, a: Action): OasisState {
         tasks: p.tasks.map(t =>
           t.id === a.taskId ? { ...t, done: !t.done } : t),
       }))
+
+    case 'addTask':
+      return inProject(s, a.projectId, p => ({ ...p, tasks: [...p.tasks, a.task] }))
 
     case 'toggleCommitmentDone':
       return {

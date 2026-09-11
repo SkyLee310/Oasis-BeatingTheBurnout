@@ -29,7 +29,10 @@ export interface Commitment {
   hours: number
   /** Whether smart deferral is allowed to move it. */
   movable: boolean
-  origin: 'seed' | 'chat' | 'timetable' | 'group'
+  /** Where this came from. Written everywhere, branched on nowhere — it exists
+   *  so a later screen can say "you added this". 'manual' is the add form;
+   *  'timetable' is the calendar importer. */
+  origin: 'seed' | 'chat' | 'timetable' | 'group' | 'manual'
   reason?: string
   /** Completed status (e.g. checked off assignment or submitted DDL). */
   done?: boolean
