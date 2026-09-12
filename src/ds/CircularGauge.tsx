@@ -16,16 +16,28 @@ export interface CircularGaugeProps {
   size?: number
   /** Whether to render the ZoneChip beneath the gauge. Defaults to true. */
   showChip?: boolean
+  /** Optional custom font size for sublabel. If omitted, automatically scales to prevent border collision. */
+  sublabelSize?: number
 }
 
 /** The hero ring gauge: a conic sweep, an ink-stroked disc, and a zone chip. */
 export function CircularGauge({
-  value, max = 100, zone, label, sublabel, size = 136, showChip = true,
+  value, max = 100, zone, label, sublabel, size = 136, showChip = true, sublabelSize,
 }: CircularGaugeProps) {
   const pct = Math.max(0, Math.min(1, value / max))
   const deg = pct * 360
   const innerSize = Math.round(size * 0.7)
   const isCompact = size < 90
+
+  const resolvedSublabelSize = sublabelSize ?? (
+    isCompact
+      ? Math.max(7, Math.round(size * 0.12))
+      : sublabel && sublabel.length > 12
+        ? Math.max(8, Math.min(9, Math.round(size * 0.064)))
+        : sublabel && sublabel.length > 8
+          ? Math.max(9, Math.min(10.5, Math.round(size * 0.075)))
+          : undefined
+  )
 
   return (
     <div className={`flex flex-col items-center ${showChip ? 'gap-3' : 'gap-0'}`}>
@@ -55,12 +67,14 @@ export function CircularGauge({
           </span>
           {sublabel && (
             <span
-              className="t-micro text-ink-muted uppercase font-bold"
+              className="t-micro text-ink-muted uppercase font-bold text-center"
               style={{
                 marginTop: isCompact ? 2 : 4,
-                fontSize: isCompact ? Math.max(7, Math.round(size * 0.12)) : undefined,
+                fontSize: resolvedSublabelSize,
                 lineHeight: 1,
-                letterSpacing: isCompact ? '0.02em' : undefined,
+                letterSpacing: isCompact ? '0.02em' : '0.02em',
+                maxWidth: '82%',
+                whiteSpace: 'nowrap',
               }}
             >
               {sublabel}
