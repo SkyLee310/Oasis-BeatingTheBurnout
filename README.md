@@ -11,7 +11,6 @@
 > **Every wellbeing app can tell a student they are overloaded. Oasis tells them what to say no to — and writes the sentence.**
 
 **Live app:** https://oasis-beating-the-burnout.vercel.app — no sign-up; open it on a phone, or in a 430×932 browser window.
-**Repository:** https://github.com/SkyLee310/Oasis-BeatingTheBurnout
 
 ---
 
