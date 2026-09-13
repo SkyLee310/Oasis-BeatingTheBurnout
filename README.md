@@ -6,7 +6,7 @@
 
 **Video Presentation:** _[Unlisted YouTube link — to be added]_
 
-**Presentation Slides:** https://canva.link/wuwe44wecrp5a1h
+**Presentation Slides:** https://canva.link/oasis-madeinxhs-codenection
 
 > **Every wellbeing app can tell a student they are overloaded. Oasis tells them what to say no to — and writes the sentence.**
 
