@@ -6,7 +6,7 @@
 
 **Video Presentation:** [YouTube link](https://youtu.be/VlFzc__r_-Q)
 
-**Presentation Slides:** [Canva Link](https://canva.link/oasis-madeinxhs-codenection)
+**Presentation Slides:** [Canva Link](https://www.canva.com/design/DAHVAl1I0tU/sGUmYqhRkVY0EfCcf5aoYA/view)
 
 > **Every wellbeing app can tell a student they are overloaded. Oasis tells them what to say no to — and writes the sentence.**
 
@@ -143,7 +143,7 @@ Redrawn as diagrams from our 31 Aug discussion log, PRD v1.0 and the repo histor
 **Board 1 — Problem tree**
 
 ```mermaid
-flowchart BT
+flowchart TD
   C1["Five loads stack up<br/>and a calendar shows one"]
   C2["Group work splits unevenly<br/>and nobody reports it"]
   C3["Segan makes the yes come out"]
