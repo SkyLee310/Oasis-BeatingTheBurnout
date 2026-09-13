@@ -4,9 +4,9 @@
 
 **Problem Statement:** Stress & Workload Manager — *Beating the Burnout* (Lifestyle track)
 
-**Video Presentation:** _[Unlisted YouTube link — to be added]_
+**Video Presentation:** [YouTube link](https://youtu.be/VlFzc__r_-Q)
 
-**Presentation Slides:** https://canva.link/oasis-madeinxhs-codenection
+**Presentation Slides:** [Canva Link](https://canva.link/oasis-madeinxhs-codenection)
 
 > **Every wellbeing app can tell a student they are overloaded. Oasis tells them what to say no to — and writes the sentence.**
 
