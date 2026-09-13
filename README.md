@@ -19,7 +19,7 @@
 
 **The Problem.**
 
-It is 11:47 PM. The DS Assignment 2 group chat has three replies and zero volunteers for a report due Friday. Maya types *"tak apa lah, I just do"*. Minutes later her shift manager asks if she can cover Friday evening, 5pm to 11pm, and needs to know by tonight. She is already short on sleep and has a deadline that same day. She says yes anyway, because saying no feels rude — *segan*, *paiseh*, *不好意思*.
+It is 11:47 PM. The DS Assignment 2 group chat has three replies and zero volunteers for a report due Friday. Maya types *"tak apa lah, I just do"*. Minutes later her shift manager asks if she can cover Friday evening, 5pm to 11pm, and needs to know by tonight. She is already short on sleep and has a deadline that same day. She says yes anyway, because saying no feels rude — *segan*, *paiseh*, *excuse me*.
 
 Nothing about that night is a mystery, and none of it shows up anywhere. The causes:
 
